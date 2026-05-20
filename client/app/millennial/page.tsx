@@ -1,110 +1,44 @@
-﻿"use client";
+"use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import ProductHoverActions from "@/components/ProductHoverActions";
 import BannerCarousel from "@/components/BannerCarousel";
-import GenerationHighestSelling from "@/components/GenerationHighestSelling";
-import type { HighestSellingProduct } from "@/components/HighestSellingProducts";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
+
+const generationHeroImage = "/hero/hero3.jpeg";
+const withGenerationHeroImage = (items: BannerItem[]) =>
+  items.map((item) => ({ ...item, image: generationHeroImage }));
 
 export default function MillennialPage() {
-  const banners = [
-    {
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1265&h=432&fit=crop",
-      alt: "Millennials Collection Banner 1",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1265&h=432&fit=crop",
-      alt: "Millennials Collection Banner 2",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1265&h=432&fit=crop",
-      alt: "Millennials Collection Banner 3",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1265&h=432&fit=crop",
-      alt: "Millennials Collection Banner 4",
-    },
-  ];
-  const bestsellers: HighestSellingProduct[] = [
-    {
-      id: "millennial-bestseller-structured-linen-blazer",
-      name: "Structured Linen Blazer",
-      price: 245,
-      priceLabel: "Rs. 245",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBgbmjaWtpS6BJmjsyjsVpe3ryDNUDRnzPssK240gv80JSDtlEtuBbTCAWXCyz5RjPThMEUD1jkQrZJAXY0UdueySarY8aKE0JdBXzLSdz5b0hDX5z9hzT1ahwzNlC5RW1JBoIPCxFQVUONFlg6YE2MLurhjU6j7neCYXCz2ENdGAUu_Qfkz4LXwXxFIsQ4P3X0fnJS0DjESaMS76S4UTActet2hbX0IWSKo9tC8IRIbOFcnNOELBhq5-iCRMOMjDr4MuvEdMzCQEPX",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Workwear hit",
-      rating: "4.8",
-      soldLabel: "820 sold",
-      note: "Capsule staple",
-    },
-    {
-      id: "millennial-bestseller-sculptural-leather-tote",
-      name: "Sculptural Leather Tote",
-      price: 320,
-      priceLabel: "Rs. 320",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDSpb5Xo2mLYWYzEbYUyDPunFWZboVHcq3rQSKHMwrDofl8hIQMW2ARJJP5PuC0NL0xjeAOdzgDXQQm6U2wziwer5U3HU7ynSahLy4SkuHQ1IQiuMagCGZm3IcBpHd9L68PbVQvNT-b8ZV1cXKuL_lyTSBGud7a-V4XcCMUHKoPSzI3wOgRINVGSMFTONswI5WuoxeiuQatzG6vphSd2Io12eaIVIVi6RIAQv9xYmIqkxjS0BuYKgxzG3zxX9wofp1xq2DSQ2I0t-Bz",
-      category: "Accessories",
-      href: "/accessories/croissant-leather-bag",
-      badge: "Most saved",
-      rating: "4.9",
-      soldLabel: "760 sold",
-      note: "Editorial look",
-    },
-    {
-      id: "millennial-bestseller-urban-minimalist-leather-low",
-      name: "Urban Minimalist Leather Low",
-      price: 165,
-      priceLabel: "Rs. 165",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDiDc3wXTF3CwZbB-zJ301OKh0puZmNqOhPwrtIEGb97rAiPTUZsMFXOP2ftvDBe4jGZKK89iYDrOMxveCc28FUp_da02scODCTHA-V99_cxO7aHJEV-v7_URSnlXwW7KF41JuflBUzBAhxjEwUdNdlka2A6QKeeMzbxTbdRKZbVjCCO5GUZfNOegWvPG2nx1knK5NtbKLR9hzhd8QrY0c0-_ZoCjjQm2LGcb1MLhcIRQZ3EiBojZNqgPKCsClvy3Qdkj0CKVKay8Ze",
-      category: "Sneakers",
-      href: "/sneakers/nova-form-strider",
-      badge: "Street clean",
-      rating: "4.7",
-      soldLabel: "710 sold",
-      note: "Minimalist",
-    },
-    {
-      id: "millennial-bestseller-silk-slip-dress",
-      name: "Silk Slip Dress",
-      price: 180,
-      priceLabel: "Rs. 180",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCYJwE8qEcqe7pYF-a-Z3BB7kg73UpbBxjqeJupUueYmAr-dM31Syhr_QD_4OXCw_tB1c2n4fIlZ3XOuG5qDclaQphMmnuyBQadSNQ67QG1tzu2V4-W94u7r5JxAV8baEkHkf1jgOY2vr9SB4AlW5MjJ-Bvb-lRz117IiOs7Y6Ny1_oQ29kMd0gTey87UC_Pq16uOC4Cx5VrVvMJwMxxRgJC7vD1yU8Kzq_EsE2U6or233QVh2O2VeEMsbcwDQCH9krMi0P9OQFUw5A",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Date-night",
-      rating: "4.8",
-      soldLabel: "650 sold",
-      note: "Easy styling",
-    },
-  ];
+  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["millennial"]));
+
+  useEffect(() => {
+    let active = true;
+    const loadBanners = async () => {
+      try {
+        const config = await fetchBannerConfig();
+        if (active) setBanners(withGenerationHeroImage(config.generationBanners["millennial"]));
+      } catch {
+        // Keep fallback data
+      }
+    };
+    void loadBanners();
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <div className="bg-[#fff8f4] text-[#211a13] font-sans selection:bg-[#ffd9e0] selection:text-[#2f121a]">
       <Navbar />
 
       <main className="pt-16">
-        <section className="px-4">
-          <div className="max-w-[1265px] mx-auto">
-            <BannerCarousel banners={banners} autoPlayInterval={4000} />
-          </div>
+        <section>
+          <BannerCarousel banners={banners} autoPlayInterval={4000} />
         </section>
-
-        <GenerationHighestSelling
-          generation="millennial"
-          generationLabel="Millennials"
-          viewAllHref="/clothing?generation=millennial"
-          backgroundClassName="bg-[#fff1e7]"
-          accentClassName="bg-[#7b535c] text-white"
-          description="A quick edit of the pieces Millennial shoppers love most: capsule layers, refined bags, and clean sneakers."
-          fallbackProducts={bestsellers}
-        />
 
         <section className="py-24 px-8 max-w-screen-2xl mx-auto">
           <div className="flex items-end justify-between mb-16 px-4 md:px-0">
@@ -142,7 +76,7 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">The Archive Collection</p>
                 <h3 className="font-serif text-lg">Structured Linen Blazer</h3>
-                <p className="font-serif text-[#7b535c] font-medium">₹245.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">?245.00</p>
               </div>
             </Link>
 
@@ -168,7 +102,7 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">New Arrivals</p>
                 <h3 className="font-serif text-lg">Silk Slip Dress</h3>
-                <p className="font-serif text-[#7b535c] font-medium">₹180.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">?180.00</p>
               </div>
             </Link>
 
@@ -194,7 +128,7 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">Essential Series</p>
                 <h3 className="font-serif text-lg">Poplin Weekend Shirt</h3>
-                <p className="font-serif text-[#7b535c] font-medium">₹95.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">?95.00</p>
               </div>
             </Link>
 
@@ -220,7 +154,7 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">Modern Denim</p>
                 <h3 className="font-serif text-lg">Wide Leg Raw Denim</h3>
-                <p className="font-serif text-[#7b535c] font-medium">₹155.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">?155.00</p>
               </div>
             </Link>
           </div>
@@ -254,7 +188,7 @@ export default function MillennialPage() {
                   />
                 </div>
                 <h3 className="font-serif text-xl mb-1">Sculptural Leather Tote</h3>
-                <p className="font-serif text-[#7b535c] mb-4">₹320.00</p>
+                <p className="font-serif text-[#7b535c] mb-4">?320.00</p>
                 <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
                   Add to Bag
                 </div>
@@ -280,7 +214,7 @@ export default function MillennialPage() {
                   />
                 </div>
                 <h3 className="font-serif text-xl mb-1">Muted Gold Links</h3>
-                <p className="font-serif text-[#7b535c] mb-4">₹85.00</p>
+                <p className="font-serif text-[#7b535c] mb-4">?85.00</p>
                 <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
                   Add to Bag
                 </div>
@@ -306,7 +240,7 @@ export default function MillennialPage() {
                   />
                 </div>
                 <h3 className="font-serif text-xl mb-1">Optical Frame 04</h3>
-                <p className="font-serif text-[#7b535c] mb-4">₹140.00</p>
+                <p className="font-serif text-[#7b535c] mb-4">?140.00</p>
                 <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
                   Add to Bag
                 </div>
@@ -449,6 +383,7 @@ export default function MillennialPage() {
       </main>
 
       <Footer />
+      <ScrollToTopButton bgColorClass="bg-[#7b535c]" shadowClass="shadow-[0_10px_30px_rgba(123,83,92,0.32)]" />
 
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap");
@@ -477,5 +412,8 @@ export default function MillennialPage() {
     </div>
   );
 }
+
+
+
 
 

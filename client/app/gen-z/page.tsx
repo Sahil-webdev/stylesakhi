@@ -1,444 +1,764 @@
-﻿"use client";
+"use client";
 
-import Navbar from "@/components/Navbar";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Gem,
+  Heart,
+  Plus,
+  RotateCcw,
+  Star,
+  Zap,
+} from "lucide-react";
+import { Cormorant_Garamond, DM_Mono, Syne } from "next/font/google";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ProductHoverActions from "@/components/ProductHoverActions";
 import BannerCarousel from "@/components/BannerCarousel";
-import GenerationHighestSelling from "@/components/GenerationHighestSelling";
-import type { HighestSellingProduct } from "@/components/HighestSellingProducts";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { useShop, type ShopProduct } from "@/contexts/ShopContext";
+import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
+
+const syne = Syne({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
+const dmMono = DM_Mono({ subsets: ["latin"], weight: ["300", "400", "500"] });
+const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["300", "400", "600"], style: ["normal", "italic"] });
+
+const generationHeroImage = "/hero/hero3.jpeg";
+const withGenerationHeroImage = (items: BannerItem[]) => items.map((item) => ({ ...item, image: generationHeroImage }));
+
+type CatalogProduct = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  oldPrice?: number;
+  image: string;
+  badge?: "New" | "Trending" | "Limited";
+  rating: number;
+  reviews: number;
+  href: string;
+};
+
+type SneakerProduct = CatalogProduct & {
+  tags: string[];
+  description: string;
+  sizes: string[];
+};
+
+const marqueeItems = [
+  "Free Shipping Over \u20B975",
+  "New Drops Every Week",
+  "Premium Quality",
+  "Easy Returns",
+  "Exclusive Members Only",
+  "Sustainable Fashion",
+];
+
+const clothingProducts: CatalogProduct[] = [
+  {
+    id: "genz-clothing-essential-oversized-tee",
+    name: "Essential Oversized Tee",
+    category: "T-Shirts",
+    price: 45,
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=700&fit=crop",
+    badge: "New",
+    rating: 5,
+    reviews: 128,
+    href: "/clothing/the-atelier-trench",
+  },
+  {
+    id: "genz-clothing-cloud-comfort-hoodie",
+    name: "Cloud Comfort Hoodie",
+    category: "Hoodies",
+    price: 89,
+    oldPrice: 110,
+    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=700&fit=crop",
+    badge: "Trending",
+    rating: 5,
+    reviews: 94,
+    href: "/clothing/the-atelier-trench",
+  },
+  {
+    id: "genz-clothing-relaxed-linen-button-up",
+    name: "Relaxed Linen Button-Up",
+    category: "Shirts",
+    price: 68,
+    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=700&fit=crop",
+    rating: 4,
+    reviews: 67,
+    href: "/clothing/the-atelier-trench",
+  },
+  {
+    id: "genz-clothing-urban-utility-jacket",
+    name: "Urban Utility Jacket",
+    category: "Jackets",
+    price: 145,
+    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&h=700&fit=crop",
+    badge: "Limited",
+    rating: 5,
+    reviews: 156,
+    href: "/clothing/the-atelier-trench",
+  },
+  {
+    id: "genz-clothing-vintage-wide-leg",
+    name: "Vintage Wash Wide Leg",
+    category: "Jeans",
+    price: 78,
+    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=600&h=700&fit=crop",
+    rating: 4,
+    reviews: 83,
+    href: "/clothing/the-atelier-trench",
+  },
+  {
+    id: "genz-clothing-archive-graphic-tee",
+    name: "Archive Graphic Tee",
+    category: "T-Shirts",
+    price: 39,
+    image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&h=700&fit=crop",
+    badge: "New",
+    rating: 5,
+    reviews: 201,
+    href: "/clothing/the-atelier-trench",
+  },
+];
+
+const accessoriesProducts: CatalogProduct[] = [
+  {
+    id: "genz-accessories-minimal-chrono-watch",
+    name: "Minimal Chrono Watch",
+    category: "Watches",
+    price: 189,
+    image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=500&h=500&fit=crop",
+    rating: 5,
+    reviews: 76,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-logo-dad-cap",
+    name: "Logo Dad Cap",
+    category: "Caps",
+    price: 28,
+    image: "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=500&h=500&fit=crop",
+    rating: 4,
+    reviews: 112,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-retro-oval-shades",
+    name: "Retro Oval Shades",
+    category: "Sunglasses",
+    price: 56,
+    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop",
+    rating: 5,
+    reviews: 89,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-crossbody-mini-bag",
+    name: "Crossbody Mini Bag",
+    category: "Bags",
+    price: 72,
+    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=500&h=500&fit=crop",
+    rating: 5,
+    reviews: 64,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-cuban-link-chain",
+    name: "Cuban Link Chain",
+    category: "Chains",
+    price: 42,
+    image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&h=500&fit=crop",
+    rating: 4,
+    reviews: 48,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-slim-leather-wallet",
+    name: "Slim Leather Wallet",
+    category: "Wallets",
+    price: 38,
+    image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=500&h=500&fit=crop",
+    rating: 5,
+    reviews: 91,
+    href: "/accessories/croissant-leather-bag",
+  },
+  {
+    id: "genz-accessories-woven-statement-belt",
+    name: "Woven Statement Belt",
+    category: "Belts",
+    price: 34,
+    image: "https://images.unsplash.com/photo-1624222247344-550fb60583dc?w=500&h=500&fit=crop",
+    rating: 4,
+    reviews: 55,
+    href: "/accessories/croissant-leather-bag",
+  },
+];
+
+const sneakersProducts: SneakerProduct[] = [
+  {
+    id: "genz-sneakers-air-pulse-max",
+    name: "Air Pulse Max",
+    category: "Sneakers",
+    price: 189,
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&h=700&fit=crop",
+    rating: 5,
+    reviews: 210,
+    href: "/sneakers/nova-form-strider",
+    tags: ["New Drop", "Trending"],
+    description: "Bold red colorway with responsive cushioning and breathable mesh upper.",
+    sizes: ["7", "8", "9", "10", "11", "12"],
+  },
+  {
+    id: "genz-sneakers-terrain-runner",
+    name: "Terrain Runner",
+    category: "Sneakers",
+    price: 156,
+    image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=700&h=700&fit=crop",
+    rating: 5,
+    reviews: 164,
+    href: "/sneakers/nova-form-strider",
+    tags: ["Limited Stock"],
+    description: "Earth-tone palette meets trail-ready design. Built for all-day comfort.",
+    sizes: ["7", "8", "9", "10", "11"],
+  },
+  {
+    id: "genz-sneakers-cloud-walker",
+    name: "Cloud Walker",
+    category: "Sneakers",
+    price: 134,
+    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=700&h=700&fit=crop",
+    rating: 4,
+    reviews: 120,
+    href: "/sneakers/nova-form-strider",
+    tags: ["Trending"],
+    description: "Clean white silhouette with cloud-foam sole. The everyday essential.",
+    sizes: ["6", "7", "8", "9", "10", "11"],
+  },
+  {
+    id: "genz-sneakers-velocity-x",
+    name: "Velocity X",
+    category: "Sneakers",
+    price: 198,
+    image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=700&h=700&fit=crop",
+    rating: 5,
+    reviews: 178,
+    href: "/sneakers/nova-form-strider",
+    tags: ["New Drop", "Limited Stock"],
+    description: "Performance meets street style. Bold orange accent on premium leather.",
+    sizes: ["8", "9", "10", "11", "12"],
+  },
+];
+
+function productToShopProduct(product: CatalogProduct): ShopProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    image: product.image,
+    category: product.category,
+    href: product.href,
+  };
+}
+
+function Stars({ rating }: { rating: number }) {
+  return (
+    <div className="flex items-center gap-0.5 text-[#f5a623]">
+      {Array.from({ length: 5 }).map((_, idx) => {
+        const filled = idx < Math.round(rating);
+        return <Star key={idx} className={`h-3.5 w-3.5 ${filled ? "fill-current" : ""}`} />;
+      })}
+    </div>
+  );
+}
+
+function ProductCard({ product, onAddToCart, onToggleWishlist, wished }: {
+  product: CatalogProduct;
+  onAddToCart: (p: CatalogProduct) => void;
+  onToggleWishlist: (p: CatalogProduct) => void;
+  wished: boolean;
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.6 }}
+      className="group overflow-hidden rounded-[20px] border border-[#1a17140a] bg-white transition duration-300 hover:-translate-y-2 hover:shadow-[0_20px_60px_rgba(26,23,20,0.1)]"
+    >
+      <div className="relative h-[320px] overflow-hidden bg-[#eae4d8]">
+        <img src={product.image} alt={product.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+        {product.badge ? (
+          <span className="absolute left-3.5 top-3.5 rounded-full px-3 py-1 text-[10px] font-medium uppercase tracking-[0.08em] text-white"
+            style={{
+              background: product.badge === "Trending" ? "#c44b2b" : product.badge === "Limited" ? "#b8a9d4" : "#1a1714",
+              color: product.badge === "Limited" ? "#1a1714" : "#ffffff",
+            }}
+          >
+            {product.badge}
+          </span>
+        ) : null}
+
+        <button
+          type="button"
+          aria-label="Add to wishlist"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleWishlist(product);
+          }}
+          className="absolute right-3.5 top-3.5 grid h-9 w-9 translate-y-[-8px] place-items-center rounded-full bg-white opacity-0 shadow-[0_2px_8px_rgba(26,23,20,0.04)] transition group-hover:translate-y-0 group-hover:opacity-100"
+        >
+          <Heart className={`h-4 w-4 ${wished ? "fill-[#c44b2b] text-[#c44b2b]" : "text-[#1a1714]"}`} />
+        </button>
+      </div>
+
+      <Link href={product.href} className="block px-5 pb-6 pt-5">
+        <p className="mb-1 text-[10px] uppercase tracking-[0.1em] text-[#8a8279]">{product.category}</p>
+        <h3 className={`${syne.className} mb-2 text-base font-semibold text-[#1a1714]`}>{product.name}</h3>
+
+        <div className="mb-3 flex items-center gap-2 text-[11px] text-[#8a8279]">
+          <Stars rating={product.rating} />
+          <span>({product.reviews})</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className={`${syne.className} text-xl font-bold text-[#1a1714]`}>
+            {"\u20B9"}{product.price}
+            {product.oldPrice ? <span className="ml-2 text-sm font-normal text-[#8a8279] line-through">{"\u20B9"}{product.oldPrice}</span> : null}
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onAddToCart(product);
+            }}
+            className="grid h-10 w-10 place-items-center rounded-full bg-[#1a1714] text-white transition hover:scale-110 hover:bg-[#c44b2b]"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+      </Link>
+    </motion.article>
+  );
+}
 
 export default function GenZPage() {
-  const banners = [
-    {
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1265&h=432&fit=crop",
-      alt: "Gen Z Collection Banner 1",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1265&h=432&fit=crop",
-      alt: "Gen Z Collection Banner 2",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1265&h=432&fit=crop",
-      alt: "Gen Z Collection Banner 3",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1265&h=432&fit=crop",
-      alt: "Gen Z Collection Banner 4",
-    },
-  ];
-  const bestsellers: HighestSellingProduct[] = [
-    {
-      id: "genz-bestseller-velocity-low",
-      name: "Velocity Low",
-      price: 225,
-      priceLabel: "Rs. 225",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAxSjE4iXtocw-zVI76kriOcYVuwrMKwv7kM4msoaJ4zc7y77f67tAauJVBxBLJ2gQpDgB1N5GqzLOmiOVlkI6bhTnaare6hnuVAfzjSGw05Bcr3Nqj9riHhljCHErTCSjHrqWvC1Sq6jXiVeP_8LyQrmTt1Qj76h0zLLwXJZ06uYqasVagBFaBbxragE3mMtZjxL10cTcEsIvXpdezLz7-38AstNg2_g4NxrZCXzNdEI0lD6NSZwATn1biFAI-DzK_24STsi7SSIN8",
-      category: "Sneakers",
-      href: "/sneakers/nova-form-strider",
-      badge: "Hot drop",
-      rating: "4.9",
-      soldLabel: "1.2k sold",
-      note: "Drop favorite",
-    },
-    {
-      id: "genz-bestseller-oversized-lavender-knit",
-      name: "Oversized Lavender Knit",
-      price: 89,
-      priceLabel: "Rs. 89",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDrjT26GbhnZOp9XJTCJhf26mKuCUKYxomQ34fnYXl7oizqaIBTD9Bdu1RD1wotUaLLsMYuIUyqBgZ9junrhIScWCZACZVnsV1Yd5s7xVlzuki5Foc5U-4ElUURkkp-zCXQLbH-0clm2K6EJzWOmUqh9Y-qcr4WGsGioapJtgtMQfMcvbmfm9IrU4wS5iTzNe-U3qQwlRPsKHahLXK8AoKg36vb5H5k1GdcXqlUuEsfev2fY_7sOaRakmCiIKpxZI-OCdk20Nqvmfhb",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Most loved",
-      rating: "4.8",
-      soldLabel: "980 sold",
-      note: "Soft street",
-    },
-    {
-      id: "genz-bestseller-tote-de-luxe",
-      name: "Tote de Luxe",
-      price: 210,
-      priceLabel: "Rs. 210",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDvUakNEGtNVYBPHn1jKGtweP6oNcSIF0fs2eN612hgJ923Ec5Ivtjq_R7wyJ7cdHcRHo-zWfufaNtOauBBCnIT8S364yJ2zjMSJWzKeALlEAylnvmo37MMZ34FMQ_RKuMRDiATsCLlSzZwbNYCjXa-_gZxH1Tg1OoqKlRs50XL8yPNe4f0N0iIHuEQ-y1EcBnKvwyYW9dPDyEOpQnEAQt5esZg20L_fYDoZh3QMi5e9r2mGfaoW3hM0a-wK-hNRo-wOsKwdomykYc3",
-      category: "Accessories",
-      href: "/accessories/croissant-leather-bag",
-      badge: "Aesthetic",
-      rating: "4.7",
-      soldLabel: "910 sold",
-      note: "Viral bag",
-    },
-    {
-      id: "genz-bestseller-patchwork-denim",
-      name: "Patchwork Denim",
-      price: 120,
-      priceLabel: "Rs. 120",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDN-sgpOjFkz_vz3lefbu5CSYGxttKx7pxAW3WM4A1SjsD_8NLhBiFuOKDcYkABv7XeSEWpWpGx8SqFu5iGXe9jK1VUVDJ6whOGEiKjH63mTVlpyrKvBkmODBfme833IviBmc7cDAY6qBcpy5eu7KtxotWa1oilKIiAtvNeG5ObF0hRg8N288f-Tq_u1aQNqNb_0oSe6c62hHK2gDXnM2Zdh5bAa6XB8Eig97hw84Z4sAUoVFFA54U_Zc43vcOzVAJbYuTWYcU0QXuB",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Trend pick",
-      rating: "4.8",
-      soldLabel: "870 sold",
-      note: "Layer hero",
-    },
-  ];
+  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["gen-z"]));
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+  const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(() =>
+    Object.fromEntries(sneakersProducts.map((item) => [item.id, item.sizes[Math.floor(item.sizes.length / 2)] ?? item.sizes[0]])),
+  );
+
+  const accessoriesRef = useRef<HTMLDivElement | null>(null);
+  const { addToCart, isWishlisted, toggleWishlist } = useShop();
+
+  useEffect(() => {
+    let active = true;
+    const loadBanners = async () => {
+      try {
+        const config = await fetchBannerConfig();
+        if (active) setBanners(withGenerationHeroImage(config.generationBanners["gen-z"]));
+      } catch {
+        // Keep fallback
+      }
+    };
+
+    void loadBanners();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleSubscribe = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setSubscribed(true);
+    setNewsletterEmail("");
+    window.setTimeout(() => setSubscribed(false), 3000);
+  };
+
+  const scrollAccessories = (direction: "left" | "right") => {
+    const node = accessoriesRef.current;
+    if (!node) return;
+    node.scrollBy({ left: direction === "left" ? -304 : 304, behavior: "smooth" });
+  };
+
   return (
-    <div className="bg-[#fafafa] font-body text-[#2f3334] antialiased selection:bg-[#f1d6ff] selection:text-[#5c486a] overflow-x-hidden">
+    <div className={`${dmMono.className} bg-[#f6f3ee] text-[#1a1714] antialiased selection:bg-[#f0e8d8] selection:text-[#1a1714]`}>
       <Navbar />
 
-      <main>
-        <section className="pt-16 pb-8 px-4">
-          <div className="max-w-[1265px] mx-auto">
-            <BannerCarousel banners={banners} autoPlayInterval={4000} />
-          </div>
+      <main className="genz-vltg relative overflow-x-hidden">
+        <section className="pt-16">
+          <BannerCarousel banners={banners} autoPlayInterval={4000} />
         </section>
 
-        <GenerationHighestSelling
-          generation="gen-z"
-          generationLabel="Gen Z"
-          viewAllHref="/sneakers?generation=gen-z"
-          backgroundClassName="bg-[#f1d6ff]/30"
-          accentClassName="bg-[#111111] text-white"
-          description="The most clicked and most bought pieces from Gen Z shoppers, ranked for fast discovery."
-          fallbackProducts={bestsellers}
-        />
+        {/*
+          Legacy Gen Z content below hero preserved as requested.
+          Old blocks kept: clothing section, accessories section, sneakers section,
+          each with previous ProductHoverActions cards and old style jsx font imports.
+        */}
 
-        <section className="py-12 px-8 bg-[#f1d6ff]/30" id="clothing">
-          <div className="max-w-screen-2xl mx-auto">
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h2 className="font-headline text-3xl font-black text-[#111111] tracking-tighter mb-2">The Wardrobe</h2>
-                <p className="text-[#5f4b6d] text-sm font-medium">Redefining classic silhouettes with an edgy twist.</p>
+        <section className="overflow-hidden bg-[#1a1714] py-[18px]">
+          <div className="genz-marquee-track flex w-max gap-14">
+            {[...marqueeItems, ...marqueeItems].map((item, idx) => (
+              <div key={`${item}-${idx}`} className={`${syne.className} flex items-center gap-4 whitespace-nowrap text-sm font-semibold uppercase tracking-[0.15em] text-[#f6f3ee]`}>
+                <span className="h-1.5 w-1.5 rounded-full bg-[#c44b2b]" />
+                {item}
               </div>
-              <Link
-                className="bg-[#111111] text-white px-5 py-2.5 rounded-xl font-headline font-bold text-sm hover:scale-105 transition-transform flex items-center gap-2"
-                href="/clothing?generation=gen-z"
-              >
-                View More
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-                <div className="relative rounded-xl overflow-hidden bg-white aspect-[3/4] mb-4">
-                  <img
-                    alt="trendy lavender oversized hoodie on minimalist clothing rack with soft artistic lighting"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrjT26GbhnZOp9XJTCJhf26mKuCUKYxomQ34fnYXl7oizqaIBTD9Bdu1RD1wotUaLLsMYuIUyqBgZ9junrhIScWCZACZVnsV1Yd5s7xVlzuki5Foc5U-4ElUURkkp-zCXQLbH-0clm2K6EJzWOmUqh9Y-qcr4WGsGioapJtgtMQfMcvbmfm9IrU4wS5iTzNe-U3qQwlRPsKHahLXK8AoKg36vb5H5k1GdcXqlUuEsfev2fY_7sOaRakmCiIKpxZI-OCdk20Nqvmfhb"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-clothing-oversized-lavender-knit",
-                      name: "Oversized Lavender Knit",
-                      price: 89,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuDrjT26GbhnZOp9XJTCJhf26mKuCUKYxomQ34fnYXl7oizqaIBTD9Bdu1RD1wotUaLLsMYuIUyqBgZ9junrhIScWCZACZVnsV1Yd5s7xVlzuki5Foc5U-4ElUURkkp-zCXQLbH-0clm2K6EJzWOmUqh9Y-qcr4WGsGioapJtgtMQfMcvbmfm9IrU4wS5iTzNe-U3qQwlRPsKHahLXK8AoKg36vb5H5k1GdcXqlUuEsfev2fY_7sOaRakmCiIKpxZI-OCdk20Nqvmfhb",
-                      category: "Clothing",
-                      href: "/clothing/the-atelier-trench",
-                    }}
-                  />
-                </div>
-                <h3 className="font-headline font-bold text-[#111111]">Oversized Lavender Knit</h3>
-                <p className="text-zinc-500">₹89.00</p>
-              </Link>
-              <Link className="group cursor-pointer mt-0 lg:mt-8 block" href="/clothing/the-atelier-trench">
-                <div className="relative rounded-xl overflow-hidden bg-white aspect-[3/4] mb-4">
-                  <img
-                    alt="aesthetic editorial shot of vintage denim jacket with patchwork details on pale purple background"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN-sgpOjFkz_vz3lefbu5CSYGxttKx7pxAW3WM4A1SjsD_8NLhBiFuOKDcYkABv7XeSEWpWpGx8SqFu5iGXe9jK1VUVDJ6whOGEiKjH63mTVlpyrKvBkmODBfme833IviBmc7cDAY6qBcpy5eu7KtxotWa1oilKIiAtvNeG5ObF0hRg8N288f-Tq_u1aQNqNb_0oSe6c62hHK2gDXnM2Zdh5bAa6XB8Eig97hw84Z4sAUoVFFA54U_Zc43vcOzVAJbYuTWYcU0QXuB"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-clothing-patchwork-denim",
-                      name: "Patchwork Denim",
-                      price: 120,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuDN-sgpOjFkz_vz3lefbu5CSYGxttKx7pxAW3WM4A1SjsD_8NLhBiFuOKDcYkABv7XeSEWpWpGx8SqFu5iGXe9jK1VUVDJ6whOGEiKjH63mTVlpyrKvBkmODBfme833IviBmc7cDAY6qBcpy5eu7KtxotWa1oilKIiAtvNeG5ObF0hRg8N288f-Tq_u1aQNqNb_0oSe6c62hHK2gDXnM2Zdh5bAa6XB8Eig97hw84Z4sAUoVFFA54U_Zc43vcOzVAJbYuTWYcU0QXuB",
-                      category: "Clothing",
-                      href: "/clothing/the-atelier-trench",
-                    }}
-                  />
-                </div>
-                <h3 className="font-headline font-bold text-[#111111]">Patchwork Denim</h3>
-                <p className="text-zinc-500">₹120.00</p>
-              </Link>
-              <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-                <div className="relative rounded-xl overflow-hidden bg-white aspect-[3/4] mb-4">
-                  <img
-                    alt="clean minimal black graphic t-shirt with aesthetic white typography worn by person in studio lighting"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHR1oncLDfQmF1HxQqHvfiGgg6ffT8v2YAMAU6vWKOwDSrk0KCKMHu-ygzDq5Kkw1TvHee4tcOLhDhJwL2V0IKPvlDQIbmfKvoRIYmP3-pd5rhyqYGyXAaeUv-3PAI4E4meT3jE86QcIAwvL9pUiZDeecYRtRjKb0Jb2-4eQf4Tn5cQsjO7tUEVXL8R5D7AENiUhkjCIFahUyK2sNiybzZFWVaSmk8kyCxFOvUcdabazo-tFzpqOIBBQa1qd6B1UcBlPTPKHwoqVln"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-clothing-digital-print-tee",
-                      name: "Digital Print Tee",
-                      price: 45,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuCHR1oncLDfQmF1HxQqHvfiGgg6ffT8v2YAMAU6vWKOwDSrk0KCKMHu-ygzDq5Kkw1TvHee4tcOLhDhJwL2V0IKPvlDQIbmfKvoRIYmP3-pd5rhyqYGyXAaeUv-3PAI4E4meT3jE86QcIAwvL9pUiZDeecYRtRjKb0Jb2-4eQf4Tn5cQsjO7tUEVXL8R5D7AENiUhkjCIFahUyK2sNiybzZFWVaSmk8kyCxFOvUcdabazo-tFzpqOIBBQa1qd6B1UcBlPTPKHwoqVln",
-                      category: "Clothing",
-                      href: "/clothing/the-atelier-trench",
-                    }}
-                  />
-                </div>
-                <h3 className="font-headline font-bold text-[#111111]">Digital Print Tee</h3>
-                <p className="text-zinc-500">₹45.00</p>
-              </Link>
-              <Link className="group cursor-pointer mt-0 lg:mt-8 block" href="/clothing/the-atelier-trench">
-                <div className="relative rounded-xl overflow-hidden bg-white aspect-[3/4] mb-4">
-                  <img
-                    alt="fashionable cargo pants in soft cream color neatly folded on purple background"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1aL2nbGlHe26yPg46RwnaGJpFNUeNMCXvsnwV5Q4qG9VP6fqQwr45beuo3BgMkFqdsiwkyS5-Bxi_ZUGYa7Qcc85xef66deY93v6SYSQO8I6wVOQ_T3TqR-6mF3_swkFGm7NO0rrPPfTKdmiQRdLhgY3CgPVL0nRjIwu4CNEMA-6EgJ__tqXEfyNB33yrvri2vaDKGuRNDHEcvc4zL4LGfiG6C4Xj4CdjsXOKJOg2DT6eJ_F78eR3VG6ixz3koYiBFF3gPDNcYsZq"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-clothing-utility-cargo-pants",
-                      name: "Utility Cargo Pants",
-                      price: 110,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuC1aL2nbGlHe26yPg46RwnaGJpFNUeNMCXvsnwV5Q4qG9VP6fqQwr45beuo3BgMkFqdsiwkyS5-Bxi_ZUGYa7Qcc85xef66deY93v6SYSQO8I6wVOQ_T3TqR-6mF3_swkFGm7NO0rrPPfTKdmiQRdLhgY3CgPVL0nRjIwu4CNEMA-6EgJ__tqXEfyNB33yrvri2vaDKGuRNDHEcvc4zL4LGfiG6C4Xj4CdjsXOKJOg2DT6eJ_F78eR3VG6ixz3koYiBFF3gPDNcYsZq",
-                      category: "Clothing",
-                      href: "/clothing/the-atelier-trench",
-                    }}
-                  />
-                </div>
-                <h3 className="font-headline font-bold text-[#111111]">Utility Cargo Pants</h3>
-                <p className="text-zinc-500">₹110.00</p>
-              </Link>
-            </div>
+            ))}
           </div>
         </section>
 
-        <section className="py-12 px-8 bg-[#ffdad2]/40" id="accessories">
-          <div className="max-w-screen-2xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-4 flex flex-col justify-center">
-              <h2 className="font-headline text-3xl font-black text-[#111111] tracking-tighter mb-4 leading-none">
-                Curated <br />
-                Accents
-              </h2>
-              <p className="text-[#7b4437] text-sm font-medium mb-6 max-w-sm">
-                The small details that define a persona. Handpicked accessories for the modern curator.
+        <section id="clothing" className="px-5 py-24 md:px-8">
+          <div className="mx-auto max-w-[1340px]">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              className="mb-12"
+            >
+              <p className="mb-3 flex items-center gap-2.5 text-[11px] uppercase tracking-[0.15em] text-[#c44b2b]">
+                <span className="h-[1.5px] w-6 bg-[#c44b2b]" /> 01 - Collection
               </p>
-              <Link
-                className="bg-[#111111] text-white px-5 py-2.5 rounded-xl font-headline font-bold text-sm hover:scale-105 transition-transform flex items-center justify-center gap-2 w-fit"
-                href="/accessories?generation=gen-z"
-              >
-                View More
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </Link>
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <h2 className={`${syne.className} text-[clamp(32px,5vw,56px)] font-extrabold tracking-[-0.03em]`}>
+                  Clothing <span className={`${cormorant.className} font-light italic text-[#8a8279]`}>Collection</span>
+                </h2>
+                <Link href="/clothing?generation=gen-z" className="rounded-full border-2 border-[#1a17141f] px-8 py-3 text-xs uppercase tracking-[0.1em] transition hover:bg-[#1a1714] hover:text-[#f6f3ee]">
+                  View More
+                </Link>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+              {clothingProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  wished={isWishlisted(product.id)}
+                  onToggleWishlist={(item) => toggleWishlist(productToShopProduct(item))}
+                  onAddToCart={(item) => addToCart(productToShopProduct(item))}
+                />
+              ))}
             </div>
-            <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-2 gap-8">
-              <Link className="relative group bg-white/40 p-4 rounded-xl backdrop-blur-md border border-white/20 custom-shadow block" href="/accessories/croissant-leather-bag">
-                <div className="relative rounded-lg overflow-hidden h-52 mb-4">
-                  <img
-                    alt="luxury minimalist leather handbag in peach color sitting on a white marble surface"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvUakNEGtNVYBPHn1jKGtweP6oNcSIF0fs2eN612hgJ923Ec5Ivtjq_R7wyJ7cdHcRHo-zWfufaNtOauBBCnIT8S364yJ2zjMSJWzKeALlEAylnvmo37MMZ34FMQ_RKuMRDiATsCLlSzZwbNYCjXa-_gZxH1Tg1OoqKlRs50XL8yPNe4f0N0iIHuEQ-y1EcBnKvwyYW9dPDyEOpQnEAQt5esZg20L_fYDoZh3QMi5e9r2mGfaoW3hM0a-wK-hNRo-wOsKwdomykYc3"
+          </div>
+        </section>
+
+        <section id="accessories" className="relative bg-[#efe9df] px-5 py-24 md:px-8">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1a171414] to-transparent" />
+          <div className="mx-auto max-w-[1340px]">
+            <div className="mb-10 flex flex-wrap items-end justify-between gap-5">
+              <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }}>
+                <p className="mb-3 flex items-center gap-2.5 text-[11px] uppercase tracking-[0.15em] text-[#c44b2b]">
+                  <span className="h-[1.5px] w-6 bg-[#c44b2b]" /> 02 - Accessories
+                </p>
+                <h2 className={`${syne.className} text-[clamp(32px,5vw,56px)] font-extrabold tracking-[-0.03em]`}>
+                  Complete <span className={`${cormorant.className} font-light italic text-[#8a8279]`}>the Look</span>
+                </h2>
+              </motion.div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => scrollAccessories("left")}
+                  className="grid h-12 w-12 place-items-center rounded-full border border-[#1a17141a] bg-white transition hover:bg-[#1a1714] hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollAccessories("right")}
+                  className="grid h-12 w-12 place-items-center rounded-full border border-[#1a17141a] bg-white transition hover:bg-[#1a1714] hover:text-white"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div ref={accessoriesRef} className="flex gap-6 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {accessoriesProducts.map((product, idx) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.55, delay: idx * 0.06 }}
+                  className="min-w-[280px] max-w-[280px]"
+                >
+                  <ProductCard
+                    product={product}
+                    wished={isWishlisted(product.id)}
+                    onToggleWishlist={(item) => toggleWishlist(productToShopProduct(item))}
+                    onAddToCart={(item) => addToCart(productToShopProduct(item))}
                   />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-accessories-tote-de-luxe",
-                      name: "Tote de Luxe",
-                      price: 210,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuDvUakNEGtNVYBPHn1jKGtweP6oNcSIF0fs2eN612hgJ923Ec5Ivtjq_R7wyJ7cdHcRHo-zWfufaNtOauBBCnIT8S364yJ2zjMSJWzKeALlEAylnvmo37MMZ34FMQ_RKuMRDiATsCLlSzZwbNYCjXa-_gZxH1Tg1OoqKlRs50XL8yPNe4f0N0iIHuEQ-y1EcBnKvwyYW9dPDyEOpQnEAQt5esZg20L_fYDoZh3QMi5e9r2mGfaoW3hM0a-wK-hNRo-wOsKwdomykYc3",
-                      category: "Accessories",
-                      href: "/accessories/croissant-leather-bag",
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between items-center px-2">
-                  <div>
-                    <p className="font-label text-[10px] tracking-widest uppercase text-zinc-400">Essential</p>
-                    <h3 className="font-headline font-bold text-[#111111]">Tote de Luxe</h3>
-                  </div>
-                  <span className="text-xl font-bold">₹210</span>
-                </div>
-              </Link>
-              <Link className="relative group bg-white/40 p-4 rounded-xl backdrop-blur-md border border-white/20 custom-shadow mt-0 block" href="/accessories/croissant-leather-bag">
-                <div className="relative rounded-lg overflow-hidden h-52 mb-4">
-                  <img
-                    alt="aesthetic chunky gold rings and pearl necklaces laid out on a silk fabric background"
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdICoc7vPgSfxV0Tq7mz7jv0b8oBlOZJGkpj3fuZ91XXjFnYLlP4sgMYRvnoDHHlY_3MH2ZuoQnnjjXeBtlxz-f1138WVnPdBhm7XXeo3Misys6CiJMaSz3vrjtSmtEJX6me4ObrLys3JD6NoQoANZCeXS9o14aJjoymYsPmf_EjPfOov8deaGJDvg2rTDUkuY8LGjjvW5y4SJ_bTkhGnUTih9xe38KFTbjPPDI5twRAjMv3xTiON3WF0m5EMx-scPtM4tBz2TBNqC"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-accessories-chain-layer-set",
-                      name: "Chain Layer Set",
-                      price: 55,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuDdICoc7vPgSfxV0Tq7mz7jv0b8oBlOZJGkpj3fuZ91XXjFnYLlP4sgMYRvnoDHHlY_3MH2ZuoQnnjjXeBtlxz-f1138WVnPdBhm7XXeo3Misys6CiJMaSz3vrjtSmtEJX6me4ObrLys3JD6NoQoANZCeXS9o14aJjoymYsPmf_EjPfOov8deaGJDvg2rTDUkuY8LGjjvW5y4SJ_bTkhGnUTih9xe38KFTbjPPDI5twRAjMv3xTiON3WF0m5EMx-scPtM4tBz2TBNqC",
-                      category: "Accessories",
-                      href: "/accessories/croissant-leather-bag",
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between items-center px-2">
-                  <div>
-                    <p className="font-label text-[10px] tracking-widest uppercase text-zinc-400">Adornments</p>
-                    <h3 className="font-headline font-bold text-[#111111]">Chain Layer Set</h3>
-                  </div>
-                  <span className="text-xl font-bold">₹55</span>
-                </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link href="/accessories?generation=gen-z" className="inline-flex rounded-full border-2 border-[#1a17141f] px-8 py-3 text-xs uppercase tracking-[0.1em] transition hover:bg-[#1a1714] hover:text-[#f6f3ee]">
+                View All Accessories
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="py-12 px-8 bg-[#a1d1fe]/20 relative" id="sneakers">
-          <div className="max-w-screen-2xl mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="font-headline text-4xl font-black text-[#111111] tracking-tighter mb-2">Street Soles</h2>
-              <p className="text-[#22577e] text-sm font-medium">Limited drops and heritage classics.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-              <Link className="bg-white rounded-xl p-8 custom-shadow flex flex-col items-center group block" href="/sneakers/nova-form-strider">
-                <div className="relative w-full h-44">
-                  <img
-                    alt="streetwear style sneakers in white and blue colorway levitating in a bright minimal studio"
-                    className="w-full h-44 object-contain group-hover:-rotate-12 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTvfluOIEPWylHWDvDGRiNqWfLsHpQ_YFpyh5l9eBxQzgD0Ax0vOB2w4IkKHBLzo0B5gUOl7HD5qvHBhDQoDTOacF1LY7jR9m6w9WiicltCWcad5ITsG41xTxu-kyPVz1vdyFVCGHZASCgfg5ojq162gd9TjZrOD9Ht6hyH8glUOYYUkT-G49Rh5GGGUH1_71XZSm36_eKdmeWJlWBH3FintSjilAxunGZTXfRaKcB0kJEA9sr-zszLhxcVEKpqAgzmd_7HodsTMLm"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-sneakers-cloud-walker-1s",
-                      name: "Cloud Walker 1s",
-                      price: 160,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuBTvfluOIEPWylHWDvDGRiNqWfLsHpQ_YFpyh5l9eBxQzgD0Ax0vOB2w4IkKHBLzo0B5gUOl7HD5qvHBhDQoDTOacF1LY7jR9m6w9WiicltCWcad5ITsG41xTxu-kyPVz1vdyFVCGHZASCgfg5ojq162gd9TjZrOD9Ht6hyH8glUOYYUkT-G49Rh5GGGUH1_71XZSm36_eKdmeWJlWBH3FintSjilAxunGZTXfRaKcB0kJEA9sr-zszLhxcVEKpqAgzmd_7HodsTMLm",
-                      category: "Sneakers",
-                      href: "/sneakers/nova-form-strider",
-                    }}
-                  />
-                </div>
-                <div className="w-full mt-8">
-                  <p className="font-label text-[10px] tracking-widest uppercase font-bold text-[#31638a] mb-1">Top Rated</p>
-                  <h3 className="font-headline font-bold text-xl text-[#111111] mb-2">Cloud Walker 1s</h3>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">₹160.00</span>
-                    <span className="w-10 h-10 rounded-full bg-[#6c5779] flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined text-sm material-fill">add</span>
-                    </span>
-                  </div>
-                </div>
-              </Link>
-              <Link className="bg-white rounded-xl p-8 custom-shadow flex flex-col items-center group scale-105 border-2 border-[#6c5779]/10 block" href="/sneakers/nova-form-strider">
-                <div className="relative w-full h-44">
-                  <img
-                    alt="luxury designer sneakers with bold red accents on a crisp white background"
-                    className="w-full h-44 object-contain group-hover:-rotate-12 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxSjE4iXtocw-zVI76kriOcYVuwrMKwv7kM4msoaJ4zc7y77f67tAauJVBxBLJ2gQpDgB1N5GqzLOmiOVlkI6bhTnaare6hnuVAfzjSGw05Bcr3Nqj9riHhljCHErTCSjHrqWvC1Sq6jXiVeP_8LyQrmTt1Qj76h0zLLwXJZ06uYqasVagBFaBbxragE3mMtZjxL10cTcEsIvXpdezLz7-38AstNg2_g4NxrZCXzNdEI0lD6NSZwATn1biFAI-DzK_24STsi7SSIN8"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-sneakers-velocity-low",
-                      name: "Velocity Low",
-                      price: 225,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuAxSjE4iXtocw-zVI76kriOcYVuwrMKwv7kM4msoaJ4zc7y77f67tAauJVBxBLJ2gQpDgB1N5GqzLOmiOVlkI6bhTnaare6hnuVAfzjSGw05Bcr3Nqj9riHhljCHErTCSjHrqWvC1Sq6jXiVeP_8LyQrmTt1Qj76h0zLLwXJZ06uYqasVagBFaBbxragE3mMtZjxL10cTcEsIvXpdezLz7-38AstNg2_g4NxrZCXzNdEI0lD6NSZwATn1biFAI-DzK_24STsi7SSIN8",
-                      category: "Sneakers",
-                      href: "/sneakers/nova-form-strider",
-                    }}
-                  />
-                </div>
-                <div className="w-full mt-8">
-                  <p className="font-label text-[10px] tracking-widest uppercase font-bold text-[#ac3149] mb-1">Hot Drop</p>
-                  <h3 className="font-headline font-bold text-xl text-[#111111] mb-2">Velocity Low</h3>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">₹225.00</span>
-                    <span className="w-10 h-10 rounded-full bg-[#6c5779] flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined text-sm material-fill">add</span>
-                    </span>
-                  </div>
-                </div>
-              </Link>
-              <Link className="bg-white rounded-xl p-8 custom-shadow flex flex-col items-center group block" href="/sneakers/nova-form-strider">
-                <div className="relative w-full h-44">
-                  <img
-                    alt="fashionable platform sneakers with pastel accents in a minimalist aesthetic composition"
-                    className="w-full h-44 object-contain group-hover:-rotate-12 transition-transform duration-500"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsRxlCzhO9zQle6vbJOGDqGGM0Qdv5-bY9SVjStBurexIljK6U5ApI7sohlwNHpUsNUoD0xK65BQoYIk6_EZpZrCEu2Zefjcit-1IlalVyons2UYlhiDaO5nQVtXBxmJOogFIyJE15Xfu_azDarRb_V2y98oOyWD9mZqH2QI4K2Ax_IHdcHR2yn1MGIl42Qm7ISimQdLx1EBGMrqFkd01PB9uwaw0yV5E0tzfObSGBKkFlWXb7MmqxadsehxS7b1WT3MKXbyIFMlVy"
-                  />
-                  <ProductHoverActions
-                    product={{
-                      id: "genz-sneakers-pastel-pivot",
-                      name: "Pastel Pivot",
-                      price: 140,
-                      image:
-                        "https://lh3.googleusercontent.com/aida-public/AB6AXuCsRxlCzhO9zQle6vbJOGDqGGM0Qdv5-bY9SVjStBurexIljK6U5ApI7sohlwNHpUsNUoD0xK65BQoYIk6_EZpZrCEu2Zefjcit-1IlalVyons2UYlhiDaO5nQVtXBxmJOogFIyJE15Xfu_azDarRb_V2y98oOyWD9mZqH2QI4K2Ax_IHdcHR2yn1MGIl42Qm7ISimQdLx1EBGMrqFkd01PB9uwaw0yV5E0tzfObSGBKkFlWXb7MmqxadsehxS7b1WT3MKXbyIFMlVy",
-                      category: "Sneakers",
-                      href: "/sneakers/nova-form-strider",
-                    }}
-                  />
-                </div>
-                <div className="w-full mt-8">
-                  <p className="font-label text-[10px] tracking-widest uppercase font-bold text-[#31638a] mb-1">New In</p>
-                  <h3 className="font-headline font-bold text-xl text-[#111111] mb-2">Pastel Pivot</h3>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">₹140.00</span>
-                    <span className="w-10 h-10 rounded-full bg-[#6c5779] flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined text-sm material-fill">add</span>
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </div>
-            <div className="mt-10 text-center">
-              <Link
-                className="bg-[#111111] text-white px-8 py-3 rounded-xl font-headline font-bold text-sm hover:scale-105 transition-transform inline-flex items-center gap-3"
-                href="/sneakers?generation=gen-z"
-              >
-                View More Sneakers
-                <span className="material-symbols-outlined">bolt</span>
-              </Link>
+        <section id="sneakers" className="px-5 py-24 md:px-8">
+          <div className="mx-auto max-w-[1340px]">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              className="mb-12"
+            >
+              <p className="mb-3 flex items-center gap-2.5 text-[11px] uppercase tracking-[0.15em] text-[#c44b2b]">
+                <span className="h-[1.5px] w-6 bg-[#c44b2b]" /> 03 - Sneakers
+              </p>
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <h2 className={`${syne.className} text-[clamp(32px,5vw,56px)] font-extrabold tracking-[-0.03em]`}>
+                  Sneaker <span className={`${cormorant.className} font-light italic text-[#8a8279]`}>Drops</span>
+                </h2>
+                <Link href="/sneakers?generation=gen-z" className="rounded-full border-2 border-[#1a17141f] px-8 py-3 text-xs uppercase tracking-[0.1em] transition hover:bg-[#1a1714] hover:text-[#f6f3ee]">
+                  View All Sneakers
+                </Link>
+              </div>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-7 xl:grid-cols-2">
+              {sneakersProducts.map((item, idx) => {
+                const activeSize = selectedSizes[item.id] ?? item.sizes[0];
+                return (
+                  <motion.article
+                    key={item.id}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.6, delay: idx * 0.06 }}
+                    className="grid min-h-[340px] overflow-hidden rounded-[28px] border border-[#1a17140a] bg-white md:grid-cols-2"
+                  >
+                    <Link href={item.href} className="relative overflow-hidden bg-[#eae4d8]">
+                      <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
+                    </Link>
+
+                    <div className="flex flex-col justify-center p-7 md:p-8">
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {item.tags.map((tag) => {
+                          const style = tag.includes("New")
+                            ? "bg-[#c44b2b14] text-[#c44b2b] border-[#c44b2b33]"
+                            : tag.includes("Trending")
+                              ? "bg-[#b8a9d426] text-[#7b6a9e] border-[#b8a9d44d]"
+                              : "bg-[#a8c5a026] text-[#5a7a52] border-[#a8c5a04d]";
+                          return (
+                            <span key={`${item.id}-${tag}`} className={`rounded-full border px-3 py-1 text-[9px] uppercase tracking-[0.1em] ${style}`}>
+                              {tag}
+                            </span>
+                          );
+                        })}
+                      </div>
+
+                      <Link href={item.href} className={`${syne.className} mb-2 text-2xl font-bold text-[#1a1714]`}>
+                        {item.name}
+                      </Link>
+                      <p className="mb-4 text-xs leading-relaxed text-[#8a8279]">{item.description}</p>
+                      <p className={`${syne.className} mb-5 text-3xl font-bold text-[#1a1714]`}>{"\u20B9"}{item.price}</p>
+
+                      <div className="mb-5 flex flex-wrap gap-1.5">
+                        {item.sizes.map((size) => (
+                          <button
+                            key={`${item.id}-${size}`}
+                            type="button"
+                            onClick={() => setSelectedSizes((prev) => ({ ...prev, [item.id]: size }))}
+                            className={`rounded-md border px-3 py-1.5 text-[10px] transition ${activeSize === size ? "border-[#1a1714] bg-[#1a1714] text-white" : "border-[#1a17141a] text-[#1a1714]"}`}
+                          >
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => addToCart(productToShopProduct(item))}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#1a1714] px-6 py-3 text-xs uppercase tracking-[0.1em] text-[#f6f3ee] transition hover:bg-[#c44b2b]"
+                        >
+                          Add to Cart
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleWishlist(productToShopProduct(item))}
+                          className="grid h-11 w-11 place-items-center rounded-full border border-[#1a17141a] bg-white"
+                        >
+                          <Heart className={`h-4 w-4 ${isWishlisted(item.id) ? "fill-[#c44b2b] text-[#c44b2b]" : "text-[#1a1714]"}`} />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.article>
+                );
+              })}
             </div>
           </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#1a1714] to-[#2d2824] px-5 py-16 md:px-8">
+          <div className="pointer-events-none absolute -right-[10%] -top-[50%] h-[600px] w-[600px] rounded-full bg-[radial-gradient(circle,rgba(196,75,43,0.15)_0%,transparent_70%)]" />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            className="relative mx-auto flex max-w-[1340px] flex-wrap items-center justify-between gap-8"
+          >
+            <div>
+              <h3 className={`${syne.className} mb-2 text-[clamp(28px,4vw,44px)] font-extrabold tracking-[-0.02em] text-[#f6f3ee]`}>Trending Now</h3>
+              <p className="text-sm text-[#f6f3ee80]">See what everyone&apos;s wearing this season</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {["Streetwear", "Y2K Revival", "Minimalist", "Gorpcore", "Dopamine Dressing"].map((chip) => (
+                <button key={chip} type="button" className="rounded-full border border-[#f6f3ee1f] bg-[#f6f3ee14] px-5 py-2.5 text-xs uppercase tracking-[0.08em] text-[#f6f3ee] transition hover:border-[#c44b2b] hover:bg-[#c44b2b]">
+                  {chip}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+
+        <section className="px-5 py-24 md:px-8">
+          <div className="mx-auto max-w-[1340px]">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              className="mb-14 text-center"
+            >
+              <p className="mb-3 flex items-center justify-center gap-2.5 text-[11px] uppercase tracking-[0.15em] text-[#c44b2b]">
+                <span className="h-[1.5px] w-6 bg-[#c44b2b]" /> Why VLTG
+              </p>
+              <h2 className={`${syne.className} text-[clamp(30px,4.6vw,52px)] font-extrabold tracking-[-0.03em]`}>
+                Why Shop <span className={`${cormorant.className} font-light italic text-[#8a8279]`}>With Us</span>
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              {[
+                {
+                  icon: Gem,
+                  title: "Premium Quality",
+                  text: "Every piece is crafted with the finest materials and attention to detail.",
+                },
+                {
+                  icon: Zap,
+                  title: "Fast Delivery",
+                  text: "Get your order delivered in 2-3 business days with free express shipping over \u20B975.",
+                },
+                {
+                  icon: RotateCcw,
+                  title: "Easy Returns",
+                  text: "Enjoy hassle-free 30-day returns with prepaid shipping labels.",
+                },
+              ].map((item, idx) => (
+                <motion.article
+                  key={item.title}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.5, delay: idx * 0.08 }}
+                  className="group relative overflow-hidden rounded-[28px] border border-[#1a17140a] bg-white p-10 text-center transition hover:-translate-y-1.5 hover:shadow-[0_8px_30px_rgba(26,23,20,0.08)]"
+                >
+                  <span className="absolute left-1/2 top-0 h-0.5 w-14 -translate-x-1/2 rounded-b bg-[#c44b2b] opacity-0 transition group-hover:opacity-100" />
+                  <div className="mx-auto mb-6 grid h-[72px] w-[72px] place-items-center rounded-[14px] bg-[#eae4d8] text-[28px] transition group-hover:rotate-[-5deg] group-hover:bg-[#c44b2b] group-hover:text-white">
+                    <item.icon className="h-7 w-7" />
+                  </div>
+                  <h4 className={`${syne.className} mb-2 text-lg font-bold`}>{item.title}</h4>
+                  <p className="text-sm leading-relaxed text-[#8a8279]">{item.text}</p>
+                </motion.article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative bg-[#efe9df] px-5 pb-24 pt-20 md:px-8">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1a171414] to-transparent" />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.5 }}
+            className="mx-auto max-w-[600px] text-center"
+          >
+            <p className="mb-3 flex items-center justify-center gap-2.5 text-[11px] uppercase tracking-[0.15em] text-[#c44b2b]">
+              <span className="h-[1.5px] w-6 bg-[#c44b2b]" /> Stay in the Loop
+            </p>
+            <h2 className={`${syne.className} mb-4 text-[clamp(28px,4vw,44px)] font-extrabold tracking-[-0.02em]`}>
+              Join the <span className={`${cormorant.className} italic`}>VLTG</span> Family
+            </h2>
+            <p className="mb-9 text-sm text-[#8a8279]">
+              Subscribe for early access to new drops, exclusive offers, and style inspiration.
+            </p>
+
+            <form onSubmit={handleSubscribe} className="mx-auto flex max-w-[480px] flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                required
+                value={newsletterEmail}
+                onChange={(event) => setNewsletterEmail(event.target.value)}
+                placeholder="Enter your email"
+                className="h-12 flex-1 rounded-full border border-[#1a171414] bg-white px-5 text-[13px] outline-none transition placeholder:text-[#8a8279] focus:border-[#c44b2b] focus:shadow-[0_0_0_4px_rgba(196,75,43,0.08)]"
+              />
+              <button
+                type="submit"
+                className={`h-12 rounded-full px-8 text-xs uppercase tracking-[0.08em] text-white transition ${
+                  subscribed ? "bg-[#a8c5a0]" : "bg-[#c44b2b] hover:-translate-y-0.5 hover:bg-[#1a1714]"
+                }`}
+              >
+                {subscribed ? (
+                  <span className="inline-flex items-center gap-1.5"><Check className="h-3.5 w-3.5" /> Subscribed</span>
+                ) : (
+                  "Subscribe"
+                )}
+              </button>
+            </form>
+          </motion.div>
         </section>
       </main>
 
       <Footer />
+      <ScrollToTopButton bgColorClass="bg-[#c44b2b]" shadowClass="shadow-[0_10px_30px_rgba(196,75,43,0.35)]" />
 
       <style jsx global>{`
-        @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;500&family=Be+Vietnam+Pro:wght@400;500;700&display=swap");
-        @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
-
-        .font-headline {
-          font-family: "Plus Jakarta Sans", sans-serif;
+        .genz-vltg::after {
+          content: "";
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 9999;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
         }
 
-        .font-body {
-          font-family: "Inter", sans-serif;
+        .genz-marquee-track {
+          animation: genz-marquee 30s linear infinite;
         }
 
-        .font-label {
-          font-family: "Be Vietnam Pro", sans-serif;
+        @keyframes genz-marquee {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
 
-        .material-symbols-outlined {
-          font-variation-settings: "FILL" 0, "wght" 300, "GRAD" 0, "opsz" 24;
-        }
-
-        .material-fill {
-          font-variation-settings: "FILL" 1, "wght" 300, "GRAD" 0, "opsz" 24;
-        }
-
-        .tonal-shift-bg {
-          background: rgba(255, 255, 255, 0.6);
-          backdrop-filter: blur(20px);
-        }
-
-        .custom-shadow {
-          box-shadow: 0 10px 30px rgba(108, 87, 121, 0.08);
+        @media (prefers-reduced-motion: reduce) {
+          .genz-marquee-track {
+            animation: none;
+          }
         }
       `}</style>
     </div>
   );
 }
-
-

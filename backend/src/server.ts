@@ -18,6 +18,8 @@ import cartRoutes from '@/routes/cart.routes';
 import wishlistRoutes from '@/routes/wishlist.routes';
 import orderRoutes from '@/routes/order.routes';
 import adminRoutes from '@/routes/admin.routes';
+import bannerRoutes from '@/routes/banner.routes';
+import adminBannerRoutes from '@/routes/admin-banner.routes';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -80,6 +82,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/banners', bannerRoutes);
+app.use('/api/admin/banners', adminBannerRoutes);
 app.use('/api/admin', adminRoutes);
 
 // 404 handler

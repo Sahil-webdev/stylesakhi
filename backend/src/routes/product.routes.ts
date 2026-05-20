@@ -3,6 +3,7 @@ import Product, { PRODUCT_CATEGORIES, PRODUCT_GENERATIONS } from '@/models/Produ
 import Review from '@/models/Review';
 import Order from '@/models/Order';
 import { authenticate, authenticateAdmin, authorizeModule } from '@/middleware/auth';
+import { destroyMediaByPublicId, uploadProductMedia } from '@/utils/cloudinary';
 import { sendError, sendNotFound, sendServerError, sendSuccess } from '@/utils/response';
 
 const router = Router();
@@ -39,6 +40,35 @@ const toBooleanOrUndefined = (value: unknown): boolean | undefined => {
     if (value === 'false') return false;
   }
   return undefined;
+};
+
+const CLOUDINARY_IMAGE_FOLDER = 'stylesakhi/products/images';
+const CLOUDINARY_VIDEO_FOLDER = 'stylesakhi/products/videos';
+
+const resolveImagePublicIds = (
+  existingImages: string[],
+  existingPublicIds: string[],
+  nextMedia: Array<{ url: string; publicId: string | null; uploaded: boolean }>,
+): string[] => {
+  const existingIdQueueByUrl = new Map<string, string[]>();
+  existingImages.forEach((url, index) => {
+    const publicId = existingPublicIds[index];
+    if (!publicId) return;
+    const queue = existingIdQueueByUrl.get(url) || [];
+    queue.push(publicId);
+    existingIdQueueByUrl.set(url, queue);
+  });
+
+  return nextMedia.reduce<string[]>((acc, item) => {
+    if (item.publicId) {
+      acc.push(item.publicId);
+      return acc;
+    }
+    const queue = existingIdQueueByUrl.get(item.url);
+    const matched = queue?.shift();
+    if (matched) acc.push(matched);
+    return acc;
+  }, []);
 };
 
 // Public product listing with filters
@@ -326,10 +356,23 @@ router.post('/', authenticateAdmin, authorizeModule('products', 'can_create'), a
       return sendError(res, 'Valid stock is required');
     }
 
-    const normalizedImages = toStringArray(images).slice(0, 4);
-    if (normalizedImages.length === 0) {
+    const normalizedImagesInput = toStringArray(images).slice(0, 4);
+    if (normalizedImagesInput.length === 0) {
       return sendError(res, 'At least one image is required');
     }
+
+    const uploadedImages = await Promise.all(
+      normalizedImagesInput.map((item) => uploadProductMedia(item, 'image', CLOUDINARY_IMAGE_FOLDER)),
+    );
+    const normalizedImages = uploadedImages.map((item) => item.url);
+    const imagePublicIds = uploadedImages
+      .map((item) => item.publicId || '')
+      .filter(Boolean);
+
+    const normalizedVideoInput = typeof video === 'string' ? video.trim() : '';
+    const uploadedVideo = normalizedVideoInput
+      ? await uploadProductMedia(normalizedVideoInput, 'video', CLOUDINARY_VIDEO_FOLDER)
+      : null;
 
     const parsedIsHighestSelling = toBooleanOrUndefined(isHighestSelling);
 
@@ -351,7 +394,9 @@ router.post('/', authenticateAdmin, authorizeModule('products', 'can_create'), a
       discountPrice: discountPrice !== undefined && discountPrice !== null ? Number(discountPrice) : undefined,
       stock: parsedStock,
       images: normalizedImages,
-      video: typeof video === 'string' ? video.trim() : '',
+      imagePublicIds,
+      video: uploadedVideo?.url || '',
+      videoPublicId: uploadedVideo?.publicId || '',
       brand: typeof brand === 'string' ? brand.trim() : '',
       sizes: toStringArray(sizes),
       colors: toStringArray(colors),
@@ -375,7 +420,14 @@ router.post('/', authenticateAdmin, authorizeModule('products', 'can_create'), a
 router.put('/:id', authenticateAdmin, authorizeModule('products', 'can_edit'), async (req, res) => {
   try {
     const { id } = req.params;
+    const existing = await Product.findById(id);
+    if (!existing) {
+      return sendNotFound(res, 'Product not found');
+    }
+
     const updates = { ...req.body } as Record<string, unknown>;
+    const imagePublicIdsToDelete: string[] = [];
+    let videoPublicIdToDelete = '';
 
     if (updates.name && typeof updates.name === 'string') {
       const normalizedName = updates.name.trim();
@@ -389,12 +441,49 @@ router.put('/:id', authenticateAdmin, authorizeModule('products', 'can_edit'), a
       updates.slug = slugify(updates.slug);
     }
 
-    if (updates.images) {
-      updates.images = toStringArray(updates.images).slice(0, 4);
+    if (updates.images !== undefined) {
+      const nextImagesInput = toStringArray(updates.images).slice(0, 4);
+      if (nextImagesInput.length === 0) {
+        return sendError(res, 'At least one image is required');
+      }
+
+      const nextImagesUploaded = await Promise.all(
+        nextImagesInput.map((item) => uploadProductMedia(item, 'image', CLOUDINARY_IMAGE_FOLDER)),
+      );
+      updates.images = nextImagesUploaded.map((item) => item.url);
+
+      const nextImagePublicIds = resolveImagePublicIds(
+        existing.images || [],
+        existing.imagePublicIds || [],
+        nextImagesUploaded,
+      );
+      updates.imagePublicIds = nextImagePublicIds;
+
+      const nextImagePublicIdSet = new Set(nextImagePublicIds);
+      imagePublicIdsToDelete.push(
+        ...(existing.imagePublicIds || []).filter((publicId) => !nextImagePublicIdSet.has(publicId)),
+      );
     }
 
     if (updates.video !== undefined) {
-      updates.video = typeof updates.video === 'string' ? updates.video.trim() : '';
+      const nextVideoInput = typeof updates.video === 'string' ? updates.video.trim() : '';
+      if (!nextVideoInput) {
+        updates.video = '';
+        updates.videoPublicId = '';
+        if (existing.videoPublicId) {
+          videoPublicIdToDelete = existing.videoPublicId;
+        }
+      } else {
+        const nextVideo = await uploadProductMedia(nextVideoInput, 'video', CLOUDINARY_VIDEO_FOLDER);
+        updates.video = nextVideo.url;
+        const nextVideoPublicId =
+          nextVideo.publicId || (existing.video === nextVideo.url ? existing.videoPublicId || '' : '');
+        updates.videoPublicId = nextVideoPublicId;
+
+        if (existing.videoPublicId && existing.videoPublicId !== nextVideoPublicId) {
+          videoPublicIdToDelete = existing.videoPublicId;
+        }
+      }
     }
 
     if (updates.sizes) {
@@ -422,6 +511,13 @@ router.put('/:id', authenticateAdmin, authorizeModule('products', 'can_edit'), a
 
     if (!updated) {
       return sendNotFound(res, 'Product not found');
+    }
+
+    await Promise.allSettled(
+      imagePublicIdsToDelete.map((publicId) => destroyMediaByPublicId(publicId, 'image')),
+    );
+    if (videoPublicIdToDelete) {
+      await destroyMediaByPublicId(videoPublicIdToDelete, 'video');
     }
 
     return sendSuccess(res, updated, 'Product updated successfully');

@@ -9,6 +9,7 @@ import {
   BarChart3,
   CreditCard,
   Star,
+  Images,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -25,6 +26,7 @@ const menuItems = [
   { title: "Analytics", icon: BarChart3, path: "/analytics", module: "analytics" as PermissionModule },
   { title: "Payments", icon: CreditCard, path: "/payments", module: "payments" as PermissionModule },
   { title: "Reviews", icon: Star, path: "/reviews", module: "reviews" as PermissionModule },
+  { title: "Banners", icon: Images, path: "/banners", module: "settings" as PermissionModule },
   { title: "Team", icon: Shield, path: "/team", module: "team" as PermissionModule },
   { title: "Settings", icon: Settings, path: "/settings", module: "settings" as PermissionModule },
 ];

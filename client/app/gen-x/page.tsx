@@ -1,99 +1,43 @@
-﻿"use client";
+"use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import Footer from "@/components/Footer";
 import ProductHoverActions from "@/components/ProductHoverActions";
 import BannerCarousel from "@/components/BannerCarousel";
-import GenerationHighestSelling from "@/components/GenerationHighestSelling";
-import type { HighestSellingProduct } from "@/components/HighestSellingProducts";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
+import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
+
+const generationHeroImage = "/hero/hero3.jpeg";
+const withGenerationHeroImage = (items: BannerItem[]) =>
+  items.map((item) => ({ ...item, image: generationHeroImage }));
 
 export default function GenXPage() {
-  const banners = [
-    {
-      image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1265&h=432&fit=crop",
-      alt: "Gen X Collection Banner 1",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1445205170230-053b83016050?w=1265&h=432&fit=crop",
-      alt: "Gen X Collection Banner 2",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1265&h=432&fit=crop",
-      alt: "Gen X Collection Banner 3",
-    },
-    {
-      image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1265&h=432&fit=crop",
-      alt: "Gen X Collection Banner 4",
-    },
-  ];
-  const bestsellers: HighestSellingProduct[] = [
-    {
-      id: "genx-bestseller-tailored-wool-blazer",
-      name: "Tailored Wool Blazer",
-      price: 345,
-      priceLabel: "Rs. 345",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC9yyw4ldPquXuSZ1uW_KPBon3VVHfMmYCztzN2Qftvv9bzgHU8QOJPSnFGo23rizCoGpOFRMIyEWYxrO7jYFz6jwG0ESIfa5c3uG1amOvsW2f1Op1lvF8RlwtZMoyjzHgsn2YTPSrz4CVhsiee6rXGou5UnSl4OC4tjaci_26BJoFY2v1ciBqTjJonT7UwjGVZLKw-38wTIchqr-VRjXPPtgj4GPzm-V6-gOf9ka4bDmZ6L5EVyCBlp7S2PHYS6BNP4r5ZwFkGQMS2",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Signature",
-      rating: "4.8",
-      soldLabel: "780 sold",
-      note: "Work polish",
-    },
-    {
-      id: "genx-bestseller-architectural-leather-tote",
-      name: "Architectural Leather Tote",
-      price: 495,
-      priceLabel: "Rs. 495",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBEN8514iTH3xZfuJDWIHPa0Z7mIEpFUYeV0SvZbr6jymg4-Sxs0d7ayqhPtkiZq0gS-Nn3pzTbZCDyo0OACPfuC3-pD-hj0KDeLRk-OgKV0ofkKOwnumMbQ78B5uQINiIrYLEH0NpUADy08wsgnB--giqScqhOakOpLQPK0M57i7bh94ayxiacnjj3AyUwrJ9uuiPnTIbbf6yq7iyyngDpk3g5ZWWCqhVhDP3FvQx5kBIG2ZrI9LPZ0O5NAbHQmKg6tiGf0cbbBGD4",
-      category: "Accessories",
-      href: "/accessories/croissant-leather-bag",
-      badge: "Desk to dinner",
-      rating: "4.9",
-      soldLabel: "690 sold",
-      note: "Premium carry",
-    },
-    {
-      id: "genx-bestseller-urban-minimalist-leather-low",
-      name: "Urban Minimalist Leather Low",
-      price: 165,
-      priceLabel: "Rs. 165",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCJU5mMsIyfh0CosozqFO32YpcvdLtkKYgKEqR3asK8aWnvQrhRvdQCfcPzxhYvvEHUKv4UkDvFfbb_oPYhOf9-hXLAt72byLTwSVVKNYA6j2Vm9OFqHQWLLhAnnZjiuRrBArj3W7c-F-ZkYTMyC9P6VYuKA3nWKwqYGi42BLHN2QxFQqFEOYDkGAPFgA0YRto9WZByiNy0iq0ifQVYNZNrRl833xECdSJZYrS4dCJ9z55rtB02gWyVVfmDQc38iaRp8S2kz-iV3bjN",
-      category: "Sneakers",
-      href: "/sneakers/nova-form-strider",
-      badge: "Everyday",
-      rating: "4.7",
-      soldLabel: "620 sold",
-      note: "Clean minimal",
-    },
-    {
-      id: "genx-bestseller-essential-cashmere-vneck",
-      name: "Essential Cashmere V-Neck",
-      price: 295,
-      priceLabel: "Rs. 295",
-      image:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuD8VqDYKC0FMJL1_S88iDsyf0bVi5dQQQiNFd8QeBVEK0l7VieoG0dmlceRi1Nos7MPvz58bdL8bjnxhR_h0L9d1I_9HkBq6p8fecT9pbJrj_DcQEn-59Bhjm06HvfpArZhG3OxNFYMmbTPcMuwCxcKeVLkXQlz4oWyyKQX-NBhQ36ew7DMxhD1GjzUbEbXHz-w738BwfWErLGIvp9Kn6RUBQjGBWQ5pk1q8-25ZBISl_NkE29Mar4IbT1f2AFHSZ7soXcBpdqMaEUn",
-      category: "Clothing",
-      href: "/clothing/the-atelier-trench",
-      badge: "Soft luxury",
-      rating: "4.8",
-      soldLabel: "590 sold",
-      note: "Repeat buy",
-    },
-  ];
+  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["gen-x"]));
+
+  useEffect(() => {
+    let active = true;
+    const loadBanners = async () => {
+      try {
+        const config = await fetchBannerConfig();
+        if (active) setBanners(withGenerationHeroImage(config.generationBanners["gen-x"]));
+      } catch {
+        // Keep fallback data
+      }
+    };
+    void loadBanners();
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <div className="bg-[#eef4ff] text-[#151c25] font-body selection:bg-[#9ec2fe] selection:text-[#284f83]">
       <Navbar />
 
       <main className="pt-16">
-        <section className="px-4">
-          <div className="max-w-[1265px] mx-auto">
-            <BannerCarousel banners={banners} autoPlayInterval={4000} />
-          </div>
+        <section>
+          <BannerCarousel banners={banners} autoPlayInterval={4000} />
         </section>
 
         <section className="bg-white py-10">
@@ -104,7 +48,7 @@ export default function GenXPage() {
               </div>
               <div>
                 <p className="font-headline font-bold text-sm tracking-tight">Free Shipping</p>
-                <p className="font-body text-xs text-slate-500">On all orders over ₹150</p>
+                <p className="font-body text-xs text-slate-500">On all orders over ?150</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -136,16 +80,6 @@ export default function GenXPage() {
             </div>
           </div>
         </section>
-
-        <GenerationHighestSelling
-          generation="gen-x"
-          generationLabel="Gen X"
-          viewAllHref="/clothing?generation=gen-x"
-          backgroundClassName="bg-[#f8fbff]"
-          accentClassName="bg-[#002440] text-white"
-          description="Premium essentials, reliable footwear, and polished accessories that Gen X customers keep coming back for."
-          fallbackProducts={bestsellers}
-        />
 
         <section className="py-16 px-8 max-w-7xl mx-auto">
           <div className="flex justify-between items-end mb-12">
@@ -180,7 +114,7 @@ export default function GenXPage() {
               </div>
               <h3 className="font-headline font-semibold text-lg text-[#002440]">Tailored Wool Blazer</h3>
               <p className="font-body text-slate-500 text-sm mb-2">Midnight Navy</p>
-              <p className="font-headline font-bold text-[#002440]">₹345.00</p>
+              <p className="font-headline font-bold text-[#002440]">?345.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
@@ -203,7 +137,7 @@ export default function GenXPage() {
               </div>
               <h3 className="font-headline font-semibold text-lg text-[#002440]">Essential Cashmere V-Neck</h3>
               <p className="font-body text-slate-500 text-sm mb-2">Oatmeal Melange</p>
-              <p className="font-headline font-bold text-[#002440]">₹295.00</p>
+              <p className="font-headline font-bold text-[#002440]">?295.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
@@ -226,7 +160,7 @@ export default function GenXPage() {
               </div>
               <h3 className="font-headline font-semibold text-lg text-[#002440]">Pleated Wide-Leg Trouser</h3>
               <p className="font-body text-slate-500 text-sm mb-2">Desert Sand</p>
-              <p className="font-headline font-bold text-[#002440]">₹185.00</p>
+              <p className="font-headline font-bold text-[#002440]">?185.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
@@ -249,7 +183,7 @@ export default function GenXPage() {
               </div>
               <h3 className="font-headline font-semibold text-lg text-[#002440]">Signature Poplin Shirt</h3>
               <p className="font-body text-slate-500 text-sm mb-2">Optic White</p>
-              <p className="font-headline font-bold text-[#002440]">₹120.00</p>
+              <p className="font-headline font-bold text-[#002440]">?120.00</p>
             </Link>
           </div>
         </section>
@@ -294,7 +228,7 @@ export default function GenXPage() {
                     <h3 className="font-headline font-semibold text-[#002440]">Architectural Leather Tote</h3>
                     <p className="font-body text-xs text-slate-500">Vegetable Tanned Leather</p>
                   </div>
-                  <p className="font-headline font-bold text-[#002440]">₹495</p>
+                  <p className="font-headline font-bold text-[#002440]">?495</p>
                 </div>
               </Link>
               <Link className="bg-white p-6 rounded-lg editorial-shadow group cursor-pointer transform lg:translate-y-12 block" href="/accessories/croissant-leather-bag">
@@ -321,7 +255,7 @@ export default function GenXPage() {
                     <h3 className="font-headline font-semibold text-[#002440]">Abstract Print Silk Scarf</h3>
                     <p className="font-body text-xs text-slate-500">100% Mulberry Silk</p>
                   </div>
-                  <p className="font-headline font-bold text-[#002440]">₹110</p>
+                  <p className="font-headline font-bold text-[#002440]">?110</p>
                 </div>
               </Link>
             </div>
@@ -347,7 +281,7 @@ export default function GenXPage() {
                 <h3 className="font-headline font-semibold text-lg text-[#002440]">Urban Minimalist Leather Low</h3>
                 <p className="font-body text-slate-500 text-sm mb-4">Ergonomic footbed, White/Tan</p>
                 <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">₹165.00</p>
+                  <p className="font-headline font-bold text-[#002440]">?165.00</p>
                   <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
                 </div>
               </div>
@@ -365,7 +299,7 @@ export default function GenXPage() {
                 <h3 className="font-headline font-semibold text-lg text-[#002440]">Seamless Leather Slip-On</h3>
                 <p className="font-body text-slate-500 text-sm mb-4">Ultra-flexible sole, Camel</p>
                 <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">₹140.00</p>
+                  <p className="font-headline font-bold text-[#002440]">?140.00</p>
                   <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
                 </div>
               </div>
@@ -383,7 +317,7 @@ export default function GenXPage() {
                 <h3 className="font-headline font-semibold text-lg text-[#002440]">Movement Tech Knit Runner</h3>
                 <p className="font-body text-slate-500 text-sm mb-4">Breathable mesh, Slate Grey</p>
                 <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">₹195.00</p>
+                  <p className="font-headline font-bold text-[#002440]">?195.00</p>
                   <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
                 </div>
               </div>
@@ -402,6 +336,7 @@ export default function GenXPage() {
       </main>
 
       <Footer />
+      <ScrollToTopButton bgColorClass="bg-[#004490]" shadowClass="shadow-[0_10px_30px_rgba(0,68,144,0.35)]" />
 
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
@@ -427,5 +362,8 @@ export default function GenXPage() {
     </div>
   );
 }
+
+
+
 
 

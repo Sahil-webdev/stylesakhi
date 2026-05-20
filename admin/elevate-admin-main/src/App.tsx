@@ -17,6 +17,7 @@ import Payments from "./pages/Payments.tsx";
 import Reviews from "./pages/Reviews.tsx";
 import Settings from "./pages/Settings.tsx";
 import Team from "./pages/Team.tsx";
+import Banners from "./pages/Banners.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Login from "./pages/Login.tsx";
 
@@ -35,6 +36,7 @@ const moduleRouteMap: Record<string, PermissionModule> = {
   "/reviews": "reviews",
   "/team": "team",
   "/settings": "settings",
+  "/banners": "settings",
 };
 
 const ProtectedRoute = ({
@@ -161,6 +163,14 @@ const AppRoutes = () => (
       element={
         <ProtectedRoute module="settings">
           <Settings />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/banners"
+      element={
+        <ProtectedRoute module="settings">
+          <Banners />
         </ProtectedRoute>
       }
     />

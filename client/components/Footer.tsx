@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -75,7 +75,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/contact-us" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Contact
                 </Link>
               </li>
@@ -118,12 +118,6 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold text-lg mb-4">Get In Touch</h3>
             <ul className="space-y-3">
-              <li className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-[#B91C1C] mt-0.5 flex-shrink-0" />
-                <span className="text-sm">
-                  123 Fashion Street, Mumbai, Maharashtra 400001
-                </span>
-              </li>
               <li className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-[#B91C1C] flex-shrink-0" />
                 <span className="text-sm">+91 98765 43210</span>
@@ -155,17 +149,20 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} StyleSakhi. All rights reserved.
+              (c) {new Date().getFullYear()} StyleSakhi. All rights reserved.
             </p>
-            <div className="flex space-x-6">
-              <Link href="/privacy" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              <Link href="/privacy-policy" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
-                Terms of Service
+              <Link href="/terms-conditions" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
+                Terms & Conditions
               </Link>
-              <Link href="/cookies" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
-                Cookie Policy
+              <Link href="/refund-cancellation" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
+                Refund & Cancellation
+              </Link>
+              <Link href="/contact-us" className="text-sm text-gray-400 hover:text-[#B91C1C] transition-colors">
+                Contact Us
               </Link>
             </div>
           </div>

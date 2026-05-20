@@ -27,7 +27,7 @@ export type ProductRecord = {
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5000/api";
+  if (!value) return "http://localhost:5003/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
   if (value.startsWith("/")) return `http://localhost:5000${value}`;
@@ -35,31 +35,39 @@ const normalizeApiBaseUrl = (input?: string) => {
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+const API_BASE_URL_CANDIDATES = process.env.NEXT_PUBLIC_API_URL
+  ? [API_BASE_URL]
+  : ["http://localhost:5003/api", "http://localhost:5000/api"];
+
+async function fetchFromApi<T>(path: string): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (const baseUrl of API_BASE_URL_CANDIDATES) {
+    try {
+      const response = await fetch(`${baseUrl}${path}`, { cache: "no-store" });
+      if (!response.ok) {
+        lastError = new Error(`Failed request (${response.status})`);
+        continue;
+      }
+      return (await response.json()) as T;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Network error");
+    }
+  }
+
+  throw lastError || new Error("Failed to reach products API");
+}
 
 export async function fetchProducts(params?: Record<string, string>) {
   const query = new URLSearchParams(params || {}).toString();
-  const response = await fetch(`${API_BASE_URL}/products${query ? `?${query}` : ""}`, {
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch products");
-  }
-
-  const payload = await response.json();
+  const payload = await fetchFromApi<{ data?: { items?: ProductRecord[] } }>(
+    `/products${query ? `?${query}` : ""}`
+  );
   return (payload?.data?.items || []) as ProductRecord[];
 }
 
 export async function fetchProductBySlug(slug: string) {
-  const response = await fetch(`${API_BASE_URL}/products/${slug}`, {
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch product");
-  }
-
-  const payload = await response.json();
+  const payload = await fetchFromApi<{ data?: ProductRecord }>(`/products/${slug}`);
   return payload?.data as ProductRecord;
 }
 
@@ -68,14 +76,8 @@ export async function fetchHighestSellingProducts(generation: ProductGeneration,
     generation,
     limit: String(limit),
   }).toString();
-  const response = await fetch(`${API_BASE_URL}/products/highest-selling?${query}`, {
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch highest-selling products");
-  }
-
-  const payload = await response.json();
+  const payload = await fetchFromApi<{ data?: { items?: ProductRecord[] } }>(
+    `/products/highest-selling?${query}`
+  );
   return (payload?.data?.items || []) as ProductRecord[];
 }

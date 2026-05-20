@@ -17,7 +17,9 @@ export interface IProduct extends Document {
   discountPrice?: number;
   stock: number;
   images: string[];
+  imagePublicIds: string[];
   video?: string;
+  videoPublicId?: string;
   brand?: string;
   sizes: string[];
   colors: string[];
@@ -94,7 +96,16 @@ const ProductSchema: Schema<IProduct> = new Schema(
         message: 'Please provide between 1 and 4 images',
       },
     },
+    imagePublicIds: {
+      type: [String],
+      default: [],
+    },
     video: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    videoPublicId: {
       type: String,
       trim: true,
       default: '',

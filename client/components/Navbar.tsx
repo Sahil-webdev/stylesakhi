@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { motion } from "framer-motion";
 import { Heart, Mic, Search, ShoppingCart, User } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Inter } from "next/font/google";
 import { HamburgerMenuOverlay } from "@/components/ui/HamburgerMenuOverlay";
@@ -70,7 +71,7 @@ export default function Navbar() {
         />
       </div>
 
-      <nav className={`fixed inset-x-0 top-0 z-50 w-full border-b border-black/10 bg-white/85 backdrop-blur-xl ${inter.className}`}>
+      <nav className={`fixed inset-x-0 top-0 z-50 w-full border-b border-black/10 bg-white/95 pt-px ${inter.className}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="md:hidden w-6" />
@@ -119,9 +120,17 @@ export default function Navbar() {
             <div className="absolute left-1/2 -translate-x-1/2">
               <Link
                 href="/"
-                className="text-base font-semibold tracking-tight text-gray-900 transition-colors hover:text-[#B91C1C]"
+                className="block w-[130px] sm:w-[162px] md:w-[200px] transition-opacity hover:opacity-90"
+                aria-label="StyleSakhi Home"
               >
-                Style Sakhi
+                <Image
+                  src="/stylesakhi-navbar-logo-v3.png"
+                  alt="StyleSakhi"
+                  width={680}
+                  height={253}
+                  className="h-auto w-full"
+                  priority
+                />
               </Link>
             </div>
 

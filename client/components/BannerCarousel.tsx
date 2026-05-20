@@ -55,8 +55,7 @@ export default function BannerCarousel({
 
   return (
     <div
-      className="relative w-full max-w-[1265px] mx-auto overflow-hidden rounded-xl group"
-      style={{ aspectRatio: "1265 / 431.54" }}
+      className="relative w-full overflow-hidden group bg-black aspect-[16/10] sm:aspect-[16/8] md:aspect-[1232/420]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -69,13 +68,25 @@ export default function BannerCarousel({
             key={index}
             className="relative min-w-full h-full"
           >
-            <Image
-              src={banner.image}
-              alt={banner.alt}
-              fill
-              className="object-cover"
-              priority={index === 0}
-            />
+            {banner.link ? (
+              <a className="block h-full w-full" href={banner.link}>
+                <Image
+                  src={banner.image}
+                  alt={banner.alt}
+                  fill
+                  className="object-cover scale-[1.28] md:scale-100"
+                  priority={index === 0}
+                />
+              </a>
+            ) : (
+              <Image
+                src={banner.image}
+                alt={banner.alt}
+                fill
+                className="object-cover scale-[1.28] md:scale-100"
+                priority={index === 0}
+              />
+            )}
           </div>
         ))}
       </div>
