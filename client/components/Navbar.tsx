@@ -120,14 +120,14 @@ export default function Navbar() {
             <div className="absolute left-1/2 -translate-x-1/2">
               <Link
                 href="/"
-                className="block w-[130px] sm:w-[162px] md:w-[200px] transition-opacity hover:opacity-90"
+                className="block w-[90px] sm:w-[110px] md:w-[128px] transition-opacity hover:opacity-90"
                 aria-label="StyleSakhi Home"
               >
                 <Image
-                  src="/stylesakhi-navbar-logo-v3.png"
+                  src="/stylesakhi-navbar-logo-v4.jpeg"
                   alt="StyleSakhi"
-                  width={680}
-                  height={253}
+                  width={1237}
+                  height={611}
                   className="h-auto w-full"
                   priority
                 />

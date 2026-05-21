@@ -294,7 +294,7 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.22 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"
+            className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 xl:grid-cols-4"
           >
             {[
               { name: "Gen X", href: "/gen-x", image: "/era/gen x.jpeg" },
@@ -312,10 +312,10 @@ export default function Home() {
               >
                 <Link
                   href={card.href}
-                  className="group relative block rounded-[34px] border border-[#d7d9df] bg-white p-3 shadow-[0_16px_30px_rgba(16,20,35,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(16,20,35,0.14)]"
+                  className="group relative block rounded-[24px] border border-[#d7d9df] bg-white p-2 sm:rounded-[34px] sm:p-3 shadow-[0_16px_30px_rgba(16,20,35,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(16,20,35,0.14)]"
                 >
-                  <div className="relative overflow-hidden rounded-[120px_120px_28px_28px] border border-[#e8d6ad] bg-[#f5f1ea]">
-                    <div className="relative h-[360px] w-full">
+                  <div className="relative overflow-hidden rounded-[72px_72px_18px_18px] border border-[#e8d6ad] bg-[#f5f1ea] sm:rounded-[120px_120px_28px_28px]">
+                    <div className="relative h-[220px] w-full sm:h-[300px] lg:h-[360px]">
                       <Image
                         src={card.image}
                         alt={`${card.name} featured collection`}
@@ -326,16 +326,16 @@ export default function Home() {
                     <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/62 via-black/20 to-transparent" />
                   </div>
 
-                  <div className="pointer-events-none absolute inset-x-8 bottom-6 flex items-end justify-between">
+                  <div className="pointer-events-none absolute inset-x-4 bottom-4 flex items-end justify-between sm:inset-x-8 sm:bottom-6">
                     <div>
-                      <p className={`${playfair.className} text-3xl font-semibold italic tracking-tight text-white drop-shadow-lg`}>
+                      <p className={`${playfair.className} text-xl font-semibold italic tracking-tight text-white drop-shadow-lg sm:text-3xl`}>
                         {card.name}
                       </p>
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-white/80">
+                      <p className="mt-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-white/80 sm:text-[10px] sm:tracking-[0.26em]">
                         Explore Archive
                       </p>
                     </div>
-                    <span className="grid h-9 w-9 place-items-center rounded-full border border-white/35 bg-white/18 text-white backdrop-blur-sm transition-transform duration-300 group-hover:translate-x-0.5">
+                    <span className="grid h-7 w-7 place-items-center rounded-full border border-white/35 bg-white/18 text-white backdrop-blur-sm transition-transform duration-300 group-hover:translate-x-0.5 sm:h-9 sm:w-9">
                       <ArrowRight className="h-4 w-4" />
                     </span>
                   </div>
@@ -445,14 +445,14 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
             {isLoadingBestsellers &&
               Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`bestseller-skeleton-${index}`}
-                  className="overflow-hidden rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                  className="overflow-hidden rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="h-[288px] animate-pulse rounded-[14px] bg-[#ece8e1]" />
+                  <div className="h-[190px] animate-pulse rounded-[12px] bg-[#ece8e1] sm:h-[288px] sm:rounded-[14px]" />
                   <div className="mt-4 h-3 w-20 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-2 h-5 w-3/4 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-3 h-4 w-24 animate-pulse rounded bg-[#ece8e1]" />
@@ -478,9 +478,9 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.45, delay: index * 0.07 }}
-                    className="group rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
+                    className="group rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
                   >
-                    <div className="relative aspect-[4/4.55] overflow-hidden rounded-[14px] bg-[#ead6c3]">
+                    <div className="relative aspect-[4/4.15] overflow-hidden rounded-[12px] bg-[#ead6c3] sm:aspect-[4/4.55] sm:rounded-[14px]">
                       <Link href={item.href} className="block h-full">
                         {item.video ? (
                           <video
@@ -498,7 +498,7 @@ export default function Home() {
                             alt={item.name}
                             fill
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 50vw, 25vw"
                           />
                         )}
                       </Link>
@@ -693,14 +693,14 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
             {isLoadingMillennialBestsellers &&
               Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`millennial-bestseller-skeleton-${index}`}
-                  className="overflow-hidden rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                  className="overflow-hidden rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="h-[288px] animate-pulse rounded-[14px] bg-[#ece8e1]" />
+                  <div className="h-[190px] animate-pulse rounded-[12px] bg-[#ece8e1] sm:h-[288px] sm:rounded-[14px]" />
                   <div className="mt-4 h-3 w-20 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-2 h-5 w-3/4 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-3 h-4 w-24 animate-pulse rounded bg-[#ece8e1]" />
@@ -726,9 +726,9 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.45, delay: index * 0.07 }}
-                    className="group rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
+                    className="group rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
                   >
-                    <div className="relative aspect-[4/4.55] overflow-hidden rounded-[14px] bg-[#ead6c3]">
+                    <div className="relative aspect-[4/4.15] overflow-hidden rounded-[12px] bg-[#ead6c3] sm:aspect-[4/4.55] sm:rounded-[14px]">
                       <Link href={item.href} className="block h-full">
                         {item.video ? (
                           <video
@@ -746,7 +746,7 @@ export default function Home() {
                             alt={item.name}
                             fill
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 50vw, 25vw"
                           />
                         )}
                       </Link>
@@ -930,14 +930,14 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
             {isLoadingGenZBestsellers &&
               Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`genz-bestseller-skeleton-${index}`}
-                  className="overflow-hidden rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                  className="overflow-hidden rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="h-[288px] animate-pulse rounded-[14px] bg-[#ece8e1]" />
+                  <div className="h-[190px] animate-pulse rounded-[12px] bg-[#ece8e1] sm:h-[288px] sm:rounded-[14px]" />
                   <div className="mt-4 h-3 w-20 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-2 h-5 w-3/4 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-3 h-4 w-24 animate-pulse rounded bg-[#ece8e1]" />
@@ -963,9 +963,9 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.45, delay: index * 0.07 }}
-                    className="group rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
+                    className="group rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
                   >
-                    <div className="relative aspect-[4/4.55] overflow-hidden rounded-[14px] bg-[#ead6c3]">
+                    <div className="relative aspect-[4/4.15] overflow-hidden rounded-[12px] bg-[#ead6c3] sm:aspect-[4/4.55] sm:rounded-[14px]">
                       <Link href={item.href} className="block h-full">
                         {item.video ? (
                           <video
@@ -983,7 +983,7 @@ export default function Home() {
                             alt={item.name}
                             fill
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 50vw, 25vw"
                           />
                         )}
                       </Link>
@@ -1170,14 +1170,14 @@ export default function Home() {
             </Link>
           </motion.div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-2 sm:gap-3 xl:grid-cols-4">
             {isLoadingGenAlphaBestsellers &&
               Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={`genalpha-bestseller-skeleton-${index}`}
-                  className="overflow-hidden rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+                  className="overflow-hidden rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
                 >
-                  <div className="h-[288px] animate-pulse rounded-[14px] bg-[#ece8e1]" />
+                  <div className="h-[190px] animate-pulse rounded-[12px] bg-[#ece8e1] sm:h-[288px] sm:rounded-[14px]" />
                   <div className="mt-4 h-3 w-20 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-2 h-5 w-3/4 animate-pulse rounded bg-[#ece8e1]" />
                   <div className="mt-3 h-4 w-24 animate-pulse rounded bg-[#ece8e1]" />
@@ -1203,9 +1203,9 @@ export default function Home() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.45, delay: index * 0.07 }}
-                    className="group rounded-[18px] border border-[#e6e2d8] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
+                    className="group rounded-[14px] border border-[#e6e2d8] bg-white p-1.5 sm:rounded-[18px] sm:p-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_20px_36px_rgba(15,23,42,0.12)]"
                   >
-                    <div className="relative aspect-[4/4.55] overflow-hidden rounded-[14px] bg-[#ead6c3]">
+                    <div className="relative aspect-[4/4.15] overflow-hidden rounded-[12px] bg-[#ead6c3] sm:aspect-[4/4.55] sm:rounded-[14px]">
                       <Link href={item.href} className="block h-full">
                         {item.video ? (
                           <video
@@ -1223,7 +1223,7 @@ export default function Home() {
                             alt={item.name}
                             fill
                             className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
-                            sizes="(max-width: 1024px) 50vw, 25vw"
+                            sizes="(max-width: 640px) 46vw, (max-width: 1024px) 50vw, 25vw"
                           />
                         )}
                       </Link>
@@ -1455,3 +1455,4 @@ export default function Home() {
     </div>
   );
 }
+
