@@ -8,7 +8,7 @@ import React, {
   TouchEvent,
 } from "react";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import { Card, CardContent } from "@/app/component2/ui/card";
+import { Card, CardContent } from "./card";
 import { useIsMobile } from "../hooks/use-mobile";
 import Link from "next/link";
 
@@ -62,11 +62,19 @@ const ThreeDCarousel = ({
   }, [isInView, isHovering, autoRotate, rotateInterval, items.length]);
 
   useEffect(() => {
+    const node = carouselRef.current;
+    if (!node) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => setIsInView(entry.isIntersecting),
       { threshold: 0.2 }
     );
-    return () => observer.disconnect();
+    observer.observe(node);
+
+    return () => {
+      observer.unobserve(node);
+      observer.disconnect();
+    };
   }, []);
 
   const onTouchStart = (e: TouchEvent) => {
