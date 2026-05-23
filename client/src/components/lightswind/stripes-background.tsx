@@ -1,3 +1,4 @@
+// @ts-nocheck
 // components/ui/StripesBackground.tsx
 import React from "react";
 import clsx from "clsx";

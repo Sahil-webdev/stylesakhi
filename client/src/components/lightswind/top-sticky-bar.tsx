@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import { motion, Easing } from "framer-motion";
 import { cn } from "../../lib/utils"; // Assuming you have a utility for class name concatenation

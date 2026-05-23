@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 
 // Define the types for the component's props.

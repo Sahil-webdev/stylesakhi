@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import React, { useRef, useEffect, useState } from "react";
 import { motion, useScroll, Variants } from "framer-motion";

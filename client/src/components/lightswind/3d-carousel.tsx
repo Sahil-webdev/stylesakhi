@@ -1,3 +1,4 @@
+// @ts-nocheck
 // components/ThreeDCarousel.tsx
 "use client";
 

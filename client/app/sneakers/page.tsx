@@ -7,9 +7,9 @@ import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
-export default function SneakersPage() {
+function SneakersPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<ProductRecord[]>([]);
@@ -245,5 +245,13 @@ export default function SneakersPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function SneakersPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f6f7]" />}>
+      <SneakersPageContent />
+    </Suspense>
   );
 }

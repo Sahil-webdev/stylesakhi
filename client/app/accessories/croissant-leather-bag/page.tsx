@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { fetchProductBySlug, fetchProducts, ProductRecord } from "@/lib/products-api";
@@ -11,7 +11,7 @@ import { formatDeliveryFromNow } from "@/lib/delivery-estimate";
 
 type MediaItem = { type: "image" | "video"; src: string };
 
-export default function AccessoriesDetailPage() {
+function AccessoriesDetailPageContent() {
   const searchParams = useSearchParams();
   const selectedSlug = searchParams.get("product") || "croissant-leather-bag";
 
@@ -204,5 +204,13 @@ export default function AccessoriesDetailPage() {
         .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
       `}</style>
     </div>
+  );
+}
+
+export default function AccessoriesDetailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f6f7]" />}>
+      <AccessoriesDetailPageContent />
+    </Suspense>
   );
 }

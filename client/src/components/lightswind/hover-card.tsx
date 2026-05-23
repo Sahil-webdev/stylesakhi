@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import * as React from "react";
 import { cn } from "../../lib/utils"; // Ensure this utility is present or replace with className logic

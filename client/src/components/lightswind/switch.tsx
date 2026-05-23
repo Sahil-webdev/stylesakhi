@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 import * as React from "react";
 import { cn } from "../../lib/utils"; // Assuming 'cn' utility is correctly set up

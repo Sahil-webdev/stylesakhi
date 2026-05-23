@@ -3,7 +3,7 @@
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { fetchProductBySlug, fetchProducts, ProductRecord } from "@/lib/products-api";
 import { useShop } from "@/contexts/ShopContext";
 import ProductReviewsSection from "@/components/ProductReviewsSection";
@@ -11,7 +11,7 @@ import { formatDeliveryFromNow } from "@/lib/delivery-estimate";
 
 type MediaItem = { type: "image" | "video"; src: string };
 
-export default function ClothingDetailPage() {
+function ClothingDetailPageContent() {
   const searchParams = useSearchParams();
   const selectedSlug = searchParams.get("product") || "the-atelier-trench";
 
@@ -232,5 +232,13 @@ export default function ClothingDetailPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function ClothingDetailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f6f7]" />}>
+      <ClothingDetailPageContent />
+    </Suspense>
   );
 }

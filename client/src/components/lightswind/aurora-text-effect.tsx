@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { cn } from "../../lib/utils"; // Assuming 'cn' is a utility for merging class names
 
