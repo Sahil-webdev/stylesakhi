@@ -27,9 +27,6 @@ const syne = Syne({ subsets: ["latin"], weight: ["400", "500", "600", "700", "80
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
 
 const fallbackBanners = defaultGenerationBanners["gen-alpha"];
-const generationHeroImage = "/hero/hero3.jpeg";
-const withGenerationHeroImage = (items: BannerItem[]) =>
-  items.map((item) => ({ ...item, image: generationHeroImage }));
 
 type CatalogProduct = {
   id: string;
@@ -139,7 +136,7 @@ const accessoryProducts: CatalogProduct[] = [
     name: "Logo Dad Cap",
     category: "Caps",
     price: 32,
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=400&h=500&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=500&fit=crop&q=80",
     badge: "New",
     rating: 4,
     reviews: 94,
@@ -404,7 +401,7 @@ function ProductCard({
 }
 
 export default function GenAlphaPage() {
-  const [banners, setBanners] = useState(() => withGenerationHeroImage(fallbackBanners));
+  const [banners, setBanners] = useState<BannerItem[]>(() => fallbackBanners);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
@@ -414,7 +411,7 @@ export default function GenAlphaPage() {
     const loadBanners = async () => {
       try {
         const config = await fetchBannerConfig();
-        if (active) setBanners(withGenerationHeroImage(config.generationBanners["gen-alpha"]));
+        if (active) setBanners(config.generationBanners["gen-alpha"]);
       } catch {
         // Keep fallback data
       }
@@ -483,7 +480,7 @@ export default function GenAlphaPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {clothingProducts.map((product) => {
                 const wished = isWishlisted(product.id);
                 return (
@@ -558,7 +555,7 @@ export default function GenAlphaPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {sneakerProducts.map((product) => {
                 const wished = isWishlisted(product.id);
                 return (

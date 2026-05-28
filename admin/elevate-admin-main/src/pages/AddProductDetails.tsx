@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AddFlowProgress from "@/components/products/AddFlowProgress";
 import { getAdminToken } from "@/lib/adminAuth";
+import { deleteAdminMedia, uploadAdminMedia } from "@/lib/mediaUpload";
 
 const generationLabelMap: Record<string, string> = {
   "gen-z": "Gen Z",
@@ -94,10 +95,10 @@ const sneakerFields = [
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5000/api";
+  if (!value) return "https://stylesakhi.com/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
-  if (value.startsWith("/")) return `http://localhost:5000${value}`;
+  if (value.startsWith("/")) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
@@ -114,8 +115,8 @@ const AddProductDetailsPage = () => {
   const [selectedSneakerSizes, setSelectedSneakerSizes] = useState<string[]>(["40"]);
   const [selectedSneakerColors, setSelectedSneakerColors] = useState<string[]>([sneakerColorOptions[0].value]);
   const [sneakerDetails, setSneakerDetails] = useState<Record<string, string>>({});
-  const [uploadedImages, setUploadedImages] = useState<Array<{ id: string; fileName: string; previewUrl: string; dataUrl: string }>>([]);
-  const [uploadedVideo, setUploadedVideo] = useState<{ fileName: string; previewUrl: string; dataUrl: string } | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<Array<{ id: string; fileName: string; previewUrl: string; mediaUrl: string; publicId: string }>>([]);
+  const [uploadedVideo, setUploadedVideo] = useState<{ fileName: string; previewUrl: string; mediaUrl: string; publicId: string } | null>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -147,33 +148,48 @@ const AddProductDetailsPage = () => {
     const remainingSlots = Math.max(0, 4 - uploadedImages.length);
     if (remainingSlots === 0) return;
 
-    const toDataUrl = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Failed to read image file"));
-        reader.readAsDataURL(file);
-      });
-
     const chosenFiles = validFiles.slice(0, remainingSlots);
-    const nextFiles = await Promise.all(
-      chosenFiles.map(async (file) => ({
-        id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
-        fileName: file.name,
-        previewUrl: URL.createObjectURL(file),
-        dataUrl: await toDataUrl(file),
-      })),
-    );
+    const token = getAdminToken();
+    if (!token) {
+      setFormError("Admin session expired. Please login again.");
+      return;
+    }
 
-    setUploadedImages((prev) => [...prev, ...nextFiles]);
+    try {
+      const nextFiles = await Promise.all(
+        chosenFiles.map(async (file) => {
+          const uploaded = await uploadAdminMedia({
+            apiBaseUrl: API_BASE_URL,
+            token,
+            file,
+            kind: "product-image",
+          });
+
+          return {
+            id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
+            fileName: file.name,
+            previewUrl: uploaded.url,
+            mediaUrl: uploaded.url,
+            publicId: uploaded.publicId,
+          };
+        }),
+      );
+      setUploadedImages((prev) => [...prev, ...nextFiles]);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to upload image.");
+    }
   };
 
   const removeImage = (id: string) => {
-    setUploadedImages((prev) => {
-      const target = prev.find((image) => image.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
-      return prev.filter((image) => image.id !== id);
-    });
+    const target = uploadedImages.find((image) => image.id === id);
+    if (target?.publicId) {
+      void deleteAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token: getAdminToken(),
+        publicId: target.publicId,
+      });
+    }
+    setUploadedImages((prev) => prev.filter((image) => image.id !== id));
   };
 
   const addVideo = async (fileList: FileList | null) => {
@@ -184,34 +200,46 @@ const AddProductDetailsPage = () => {
       return;
     }
 
-    const toDataUrl = (targetFile: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Failed to read video file"));
-        reader.readAsDataURL(targetFile);
-      });
-
     try {
-      const dataUrl = await toDataUrl(file);
-      setUploadedVideo((prev) => {
-        if (prev) URL.revokeObjectURL(prev.previewUrl);
-        return {
-          fileName: file.name,
-          previewUrl: URL.createObjectURL(file),
-          dataUrl,
-        };
+      const token = getAdminToken();
+      if (!token) {
+        setFormError("Admin session expired. Please login again.");
+        return;
+      }
+
+      const uploaded = await uploadAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token,
+        file,
+        kind: "product-video",
       });
-    } catch {
-      setFormError("Failed to process selected video.");
+      if (uploadedVideo?.publicId) {
+        void deleteAdminMedia({
+          apiBaseUrl: API_BASE_URL,
+          token,
+          publicId: uploadedVideo.publicId,
+        });
+      }
+      setUploadedVideo({
+        fileName: file.name,
+        previewUrl: uploaded.url,
+        mediaUrl: uploaded.url,
+        publicId: uploaded.publicId,
+      });
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to process selected video.");
     }
   };
 
   const removeVideo = () => {
-    setUploadedVideo((prev) => {
-      if (prev) URL.revokeObjectURL(prev.previewUrl);
-      return null;
-    });
+    if (uploadedVideo?.publicId) {
+      void deleteAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token: getAdminToken(),
+        publicId: uploadedVideo.publicId,
+      });
+    }
+    setUploadedVideo(null);
   };
 
   const handleCreateProduct = async () => {
@@ -261,8 +289,8 @@ const AddProductDetailsPage = () => {
       brand: brand.trim(),
       sizes: categoryKey === "sneakers" ? selectedSneakerSizes : [],
       colors: categoryKey === "sneakers" ? selectedSneakerColors : [],
-      images: uploadedImages.map((item) => item.dataUrl),
-      video: uploadedVideo?.dataUrl || "",
+      images: uploadedImages.map((item) => item.mediaUrl),
+      video: uploadedVideo?.mediaUrl || "",
       productDetails,
       isActive: true,
       featured: false,
@@ -287,7 +315,7 @@ const AddProductDetailsPage = () => {
       setTimeout(() => navigate("/products"), 900);
     } catch (error) {
       if (error instanceof TypeError) {
-        setFormError("Backend API unreachable. Please start backend on http://localhost:5000 and retry.");
+        setFormError("Backend API unreachable. Check VITE_API_URL or backend deployment and retry.");
       } else {
         setFormError(error instanceof Error ? error.message : "Failed to create product");
       }

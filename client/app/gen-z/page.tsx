@@ -26,9 +26,6 @@ const syne = Syne({ subsets: ["latin"], weight: ["400", "500", "600", "700", "80
 const dmMono = DM_Mono({ subsets: ["latin"], weight: ["300", "400", "500"] });
 const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["300", "400", "600"], style: ["normal", "italic"] });
 
-const generationHeroImage = "/hero/hero3.jpeg";
-const withGenerationHeroImage = (items: BannerItem[]) => items.map((item) => ({ ...item, image: generationHeroImage }));
-
 type CatalogProduct = {
   id: string;
   name: string;
@@ -141,7 +138,7 @@ const accessoriesProducts: CatalogProduct[] = [
     name: "Logo Dad Cap",
     category: "Caps",
     price: 28,
-    image: "https://images.unsplash.com/photo-1588850561407-ed78c334e67a?w=500&h=500&fit=crop",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
     rating: 4,
     reviews: 112,
     href: "/accessories/croissant-leather-bag",
@@ -349,7 +346,7 @@ function ProductCard({ product, onAddToCart, onToggleWishlist, wished }: {
 }
 
 export default function GenZPage() {
-  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["gen-z"]));
+  const [banners, setBanners] = useState<BannerItem[]>(() => defaultGenerationBanners["gen-z"]);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>(() =>
@@ -364,7 +361,7 @@ export default function GenZPage() {
     const loadBanners = async () => {
       try {
         const config = await fetchBannerConfig();
-        if (active) setBanners(withGenerationHeroImage(config.generationBanners["gen-z"]));
+        if (active) setBanners(config.generationBanners["gen-z"]);
       } catch {
         // Keep fallback
       }

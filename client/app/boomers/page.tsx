@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,19 +9,15 @@ import BannerCarousel from "@/components/BannerCarousel";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
 
-const generationHeroImage = "/hero/hero3.jpeg";
-const withGenerationHeroImage = (items: BannerItem[]) =>
-  items.map((item) => ({ ...item, image: generationHeroImage }));
-
 export default function BoomersPage() {
-  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["boomer"]));
+  const [banners, setBanners] = useState<BannerItem[]>(() => defaultGenerationBanners["boomer"]);
 
   useEffect(() => {
     let active = true;
     const loadBanners = async () => {
       try {
         const config = await fetchBannerConfig();
-        if (active) setBanners(withGenerationHeroImage(config.generationBanners["boomer"]));
+        if (active) setBanners(config.generationBanners["boomer"]);
       } catch {
         // Keep fallback data
       }
@@ -40,34 +36,50 @@ export default function BoomersPage() {
           <BannerCarousel banners={banners} autoPlayInterval={4000} />
         </section>
 
-        <section className="bg-[#eaf6ff] py-7 border-y border-[#b8dff5]/70">
-          <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-5 text-center">
-            <div className="flex flex-col items-center gap-2">
-              <span className="material-symbols-outlined text-[#004490] text-3xl">local_shipping</span>
-              <h3 className="text-lg font-headline font-bold">Free Shipping</h3>
-              <p className="text-sm leading-relaxed text-[#434751]">On all orders over ?75 within the USA.</p>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="material-symbols-outlined text-[#004490] text-3xl">assignment_return</span>
-              <h3 className="text-lg font-headline font-bold">Easy Returns</h3>
-              <p className="text-sm leading-relaxed text-[#434751]">30-day no-hassle return policy for your peace of mind.</p>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <span className="material-symbols-outlined text-[#004490] text-3xl">verified_user</span>
-              <h3 className="text-lg font-headline font-bold">Secure Checkout</h3>
-              <p className="text-sm leading-relaxed text-[#434751]">Your privacy and security are our top priorities.</p>
+        <section className="border-y border-[#b8dff5]/70 bg-[#eaf6ff] py-6 md:py-7">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+              <div className="rounded-xl border border-[#c7e4f6] bg-white/70 p-3 md:p-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined rounded-lg bg-[#e9f3ff] p-2 text-[20px] text-[#004490]">local_shipping</span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-headline font-bold text-[#1e1b17]">Free Shipping</h3>
+                    <p className="truncate text-xs text-[#434751]">Orders over ₹75 in USA</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-[#c7e4f6] bg-white/70 p-3 md:p-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined rounded-lg bg-[#e9f3ff] p-2 text-[20px] text-[#004490]">assignment_return</span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-headline font-bold text-[#1e1b17]">Easy Returns</h3>
+                    <p className="truncate text-xs text-[#434751]">30-day hassle-free policy</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-2 rounded-xl border border-[#c7e4f6] bg-white/70 p-3 md:col-span-1 md:p-4">
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined rounded-lg bg-[#e9f3ff] p-2 text-[20px] text-[#004490]">verified_user</span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-base font-headline font-bold text-[#1e1b17]">Secure Checkout</h3>
+                    <p className="truncate text-xs text-[#434751]">Your data stays protected</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="py-24 max-w-7xl mx-auto px-8">
-          <div className="flex justify-between items-end mb-12">
-            <h2 className="text-4xl font-headline text-[#1e1b17]">Clothing</h2>
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 sm:py-24">
+          <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
+            <h2 className="font-headline text-[1.8rem] text-[#1e1b17] sm:text-4xl">Clothing</h2>
             <Link className="text-[#004490] font-bold border-b border-[#004490] pb-1 hover:text-[#ac3231] hover:border-[#ac3231] transition-colors" href="/clothing?generation=boomer">
               View All Clothing
             </Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative aspect-[4/5] bg-[#e8e1da] rounded-lg overflow-hidden mb-4">
                 <img
@@ -87,9 +99,9 @@ export default function BoomersPage() {
                   }}
                 />
               </div>
-              <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Essential Cashmere Cardigan</h3>
-              <p className="text-[#434751] mb-2">Heather Grey</p>
-              <p className="text-lg font-bold text-[#ac3231]">?128.00</p>
+              <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Essential Cashmere Cardigan</h3>
+              <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Heather Grey</p>
+              <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹128.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative aspect-[4/5] bg-[#e8e1da] rounded-lg overflow-hidden mb-4">
@@ -110,9 +122,9 @@ export default function BoomersPage() {
                   }}
                 />
               </div>
-              <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Easy-Fit Linen Trousers</h3>
-              <p className="text-[#434751] mb-2">Sand Dune</p>
-              <p className="text-lg font-bold text-[#ac3231]">?89.00</p>
+              <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Easy-Fit Linen Trousers</h3>
+              <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Sand Dune</p>
+              <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹89.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
               <div className="relative aspect-[4/5] bg-[#e8e1da] rounded-lg overflow-hidden mb-4">
@@ -133,9 +145,9 @@ export default function BoomersPage() {
                   }}
                 />
               </div>
-              <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Classic Silk Button-Down</h3>
-              <p className="text-[#434751] mb-2">Deep Navy</p>
-              <p className="text-lg font-bold text-[#ac3231]">?145.00</p>
+              <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Classic Silk Button-Down</h3>
+              <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Deep Navy</p>
+              <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹145.00</p>
             </Link>
           </div>
           <div className="mt-16 text-center">
@@ -145,15 +157,15 @@ export default function BoomersPage() {
           </div>
         </section>
 
-        <section className="py-24 bg-[#f9f3eb]">
-          <div className="max-w-7xl mx-auto px-8">
-            <div className="flex justify-between items-end mb-12">
-              <h2 className="text-4xl font-headline text-[#1e1b17]">Accessories</h2>
+        <section className="bg-[#f9f3eb] py-16 sm:py-24">
+          <div className="mx-auto max-w-7xl px-4 sm:px-8">
+            <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
+              <h2 className="font-headline text-[1.8rem] text-[#1e1b17] sm:text-4xl">Accessories</h2>
               <Link className="text-[#004490] font-bold border-b border-[#004490] pb-1 hover:text-[#ac3231] hover:border-[#ac3231] transition-colors" href="/accessories?generation=boomer">
                 View All Accessories
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
               <Link className="group cursor-pointer block" href="/accessories/croissant-leather-bag">
                 <div className="relative aspect-square bg-white rounded-lg overflow-hidden mb-4">
                   <img
@@ -163,9 +175,9 @@ export default function BoomersPage() {
                   />
                   <ProductHoverActions product={{ id: "boomers-accessories-hand-stitched-leather-tote", name: "Hand-Stitched Leather Tote", price: 210, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBg-jt_wCKw3m7Ah4EulZ6ndotlJ4MJcceVi485hBKc0JBHUxHNkLcvOZxFXgGcXN2xKf9Xe2ujQiPjG98lakQ_0ucU6CObCk66vOSNkRFhbO33xv4kvX3q_rPs1Ak6blcROuwNkcUWkJ9NlWxUdETsLKuLBLRXetXWSkJnkSI3u8CrGZgPPhs-A1bm9DSmr3eud6zepVBtup53B-poIn0i8GAIegeJtwiTlT7dNehurcMKk8K3E1JnUY-Wj_ynfMjlp9db1td9fDS3", category: "Accessories", href: "/accessories/croissant-leather-bag" }} />
                 </div>
-                <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Hand-Stitched Leather Tote</h3>
-                <p className="text-[#434751] mb-2">Cognac Brown</p>
-                <p className="text-lg font-bold text-[#ac3231]">?210.00</p>
+                <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Hand-Stitched Leather Tote</h3>
+                <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Cognac Brown</p>
+                <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹210.00</p>
               </Link>
               <Link className="group cursor-pointer block" href="/accessories/croissant-leather-bag">
                 <div className="relative aspect-square bg-white rounded-lg overflow-hidden mb-4">
@@ -176,9 +188,9 @@ export default function BoomersPage() {
                   />
                   <ProductHoverActions product={{ id: "boomers-accessories-heritage-floral-silk-scarf", name: "Heritage Floral Silk Scarf", price: 55, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB6e-oExkALBJFibTu4sNBE4N6w3fmdU8H_BVej7t7wWDiR7EOa66dbMFVtE0hSKsgibWZyVJqvHJY4rAP0uxKDaoJ015TSs0V70qCqpdSSaicLQujXfW3OQ7NeUdgzZ2eyuTR7-xx_3ZOChxd8oG-FnBySzCfljizCkGX33LSmEqJzddR7xaX9SZbzC-PyRmFJhJON2EFl_kF3DImnUEswbYbmdfAHmRrNJSrWqBBsoiZ884VZ09X0HTW4J_gX73dr7L9e1x6Z83k1", category: "Accessories", href: "/accessories/croissant-leather-bag" }} />
                 </div>
-                <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Heritage Floral Silk Scarf</h3>
-                <p className="text-[#434751] mb-2">Rose &amp; Sage</p>
-                <p className="text-lg font-bold text-[#ac3231]">?55.00</p>
+                <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Heritage Floral Silk Scarf</h3>
+                <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Rose &amp; Sage</p>
+                <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹55.00</p>
               </Link>
               <Link className="group cursor-pointer block" href="/accessories/croissant-leather-bag">
                 <div className="relative aspect-square bg-white rounded-lg overflow-hidden mb-4">
@@ -189,9 +201,9 @@ export default function BoomersPage() {
                   />
                   <ProductHoverActions product={{ id: "boomers-accessories-lightweight-reading-frames", name: "Lightweight Reading Frames", price: 78, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBNOhtu7R58uFsyNpMjr46boKRNPUwKT7UHuxsJWciDe3x1LJfhTriOeXD6Xdpm_7VHQQ37W4qJ3ScU-VYUP0c9v4_ogX4BaTuhBdc-RTJNY80Hrnn9QnL3fgTg9kXSD-q2kdFNfAOukqgu0na8KYqmZFVGEseIk01k9RYGFqM-Ut7fi7wLHR21rgTIDkxDflglIDnfy1Ptyjk2eofpuhFv9Y50V0gZ1-4U2x0Ge9UkjvSdoZUCy1m2nv7R0md_fe4sXmQNur1HZW0C", category: "Accessories", href: "/accessories/croissant-leather-bag" }} />
                 </div>
-                <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Lightweight Reading Frames</h3>
-                <p className="text-[#434751] mb-2">Classic Gold</p>
-                <p className="text-lg font-bold text-[#ac3231]">?78.00</p>
+                <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Lightweight Reading Frames</h3>
+                <p className="mb-1 text-xs text-[#434751] sm:mb-2 sm:text-base">Classic Gold</p>
+                <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹78.00</p>
               </Link>
             </div>
             <div className="mt-16 text-center">
@@ -202,10 +214,10 @@ export default function BoomersPage() {
           </div>
         </section>
 
-        <section className="py-24 max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center mb-16">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8 sm:py-24">
+          <div className="mb-12 grid grid-cols-1 items-center gap-8 lg:mb-16 lg:grid-cols-3 lg:gap-12">
             <div className="lg:col-span-1">
-              <h2 className="text-4xl font-headline text-[#1e1b17] mb-6">Sneakers Built for Comfort</h2>
+              <h2 className="mb-4 font-headline text-[1.8rem] text-[#1e1b17] sm:mb-6 sm:text-4xl">Sneakers Built for Comfort</h2>
               <p className="text-[#434751] mb-8 leading-relaxed">
                 Say goodbye to sore feet. Our sneaker collection features orthotic-friendly insoles, breathable fabrics, and slip-resistant soles
                 without compromising on style.
@@ -214,7 +226,7 @@ export default function BoomersPage() {
                 View All Sneakers
               </Link>
             </div>
-            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:col-span-2 lg:gap-8">
               <Link className="group cursor-pointer block" href="/sneakers/nova-form-strider">
                 <div className="relative aspect-[4/3] bg-[#eee7df] rounded-lg overflow-hidden mb-4">
                   <img
@@ -224,8 +236,8 @@ export default function BoomersPage() {
                   />
                   <ProductHoverActions product={{ id: "boomers-sneakers-cloudwalk-leather-trainer", name: "CloudWalk Leather Trainer", price: 115, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCDgdQQvsycPGbV8jIeagAj9a6g87EQSOsFhnXcfWGBrv_TipcUZVkJkGKjq80lFo6MR4oZhD3wuILDwLxo0PztpsvNCYPnlAdqEtbdJ5dFHji9FAL961W5lA1saVD69FIzVkP5dQx2JP1xlcqJeXz6COwoYbUTn1CIGgiW3p-mxP3H4rrdJIaK5J_iMw5kseoJhIafZBuB8SnyDjNvY-rJHEASVN_TMYiEt-ldDhxFfAaDxK7DGC3HKi1GGPVOTo7062BUxdVwUgN2", category: "Sneakers", href: "/sneakers/nova-form-strider" }} />
                 </div>
-                <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">CloudWalk Leather Trainer</h3>
-                <p className="text-lg font-bold text-[#ac3231]">?115.00</p>
+                <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">CloudWalk Leather Trainer</h3>
+                <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹115.00</p>
               </Link>
               <Link className="group cursor-pointer block" href="/sneakers/nova-form-strider">
                 <div className="relative aspect-[4/3] bg-[#eee7df] rounded-lg overflow-hidden mb-4">
@@ -236,8 +248,8 @@ export default function BoomersPage() {
                   />
                   <ProductHoverActions product={{ id: "boomers-sneakers-air-mesh-comfort-slip-on", name: "Air-Mesh Comfort Slip-On", price: 95, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDXQBxyi81hcXbar5t5DnMu-spV2H8ZxI2tqZhAnaXsbVeWMfLq4rrFWRzQ3UCeCJFCbAI3QURevrrI130VaZQHw5XevXJ6nbo5qipKaqJZD8YJVFg_c4c-EkUUuiBJnYKxxGlrNixXudy1hI48-hoOIpSzlf3P8WCgD-Bz3qf19KeFDN3pnwbWUYW714ybrEQoUMo37KrMUGObd33_sEwYiGgLUBU7gxc5H74h37mJtgw2jyHzwqL2sqMBfmy-WazEuFdifhe1tpV_", category: "Sneakers", href: "/sneakers/nova-form-strider" }} />
                 </div>
-                <h3 className="text-xl font-body font-semibold text-[#1e1b17] mb-1">Air-Mesh Comfort Slip-On</h3>
-                <p className="text-lg font-bold text-[#ac3231]">?95.00</p>
+                <h3 className="mb-1 font-body text-base font-semibold leading-tight text-[#1e1b17] sm:text-xl">Air-Mesh Comfort Slip-On</h3>
+                <p className="text-sm font-bold text-[#ac3231] sm:text-lg">₹95.00</p>
               </Link>
             </div>
           </div>
@@ -273,6 +285,7 @@ export default function BoomersPage() {
     </div>
   );
 }
+
 
 
 

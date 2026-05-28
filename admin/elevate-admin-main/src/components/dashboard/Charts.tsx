@@ -36,7 +36,7 @@ const ordersData = [
   { month: "Jul", orders: 290 },
 ];
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/+$/, "");
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
 const categoryData = [
   { name: "Electronics", value: 35, color: "hsl(250, 80%, 60%)" },

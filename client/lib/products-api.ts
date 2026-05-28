@@ -27,17 +27,17 @@ export type ProductRecord = {
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5003/api";
+  if (!value) return "https://stylesakhi.com/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
-  if (value.startsWith("/")) return `http://localhost:5000${value}`;
+  if (value.startsWith("/")) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 const API_BASE_URL_CANDIDATES = process.env.NEXT_PUBLIC_API_URL
   ? [API_BASE_URL]
-  : ["http://localhost:5003/api", "http://localhost:5000/api"];
+  : ["https://stylesakhi.com/api"];
 
 async function fetchFromApi<T>(path: string): Promise<T> {
   let lastError: Error | null = null;
@@ -81,3 +81,4 @@ export async function fetchHighestSellingProducts(generation: ProductGeneration,
   );
   return (payload?.data?.items || []) as ProductRecord[];
 }
+

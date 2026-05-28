@@ -1,11 +1,39 @@
 import type { NextConfig } from "next";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
+
+const additionalMediaHostnames = (process.env.NEXT_PUBLIC_MEDIA_HOSTNAMES || "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean);
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: process.cwd(),
+    root: configDir,
   },
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '5000',
+      },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -30,6 +58,18 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.r2.dev',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.r2.cloudflarestorage.com',
+      },
+      ...additionalMediaHostnames.map((hostname) => ({
+        protocol: 'https' as const,
+        hostname,
+      })),
     ],
   },
 };

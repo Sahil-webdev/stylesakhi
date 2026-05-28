@@ -3,13 +3,19 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAdminToken } from "@/lib/adminAuth";
 import { ImagePlus, Loader2, Save, Sparkles } from "lucide-react";
+import { uploadAdminMedia } from "@/lib/mediaUpload";
 
 type GenerationKey = "gen-z" | "millennial" | "gen-x" | "boomer" | "gen-alpha";
 
 type BannerItem = {
   image: string;
+  desktopImage?: string;
+  mobileImage?: string;
   alt: string;
   link?: string;
+  publicId?: string;
+  desktopPublicId?: string;
+  mobilePublicId?: string;
 };
 
 type BannerForm = {
@@ -36,8 +42,13 @@ const createFallbackForm = (): BannerForm => {
   const generationBanners = generationMeta.reduce<Record<GenerationKey, BannerItem[]>>((acc, generation) => {
     acc[generation.key] = defaultCarouselImages.map((image, index) => ({
       image,
+      desktopImage: image,
+      mobileImage: image,
       alt: `${generation.label} Collection Banner ${index + 1}`,
       link: "",
+      publicId: "",
+      desktopPublicId: "",
+      mobilePublicId: "",
     }));
     return acc;
   }, {} as Record<GenerationKey, BannerItem[]>);
@@ -45,8 +56,13 @@ const createFallbackForm = (): BannerForm => {
   return {
     homeBanner: {
       image: "/hero/heroImg.png",
+      desktopImage: "/hero/heroImg.png",
+      mobileImage: "/hero/heroImg.png",
       alt: "StyleSakhi hero banner",
       link: "",
+      publicId: "",
+      desktopPublicId: "",
+      mobilePublicId: "",
     },
     generationBanners,
   };
@@ -54,21 +70,50 @@ const createFallbackForm = (): BannerForm => {
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5000/api";
+  if (!value) return "https://stylesakhi.com/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
-  if (value.startsWith("/")) return `http://localhost:5000${value}`;
+  if (value.startsWith("/")) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL);
+const generationPreviewKey = (generation: GenerationKey, index: number) => `${generation}:${index}`;
 
 const normalizeBannerItem = (value: unknown, fallback: BannerItem) => {
   const source = (value || {}) as Partial<BannerItem>;
+  const fallbackDesktop = fallback.desktopImage || fallback.image;
+  const fallbackMobile = fallback.mobileImage || fallbackDesktop;
+  const desktopImage =
+    typeof source.desktopImage === "string" && source.desktopImage.trim()
+      ? source.desktopImage.trim()
+      : typeof source.image === "string" && source.image.trim()
+        ? source.image.trim()
+        : fallbackDesktop;
+  const mobileImage =
+    typeof source.mobileImage === "string" && source.mobileImage.trim()
+      ? source.mobileImage.trim()
+      : desktopImage || fallbackMobile;
+  const desktopPublicId =
+    typeof source.desktopPublicId === "string" && source.desktopPublicId.trim()
+      ? source.desktopPublicId.trim()
+      : typeof source.publicId === "string"
+        ? source.publicId.trim()
+        : "";
+  const mobilePublicId =
+    typeof source.mobilePublicId === "string" && source.mobilePublicId.trim()
+      ? source.mobilePublicId.trim()
+      : desktopPublicId;
+
   return {
-    image: typeof source.image === "string" && source.image.trim() ? source.image.trim() : fallback.image,
+    image: desktopImage || mobileImage || fallback.image,
+    desktopImage,
+    mobileImage,
     alt: typeof source.alt === "string" && source.alt.trim() ? source.alt.trim() : fallback.alt,
     link: typeof source.link === "string" ? source.link.trim() : "",
+    publicId: desktopPublicId,
+    desktopPublicId,
+    mobilePublicId,
   };
 };
 
@@ -95,14 +140,6 @@ const normalizePayload = (value: unknown): BannerForm => {
   };
 };
 
-const toDataUrl = (file: File) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("Failed to read image file"));
-    reader.readAsDataURL(file);
-  });
-
 const BannersPage = () => {
   const { hasModuleAccess } = useAuth();
   const canEdit = hasModuleAccess("settings", "can_edit");
@@ -112,6 +149,15 @@ const BannersPage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [homeDesktopPreview, setHomeDesktopPreview] = useState("");
+  const [homeMobilePreview, setHomeMobilePreview] = useState("");
+  const [generationDesktopPreview, setGenerationDesktopPreview] = useState<Record<string, string>>({});
+  const [generationMobilePreview, setGenerationMobilePreview] = useState<Record<string, string>>({});
+
+  const safeRevokeObjectUrl = (value?: string) => {
+    if (!value || !value.startsWith("blob:")) return;
+    URL.revokeObjectURL(value);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -131,6 +177,10 @@ const BannersPage = () => {
         }
         if (mounted) {
           setForm(normalizePayload(payload?.data));
+          setHomeDesktopPreview("");
+          setHomeMobilePreview("");
+          setGenerationDesktopPreview({});
+          setGenerationMobilePreview({});
         }
       } catch (loadError) {
         if (mounted) {
@@ -146,6 +196,15 @@ const BannersPage = () => {
       mounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      safeRevokeObjectUrl(homeDesktopPreview);
+      safeRevokeObjectUrl(homeMobilePreview);
+      Object.values(generationDesktopPreview).forEach((value) => safeRevokeObjectUrl(value));
+      Object.values(generationMobilePreview).forEach((value) => safeRevokeObjectUrl(value));
+    };
+  }, [homeDesktopPreview, homeMobilePreview, generationDesktopPreview, generationMobilePreview]);
 
   const generationCountLabel = useMemo(
     () =>
@@ -189,42 +248,110 @@ const BannersPage = () => {
   };
 
   const removeGenerationBanner = (generation: GenerationKey, index: number) => {
+    const key = generationPreviewKey(generation, index);
+    safeRevokeObjectUrl(generationDesktopPreview[key]);
+    safeRevokeObjectUrl(generationMobilePreview[key]);
+    setGenerationDesktopPreview((prev) => ({ ...prev, [key]: "" }));
+    setGenerationMobilePreview((prev) => ({ ...prev, [key]: "" }));
     updateGenerationField(generation, index, "image", "");
+    updateGenerationField(generation, index, "desktopImage", "");
+    updateGenerationField(generation, index, "mobileImage", "");
+    updateGenerationField(generation, index, "publicId", "");
+    updateGenerationField(generation, index, "desktopPublicId", "");
+    updateGenerationField(generation, index, "mobilePublicId", "");
   };
 
-  const onHomeUpload = async (files: FileList | null) => {
+  const onHomeUpload = async (variant: "desktop" | "mobile", files: FileList | null) => {
     if (!files || files.length === 0) return;
     const file = Array.from(files).find((item) => item.type.startsWith("image/"));
     if (!file) {
       setError("Please choose a valid image file.");
       return;
     }
+    const previewUrl = URL.createObjectURL(file);
+    if (variant === "desktop") {
+      safeRevokeObjectUrl(homeDesktopPreview);
+      setHomeDesktopPreview(previewUrl);
+    } else {
+      safeRevokeObjectUrl(homeMobilePreview);
+      setHomeMobilePreview(previewUrl);
+    }
     try {
-      const dataUrl = await toDataUrl(file);
-      updateHomeField("image", dataUrl);
+      const token = getAdminToken();
+      if (!token) {
+        setError("Admin session expired. Please login again.");
+        return;
+      }
+      const uploaded = await uploadAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token,
+        file,
+        kind: "banner-image",
+      });
+      if (variant === "desktop") {
+        updateHomeField("image", uploaded.url);
+        updateHomeField("desktopImage", uploaded.url);
+        updateHomeField("publicId", uploaded.publicId);
+        updateHomeField("desktopPublicId", uploaded.publicId);
+      } else {
+        updateHomeField("mobileImage", uploaded.url);
+        updateHomeField("mobilePublicId", uploaded.publicId);
+      }
       if (!form.homeBanner.alt) {
         updateHomeField("alt", "StyleSakhi hero banner");
       }
-    } catch {
-      setError("Failed to process selected image.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to process selected image.");
     }
   };
 
-  const onGenerationUpload = async (generation: GenerationKey, index: number, files: FileList | null) => {
+  const onGenerationUpload = async (
+    generation: GenerationKey,
+    index: number,
+    variant: "desktop" | "mobile",
+    files: FileList | null,
+  ) => {
     if (!files || files.length === 0) return;
     const file = Array.from(files).find((item) => item.type.startsWith("image/"));
     if (!file) {
       setError("Please choose a valid image file.");
       return;
     }
+    const previewUrl = URL.createObjectURL(file);
+    const key = generationPreviewKey(generation, index);
+    if (variant === "desktop") {
+      safeRevokeObjectUrl(generationDesktopPreview[key]);
+      setGenerationDesktopPreview((prev) => ({ ...prev, [key]: previewUrl }));
+    } else {
+      safeRevokeObjectUrl(generationMobilePreview[key]);
+      setGenerationMobilePreview((prev) => ({ ...prev, [key]: previewUrl }));
+    }
     try {
-      const dataUrl = await toDataUrl(file);
-      updateGenerationField(generation, index, "image", dataUrl);
+      const token = getAdminToken();
+      if (!token) {
+        setError("Admin session expired. Please login again.");
+        return;
+      }
+      const uploaded = await uploadAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token,
+        file,
+        kind: "banner-image",
+      });
+      if (variant === "desktop") {
+        updateGenerationField(generation, index, "image", uploaded.url);
+        updateGenerationField(generation, index, "desktopImage", uploaded.url);
+        updateGenerationField(generation, index, "publicId", uploaded.publicId);
+        updateGenerationField(generation, index, "desktopPublicId", uploaded.publicId);
+      } else {
+        updateGenerationField(generation, index, "mobileImage", uploaded.url);
+        updateGenerationField(generation, index, "mobilePublicId", uploaded.publicId);
+      }
       if (!form.generationBanners[generation][index]?.alt) {
         updateGenerationField(generation, index, "alt", `${generationMeta.find((item) => item.key === generation)?.label || generation} Collection Banner ${index + 1}`);
       }
-    } catch {
-      setError("Failed to process selected image.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to process selected image.");
     }
   };
 
@@ -237,22 +364,44 @@ const BannersPage = () => {
       return;
     }
 
-    if (!form.homeBanner.image.trim()) {
-      setError("Home page banner image is required.");
+    const homeDesktopImage = (form.homeBanner.desktopImage || form.homeBanner.image || "").trim();
+    if (!homeDesktopImage) {
+      setError("Home page desktop banner image is required.");
       return;
     }
-
     for (const generation of generationMeta) {
       const items = form.generationBanners[generation.key];
       if (items.length !== 4) {
         setError(`${generation.label} must have exactly 4 banners.`);
         return;
       }
-      if (items.some((item) => !item.image.trim())) {
-        setError(`${generation.label} has empty banner image. Please upload all 4 banners.`);
+      if (items.some((item) => !(item.desktopImage || item.image || "").trim())) {
+        setError(`${generation.label} has empty desktop banner image. Please upload all 4 banners.`);
         return;
       }
     }
+
+    const payloadToSave: BannerForm = {
+      homeBanner: {
+        ...form.homeBanner,
+        image: homeDesktopImage,
+        desktopImage: homeDesktopImage,
+        mobileImage: (form.homeBanner.mobileImage || "").trim() || homeDesktopImage,
+      },
+      generationBanners: generationMeta.reduce<Record<GenerationKey, BannerItem[]>>((acc, generation) => {
+        acc[generation.key] = form.generationBanners[generation.key].map((item) => {
+          const desktopImage = (item.desktopImage || item.image || "").trim();
+          const mobileImage = (item.mobileImage || "").trim() || desktopImage;
+          return {
+            ...item,
+            image: desktopImage,
+            desktopImage,
+            mobileImage,
+          };
+        });
+        return acc;
+      }, {} as Record<GenerationKey, BannerItem[]>),
+    };
 
     try {
       setSaving(true);
@@ -262,7 +411,7 @@ const BannersPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getAdminToken()}`,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payloadToSave),
       });
 
       const payload = await response.json();
@@ -271,6 +420,10 @@ const BannersPage = () => {
       }
 
       setForm(normalizePayload(payload?.data));
+      setHomeDesktopPreview("");
+      setHomeMobilePreview("");
+      setGenerationDesktopPreview({});
+      setGenerationMobilePreview({});
       setMessage("Banners updated successfully.");
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "Failed to save banners");
@@ -312,12 +465,35 @@ const BannersPage = () => {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-            <div className="overflow-hidden rounded-xl border border-[#dfe4e8] bg-[#f4f6f8]">
-              {form.homeBanner.image ? (
-                <img alt={form.homeBanner.alt || "Home banner"} className="h-[220px] w-full object-cover" src={form.homeBanner.image} />
-              ) : (
-                <div className="grid h-[220px] place-items-center text-sm font-medium text-[#7c868b]">No image selected</div>
-              )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="overflow-hidden rounded-xl border border-[#dfe4e8] bg-[#f4f6f8]">
+                <div className="border-b border-[#dfe4e8] bg-[#f6f8fb] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#55606d]">
+                  Desktop Banner
+                </div>
+                {form.homeBanner.desktopImage || form.homeBanner.image ? (
+                  <img
+                    alt={form.homeBanner.alt || "Home desktop banner"}
+                    className="h-[220px] w-full object-cover"
+                    src={homeDesktopPreview || form.homeBanner.desktopImage || form.homeBanner.image}
+                  />
+                ) : (
+                  <div className="grid h-[220px] place-items-center text-sm font-medium text-[#7c868b]">No desktop image selected</div>
+                )}
+              </div>
+              <div className="overflow-hidden rounded-xl border border-[#dfe4e8] bg-[#f4f6f8]">
+                <div className="border-b border-[#dfe4e8] bg-[#f6f8fb] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#55606d]">
+                  Mobile Banner
+                </div>
+                {form.homeBanner.mobileImage || form.homeBanner.desktopImage || form.homeBanner.image ? (
+                  <img
+                    alt={form.homeBanner.alt || "Home mobile banner"}
+                    className="h-[220px] w-full object-cover"
+                    src={homeMobilePreview || form.homeBanner.mobileImage || form.homeBanner.desktopImage || form.homeBanner.image}
+                  />
+                ) : (
+                  <div className="grid h-[220px] place-items-center text-sm font-medium text-[#7c868b]">No mobile image selected</div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -339,19 +515,34 @@ const BannersPage = () => {
                 />
               </label>
 
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-[#dbe4e7] px-4 py-2 text-sm font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
-                <ImagePlus className="h-4 w-4" />
-                Upload / Replace
-                <input
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(event) => {
-                    void onHomeUpload(event.target.files);
-                    event.currentTarget.value = "";
-                  }}
-                  type="file"
-                />
-              </label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#dbe4e7] px-4 py-2 text-sm font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
+                  <ImagePlus className="h-4 w-4" />
+                  Desktop Upload
+                  <input
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      void onHomeUpload("desktop", event.target.files);
+                      event.currentTarget.value = "";
+                    }}
+                    type="file"
+                  />
+                </label>
+                <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[#dbe4e7] px-4 py-2 text-sm font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
+                  <ImagePlus className="h-4 w-4" />
+                  Mobile Upload
+                  <input
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => {
+                      void onHomeUpload("mobile", event.target.files);
+                      event.currentTarget.value = "";
+                    }}
+                    type="file"
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </section>
@@ -369,12 +560,35 @@ const BannersPage = () => {
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                 {form.generationBanners[generation.key].map((item, index) => (
                   <div key={`${generation.key}-${index}`} className="rounded-xl border border-[#e1e7ea] bg-[#fbfcfd] p-3">
-                    <div className="overflow-hidden rounded-lg border border-[#dfe4e8] bg-[#eef2f4]">
-                      {item.image ? (
-                        <img alt={item.alt || `${generation.label} banner ${index + 1}`} className="h-32 w-full object-cover" src={item.image} />
-                      ) : (
-                        <div className="grid h-32 place-items-center text-xs font-medium text-[#7c868b]">Empty slot</div>
-                      )}
+                    <div className="grid gap-2">
+                      <div className="overflow-hidden rounded-lg border border-[#dfe4e8] bg-[#eef2f4]">
+                        <div className="border-b border-[#dfe4e8] bg-[#f6f8fb] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#55606d]">
+                          Desktop
+                        </div>
+                        {item.desktopImage || item.image || generationDesktopPreview[generationPreviewKey(generation.key, index)] ? (
+                          <img
+                            alt={item.alt || `${generation.label} desktop banner ${index + 1}`}
+                            className="h-28 w-full object-cover"
+                            src={generationDesktopPreview[generationPreviewKey(generation.key, index)] || item.desktopImage || item.image}
+                          />
+                        ) : (
+                          <div className="grid h-28 place-items-center text-xs font-medium text-[#7c868b]">Desktop image empty</div>
+                        )}
+                      </div>
+                      <div className="overflow-hidden rounded-lg border border-[#dfe4e8] bg-[#eef2f4]">
+                        <div className="border-b border-[#dfe4e8] bg-[#f6f8fb] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#55606d]">
+                          Mobile
+                        </div>
+                        {item.mobileImage || item.desktopImage || item.image || generationMobilePreview[generationPreviewKey(generation.key, index)] ? (
+                          <img
+                            alt={item.alt || `${generation.label} mobile banner ${index + 1}`}
+                            className="h-28 w-full object-cover"
+                            src={generationMobilePreview[generationPreviewKey(generation.key, index)] || item.mobileImage || item.desktopImage || item.image}
+                          />
+                        ) : (
+                          <div className="grid h-28 place-items-center text-xs font-medium text-[#7c868b]">Mobile image empty</div>
+                        )}
+                      </div>
                     </div>
 
                     <div className="mt-3 space-y-2">
@@ -397,22 +611,37 @@ const BannersPage = () => {
                       </label>
                     </div>
 
-                    <div className="mt-3 flex gap-2">
-                      <label className="inline-flex flex-1 cursor-pointer items-center justify-center gap-1 rounded-md bg-[#dbe4e7] px-2.5 py-2 text-xs font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-md bg-[#dbe4e7] px-2.5 py-2 text-xs font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
                         <ImagePlus className="h-3.5 w-3.5" />
-                        Replace
+                        Desktop
                         <input
                           accept="image/*"
                           className="hidden"
                           onChange={(event) => {
-                            void onGenerationUpload(generation.key, index, event.target.files);
+                            void onGenerationUpload(generation.key, index, "desktop", event.target.files);
                             event.currentTarget.value = "";
                           }}
                           type="file"
                         />
                       </label>
+                      <label className="inline-flex cursor-pointer items-center justify-center gap-1 rounded-md bg-[#dbe4e7] px-2.5 py-2 text-xs font-semibold text-[#4d44e3] transition-colors hover:bg-[#cedadd]">
+                        <ImagePlus className="h-3.5 w-3.5" />
+                        Mobile
+                        <input
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(event) => {
+                            void onGenerationUpload(generation.key, index, "mobile", event.target.files);
+                            event.currentTarget.value = "";
+                          }}
+                          type="file"
+                        />
+                      </label>
+                    </div>
+                    <div className="mt-2">
                       <button
-                        className="rounded-md border border-[#e1c9cf] bg-[#fff3f5] px-2.5 py-2 text-xs font-semibold text-[#9e3f4e] transition-colors hover:bg-[#ffe8ec]"
+                        className="w-full rounded-md border border-[#e1c9cf] bg-[#fff3f5] px-2.5 py-2 text-xs font-semibold text-[#9e3f4e] transition-colors hover:bg-[#ffe8ec]"
                         onClick={() => removeGenerationBanner(generation.key, index)}
                         type="button"
                       >

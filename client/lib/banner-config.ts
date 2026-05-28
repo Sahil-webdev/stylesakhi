@@ -2,6 +2,8 @@ export type BannerGeneration = 'gen-z' | 'millennial' | 'gen-x' | 'boomer' | 'ge
 
 export type BannerItem = {
   image: string;
+  desktopImage?: string;
+  mobileImage?: string;
   alt: string;
   link?: string;
 };
@@ -13,10 +15,10 @@ export type BannerConfigPayload = {
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || '').trim().replace(/\/+$/, '');
-  if (!value) return 'http://localhost:5000/api';
+  if (!value) return 'https://stylesakhi.com/api';
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
   if (value.startsWith(':')) return `http://localhost${value}`;
-  if (value.startsWith('/')) return `http://localhost:5000${value}`;
+  if (value.startsWith('/')) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
@@ -24,6 +26,8 @@ const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
 export const defaultHomeBanner: BannerItem = {
   image: '/hero/heroImg.png',
+  desktopImage: '/hero/heroImg.png',
+  mobileImage: '/hero/heroImg.png',
   alt: 'StyleSakhi hero banner',
 };
 
@@ -37,6 +41,8 @@ const defaultCarouselImages = [
 const makeDefaultGenerationBanners = (label: string): BannerItem[] =>
   defaultCarouselImages.map((image, index) => ({
     image,
+    desktopImage: image,
+    mobileImage: image,
     alt: `${label} Collection Banner ${index + 1}`,
   }));
 
@@ -50,12 +56,26 @@ export const defaultGenerationBanners: Record<BannerGeneration, BannerItem[]> = 
 
 const normalizeBannerItem = (value: unknown, fallback: BannerItem): BannerItem => {
   const source = (value || {}) as Partial<BannerItem>;
-  const image = typeof source.image === 'string' && source.image.trim() ? source.image.trim() : fallback.image;
+  const fallbackDesktop = fallback.desktopImage || fallback.image;
+  const fallbackMobile = fallback.mobileImage || fallbackDesktop;
+  const desktopImage =
+    typeof source.desktopImage === 'string' && source.desktopImage.trim()
+      ? source.desktopImage.trim()
+      : typeof source.image === 'string' && source.image.trim()
+        ? source.image.trim()
+        : fallbackDesktop;
+  const mobileImage =
+    typeof source.mobileImage === 'string' && source.mobileImage.trim()
+      ? source.mobileImage.trim()
+      : desktopImage || fallbackMobile;
+  const image = desktopImage || mobileImage || fallback.image;
   const alt = typeof source.alt === 'string' && source.alt.trim() ? source.alt.trim() : fallback.alt;
   const link = typeof source.link === 'string' && source.link.trim() ? source.link.trim() : '';
 
   return {
     image,
+    desktopImage,
+    mobileImage,
     alt,
     ...(link ? { link } : {}),
   };
@@ -102,3 +122,4 @@ export async function fetchBannerConfig() {
 }
 
 export const getBannerConfigFallback = () => fallbackPayload;
+

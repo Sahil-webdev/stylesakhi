@@ -18,16 +18,26 @@ const CLOUDINARY_BANNER_FOLDER = 'stylesakhi/banners';
 
 type BannerItemInput = {
   image?: unknown;
+  desktopImage?: unknown;
+  mobileImage?: unknown;
   alt?: unknown;
   link?: unknown;
+  publicId?: unknown;
+  desktopPublicId?: unknown;
+  mobilePublicId?: unknown;
 };
 
 const normalizeString = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
 
 const collectPublicIdsFromItems = (items: IBannerItem[]) =>
-  items
-    .map((item) => normalizeString(item.publicId))
-    .filter(Boolean);
+  items.flatMap((item) => {
+    const ids = [
+      normalizeString(item.publicId),
+      normalizeString(item.desktopPublicId),
+      normalizeString(item.mobilePublicId),
+    ].filter(Boolean);
+    return Array.from(new Set(ids));
+  });
 
 const consumeUrlPublicId = (urlMap: Map<string, string[]>, url: string) => {
   const queue = urlMap.get(url);
@@ -43,13 +53,23 @@ const consumeUrlPublicId = (urlMap: Map<string, string[]>, url: string) => {
 
 const buildExistingPublicIdQueue = (homeBanner: IBannerItem, generationBanners: Record<BannerGeneration, IBannerItem[]>) => {
   const queue = new Map<string, string[]>();
-  const append = (item: IBannerItem) => {
-    const url = normalizeString(item.image);
-    const publicId = normalizeString(item.publicId);
+  const appendPair = (url: string, publicId: string) => {
     if (!url || !publicId) return;
     const existing = queue.get(url) || [];
     existing.push(publicId);
     queue.set(url, existing);
+  };
+  const append = (item: IBannerItem) => {
+    const legacyUrl = normalizeString(item.image);
+    const desktopUrl = normalizeString(item.desktopImage) || legacyUrl;
+    const mobileUrl = normalizeString(item.mobileImage) || desktopUrl || legacyUrl;
+    const legacyPublicId = normalizeString(item.publicId);
+    const desktopPublicId = normalizeString(item.desktopPublicId) || legacyPublicId;
+    const mobilePublicId = normalizeString(item.mobilePublicId) || legacyPublicId;
+
+    appendPair(legacyUrl, legacyPublicId);
+    appendPair(desktopUrl, desktopPublicId);
+    appendPair(mobileUrl, mobilePublicId);
   };
 
   append(homeBanner);
@@ -79,22 +99,42 @@ const processBannerItem = async (
   fallback: IBannerItem,
   urlPublicIdQueue: Map<string, string[]>,
 ) => {
-  const imageInput = normalizeString(input?.image);
-  if (!imageInput) {
+  const desktopInput = normalizeString(input?.desktopImage) || normalizeString(input?.image);
+  if (!desktopInput) {
     throw new Error('Banner image is required');
   }
+  const mobileInput = normalizeString(input?.mobileImage) || desktopInput;
 
-  const uploaded = await uploadProductMedia(imageInput, 'image', CLOUDINARY_BANNER_FOLDER);
+  const uploadedDesktop = await uploadProductMedia(desktopInput, 'image', CLOUDINARY_BANNER_FOLDER);
+  const uploadedMobile =
+    mobileInput === desktopInput
+      ? uploadedDesktop
+      : await uploadProductMedia(mobileInput, 'image', CLOUDINARY_BANNER_FOLDER);
   const alt = normalizeString(input?.alt) || fallback.alt;
   const link = normalizeString(input?.link);
 
-  const resolvedPublicId = normalizeString(uploaded.publicId) || consumeUrlPublicId(urlPublicIdQueue, uploaded.url);
+  const fallbackLegacyId = normalizeString(input?.publicId);
+  const fallbackDesktopId = normalizeString(input?.desktopPublicId) || fallbackLegacyId;
+  const fallbackMobileId = normalizeString(input?.mobilePublicId) || fallbackLegacyId;
+  const desktopPublicId =
+    normalizeString(uploadedDesktop.publicId) ||
+    consumeUrlPublicId(urlPublicIdQueue, uploadedDesktop.url) ||
+    fallbackDesktopId;
+  const mobilePublicId =
+    normalizeString(uploadedMobile.publicId) ||
+    consumeUrlPublicId(urlPublicIdQueue, uploadedMobile.url) ||
+    fallbackMobileId ||
+    desktopPublicId;
 
   return {
-    image: uploaded.url,
+    image: uploadedDesktop.url,
+    desktopImage: uploadedDesktop.url,
+    mobileImage: uploadedMobile.url,
     alt,
     link,
-    publicId: resolvedPublicId,
+    publicId: desktopPublicId,
+    desktopPublicId,
+    mobilePublicId,
   };
 };
 
@@ -148,12 +188,16 @@ router.put('/', authorizeModule('settings', 'can_edit'), async (req, res) => {
       return acc;
     }, {} as Record<BannerGeneration, IBannerItem[]>);
 
-    const previousPublicIds = [
+    const previousPublicIds = Array.from(
+      new Set([
       ...collectPublicIdsFromItems([current.homeBanner]),
       ...BANNER_GENERATIONS.flatMap((generation) => collectPublicIdsFromItems(current.generationBanners[generation])),
-    ];
+      ]),
+    );
     const nextPublicIds = new Set([
       normalizeString(nextHomeBanner.publicId),
+      normalizeString(nextHomeBanner.desktopPublicId),
+      normalizeString(nextHomeBanner.mobilePublicId),
       ...BANNER_GENERATIONS.flatMap((generation) => collectPublicIdsFromItems(nextGenerationBanners[generation])),
     ].filter(Boolean));
 

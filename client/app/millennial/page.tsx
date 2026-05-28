@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,19 +9,15 @@ import BannerCarousel from "@/components/BannerCarousel";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
 
-const generationHeroImage = "/hero/hero3.jpeg";
-const withGenerationHeroImage = (items: BannerItem[]) =>
-  items.map((item) => ({ ...item, image: generationHeroImage }));
-
 export default function MillennialPage() {
-  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["millennial"]));
+  const [banners, setBanners] = useState<BannerItem[]>(() => defaultGenerationBanners["millennial"]);
 
   useEffect(() => {
     let active = true;
     const loadBanners = async () => {
       try {
         const config = await fetchBannerConfig();
-        if (active) setBanners(withGenerationHeroImage(config.generationBanners["millennial"]));
+        if (active) setBanners(config.generationBanners["millennial"]);
       } catch {
         // Keep fallback data
       }
@@ -76,7 +72,10 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">The Archive Collection</p>
                 <h3 className="font-serif text-lg">Structured Linen Blazer</h3>
-                <p className="font-serif text-[#7b535c] font-medium">?245.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">₹245.00</p>
+                <div className="mt-3 w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                  Add to Bag
+                </div>
               </div>
             </Link>
 
@@ -102,7 +101,10 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">New Arrivals</p>
                 <h3 className="font-serif text-lg">Silk Slip Dress</h3>
-                <p className="font-serif text-[#7b535c] font-medium">?180.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">₹180.00</p>
+                <div className="mt-3 w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                  Add to Bag
+                </div>
               </div>
             </Link>
 
@@ -128,7 +130,10 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">Essential Series</p>
                 <h3 className="font-serif text-lg">Poplin Weekend Shirt</h3>
-                <p className="font-serif text-[#7b535c] font-medium">?95.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">₹95.00</p>
+                <div className="mt-3 w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                  Add to Bag
+                </div>
               </div>
             </Link>
 
@@ -154,22 +159,25 @@ export default function MillennialPage() {
               <div className="space-y-1">
                 <p className="font-sans text-sm text-[#827476]">Modern Denim</p>
                 <h3 className="font-serif text-lg">Wide Leg Raw Denim</h3>
-                <p className="font-serif text-[#7b535c] font-medium">?155.00</p>
+                <p className="font-serif text-[#7b535c] font-medium">₹155.00</p>
+                <div className="mt-3 w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                  Add to Bag
+                </div>
               </div>
             </Link>
           </div>
         </section>
 
-        <section className="bg-[#fff1e7] py-24 px-8">
+        <section className="bg-[#fff1e7] px-4 py-16 sm:px-8 sm:py-24">
           <div className="max-w-screen-2xl mx-auto">
-            <div className="flex flex-col items-center mb-16 text-center">
+            <div className="mb-10 flex flex-col items-center text-center sm:mb-16">
               <span className="font-sans text-xs tracking-widest text-[#526442] uppercase font-semibold mb-4">The Finishing Touches</span>
               <h2 className="font-serif text-4xl text-[#211a13] mb-4">Accessories</h2>
               <p className="font-sans text-[#827476] max-w-md">Small details that define the aesthetic of the modern atelier.</p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
-              <Link className="group bg-[#fff8f4] p-6 rounded-lg editorial-shadow transition-all hover:-translate-y-2 block" href="/accessories/croissant-leather-bag">
-                <div className="relative aspect-square overflow-hidden rounded-lg mb-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 md:gap-8">
+              <Link className="group block h-full rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-5 md:hover:-translate-y-1.5" href="/accessories/croissant-leather-bag">
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-lg sm:mb-4">
                   <img
                     alt="Luxury leather handbag in warm terracotta tone with gold hardware on a minimalist pedestal"
                     className="w-full h-full object-cover"
@@ -187,15 +195,15 @@ export default function MillennialPage() {
                     }}
                   />
                 </div>
-                <h3 className="font-serif text-xl mb-1">Sculptural Leather Tote</h3>
-                <p className="font-serif text-[#7b535c] mb-4">?320.00</p>
-                <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Sculptural Leather Tote</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹320.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
                   Add to Bag
                 </div>
               </Link>
 
-              <Link className="group bg-[#fff8f4] p-6 rounded-lg editorial-shadow transition-all hover:-translate-y-2 block" href="/accessories/croissant-leather-bag">
-                <div className="relative aspect-square overflow-hidden rounded-lg mb-6">
+              <Link className="group block h-full rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-5 md:hover:-translate-y-1.5" href="/accessories/croissant-leather-bag">
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-lg sm:mb-4">
                   <img
                     alt="Minimal gold layered necklaces resting on a white ceramic plate with gentle morning sunlight"
                     className="w-full h-full object-cover"
@@ -213,15 +221,18 @@ export default function MillennialPage() {
                     }}
                   />
                 </div>
-                <h3 className="font-serif text-xl mb-1">Muted Gold Links</h3>
-                <p className="font-serif text-[#7b535c] mb-4">?85.00</p>
-                <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Muted Gold Links</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹85.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
                   Add to Bag
                 </div>
               </Link>
 
-              <Link className="group bg-[#fff8f4] p-6 rounded-lg editorial-shadow transition-all hover:-translate-y-2 block" href="/accessories/croissant-leather-bag">
-                <div className="relative aspect-square overflow-hidden rounded-lg mb-6">
+              <Link
+                className="group col-span-2 block h-full max-w-[240px] justify-self-center rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:max-w-none sm:p-5 md:col-span-1 md:justify-self-auto md:hover:-translate-y-1.5"
+                href="/accessories/croissant-leather-bag"
+              >
+                <div className="relative mb-3 aspect-square overflow-hidden rounded-lg sm:mb-4">
                   <img
                     alt="Transparent cat-eye glasses with rose gold details sitting on an open art book"
                     className="w-full h-full object-cover"
@@ -239,9 +250,9 @@ export default function MillennialPage() {
                     }}
                   />
                 </div>
-                <h3 className="font-serif text-xl mb-1">Optical Frame 04</h3>
-                <p className="font-serif text-[#7b535c] mb-4">?140.00</p>
-                <div className="w-full py-2 border border-[#d4c2c5] rounded-md font-sans text-xs uppercase tracking-widest text-center hover:bg-[#211a13] hover:text-white transition-colors">
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Optical Frame 04</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹140.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
                   Add to Bag
                 </div>
               </Link>
@@ -257,28 +268,28 @@ export default function MillennialPage() {
           </div>
         </section>
 
-        <section className="py-24 px-8 max-w-screen-2xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-4 space-y-6">
-              <span className="font-sans text-xs tracking-widest text-[#7b535c] uppercase font-semibold">Street Sophistication</span>
-              <h2 className="font-serif text-5xl text-[#211a13] leading-tight">Sneakers Redefined</h2>
-              <p className="font-sans text-[#827476] leading-relaxed">
-                Merging comfort with an elevated aesthetic. Our curated footwear collection prioritizes sustainable materials and timeless
-                silhouettes.
+        <section className="mx-auto max-w-screen-2xl px-4 py-16 sm:px-8 sm:py-24">
+          <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-10">
+            <div className="rounded-2xl bg-[#fff8f4] p-6 shadow-[0_10px_30px_rgba(33,26,19,0.06)] lg:col-span-4 lg:sticky lg:top-24 lg:p-8">
+              <span className="font-sans text-xs font-semibold uppercase tracking-widest text-[#7b535c]">Street Sophistication</span>
+              <h2 className="mt-3 font-serif text-4xl leading-tight text-[#211a13] sm:text-5xl">Sneakers Redefined</h2>
+              <p className="mt-4 font-sans leading-relaxed text-[#827476]">
+                Merging comfort with an elevated aesthetic. Our curated footwear collection prioritizes sustainable materials and timeless silhouettes.
               </p>
               <Link
-                className="bg-[#7b535c] text-white px-8 py-3 rounded-full font-sans text-sm tracking-wide hover:opacity-90 transition-all editorial-shadow inline-block"
+                className="mt-6 inline-block rounded-full bg-[#7b535c] px-8 py-3 font-sans text-sm tracking-wide text-white transition-all hover:opacity-90"
                 href="/sneakers?generation=millennial"
               >
                 View More
               </Link>
             </div>
-            <div className="lg:col-span-8 grid grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <Link className="relative bg-[#f5e6da] rounded-xl overflow-hidden aspect-[4/5] group block" href="/sneakers/nova-form-strider">
+
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:col-span-8">
+              <Link className="group block rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-4 md:hover:-translate-y-1.5" href="/sneakers/nova-form-strider">
+                <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-lg">
                   <img
                     alt="Minimalist white leather sneakers with gum sole on a clean grey concrete background"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiDc3wXTF3CwZbB-zJ301OKh0puZmNqOhPwrtIEGb97rAiPTUZsMFXOP2ftvDBe4jGZKK89iYDrOMxveCc28FUp_da02scODCTHA-V99_cxO7aHJEV-v7_URSnlXwW7KF41JuflBUzBAhxjEwUdNdlka2A6QKeeMzbxTbdRKZbVjCCO5GUZfNOegWvPG2nx1knK5NtbKLR9hzhd8QrY0c0-_ZoCjjQm2LGcb1MLhcIRQZ3EiBojZNqgPKCsClvy3Qdkj0CKVKay8Ze"
                   />
                   <ProductHoverActions
@@ -292,11 +303,19 @@ export default function MillennialPage() {
                       href: "/sneakers/nova-form-strider",
                     }}
                   />
-                </Link>
-                <Link className="relative bg-[#f5e6da] rounded-xl overflow-hidden aspect-square group block" href="/sneakers/nova-form-strider">
+                </div>
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Urban Minimalist Leather Low</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹165.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
+                  Add to Bag
+                </div>
+              </Link>
+
+              <Link className="group block rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-4 md:hover:-translate-y-1.5" href="/sneakers/nova-form-strider">
+                <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-lg">
                   <img
                     alt="Pastel pink and white trainer sneaker shot from a low angle on a soft beige surface"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9fjI2UTroBwVXNVCzuhJ64i9IyLBbKqIFen1Q8n4aKKSp8kSg3ru5LWSGkloK49zyoMtuJv--vio7K39O_Ad1lWdA43bYw_R_jaDY_jdr9s_q6EDWo28y9Khrm8il1wf1sTD1aO-WoxtCcJC-q9wtFQLLYripU8FeKuyj1kexfvEcWYCTJUIDtRJlB4rvyKzSWaTd0R1IRdU6eihm4zVq6Mpyq8SwYy8AwYLF2Kz6IZA8VcqJQWRt2btbJck2wrBwiY-4uSDt6jps"
                   />
                   <ProductHoverActions
@@ -310,13 +329,19 @@ export default function MillennialPage() {
                       href: "/sneakers/nova-form-strider",
                     }}
                   />
-                </Link>
-              </div>
-              <div className="pt-12 space-y-6">
-                <Link className="relative bg-[#f5e6da] rounded-xl overflow-hidden aspect-square group block" href="/sneakers/nova-form-strider">
+                </div>
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Pastel Pink Runners</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹140.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
+                  Add to Bag
+                </div>
+              </Link>
+
+              <Link className="group block rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-4 md:hover:-translate-y-1.5" href="/sneakers/nova-form-strider">
+                <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-lg">
                   <img
                     alt="Beige suede lifestyle sneakers against a warm textured plaster wall"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6-THRwN-LcgfkIC5L0nHaDWAXMaUzoaqE5uTsE_lS4VphEEtoLNedRPdwKDdORmRHkBKcTzU0vicLASA0v5cx6rJRevkSofwPSUMFiI56D1qttp4seJyEqqJcYWNBzOrBtGWzkJm29A7LN9nK-EpAoXZ_7H1VD97pNbt_YGzFZbZ4M3oXfsT8Be-g_mgIC84X_VipQw6HnA1lcarmj1LhSBHvR8s1xDMlBIqMDA9Z5Ra2Z4JxFM-Gd41cg-ojQCOh9Ah81wiOcD1u"
                   />
                   <ProductHoverActions
@@ -330,11 +355,19 @@ export default function MillennialPage() {
                       href: "/sneakers/nova-form-strider",
                     }}
                   />
-                </Link>
-                <Link className="relative bg-[#f5e6da] rounded-xl overflow-hidden aspect-[4/5] group block" href="/sneakers/nova-form-strider">
+                </div>
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">Beige Suede Lifestyle</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹170.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
+                  Add to Bag
+                </div>
+              </Link>
+
+              <Link className="group block rounded-xl bg-[#fff8f4] p-3 shadow-[0_8px_22px_rgba(33,26,19,0.06)] transition-all sm:p-4 md:hover:-translate-y-1.5" href="/sneakers/nova-form-strider">
+                <div className="relative mb-3 aspect-[4/5] overflow-hidden rounded-lg">
                   <img
                     alt="High top canvas sneakers in a muted sage green color arranged neatly on a wooden floor"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700"
+                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-cKwQ5OJLyQeQBTSIJYiS_trb45M76nSLIkcrX_c0NR4TdU_DzUVYOHyMU2lNIZBqj7s0SM_5jeAX9_cYfNTlMbdxTTyvcwG1tQ4f1xaDkk3RXemizQHV1o1HkTMNqZP2ge0JNShyGm6s_lhWEMkZOh7T_5uC1zOh1EkeRYOr6oQDRNAg8gmGIxA1FFgZJEaZK73SWbXvbFhT_Pcccw2cfacgcN9XZm5IsTQwr9igisxzwj3MyFUvpNosuLm8riljDJRz39tXD5Tj"
                   />
                   <ProductHoverActions
@@ -348,8 +381,13 @@ export default function MillennialPage() {
                       href: "/sneakers/nova-form-strider",
                     }}
                   />
-                </Link>
-              </div>
+                </div>
+                <h3 className="mb-1 font-serif text-[1.05rem] leading-snug sm:text-xl">High Top Canvas Sage</h3>
+                <p className="mb-3 font-serif text-sm text-[#7b535c] sm:mb-4 sm:text-base">₹175.00</p>
+                <div className="w-full rounded-md border border-[#d4c2c5] py-2 text-center font-sans text-[10px] uppercase tracking-[0.16em] transition-colors hover:bg-[#211a13] hover:text-white sm:text-xs sm:tracking-widest">
+                  Add to Bag
+                </div>
+              </Link>
             </div>
           </div>
         </section>
@@ -412,6 +450,7 @@ export default function MillennialPage() {
     </div>
   );
 }
+
 
 
 

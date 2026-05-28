@@ -1,9 +1,9 @@
 /**
  * API Client for StyleSakhi Backend
- * Base URL: http://localhost:5000/api
+ * Base URL: https://stylesakhi.com/api
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://stylesakhi.com/api';
 
 interface ApiError {
   success: false;
@@ -212,3 +212,4 @@ class ApiClient {
 
 export const api = new ApiClient(API_BASE_URL);
 export default api;
+

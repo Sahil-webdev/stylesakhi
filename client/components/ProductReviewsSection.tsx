@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,10 +24,10 @@ type ReviewsPayload = {
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5000/api";
+  if (!value) return "https://stylesakhi.com/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
-  if (value.startsWith("/")) return `http://localhost:5000${value}`;
+  if (value.startsWith("/")) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
@@ -38,7 +38,7 @@ function StarRow({ value }: { value: number }) {
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((s) => (
         <span key={s} className={`text-sm ${s <= value ? "text-amber-400" : "text-gray-300"}`}>
-          ★
+          ?
         </span>
       ))}
     </div>
@@ -148,7 +148,7 @@ export default function ProductReviewsSection({ productId, className = "" }: { p
               className={`text-xl ${selectedRating >= s ? "text-amber-400" : "text-gray-300"}`}
               onClick={() => setSelectedRating(s)}
             >
-              ★
+              ?
             </button>
           ))}
         </div>
@@ -199,3 +199,4 @@ export default function ProductReviewsSection({ productId, className = "" }: { p
     </section>
   );
 }
+

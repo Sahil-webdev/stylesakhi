@@ -10,12 +10,14 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useShop, type ShopProduct } from "@/contexts/ShopContext";
 import { fetchHighestSellingProducts, fetchProducts, type ProductGeneration, type ProductRecord } from "@/lib/products-api";
+import { defaultHomeBanner, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "600", "700"] });
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export default function Home() {
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
+  const [homeBanner, setHomeBanner] = useState<BannerItem>(defaultHomeBanner);
   const [bestsellerProducts, setBestsellerProducts] = useState<ProductRecord[]>([]);
   const [isLoadingBestsellers, setIsLoadingBestsellers] = useState(true);
   const [millennialBestsellerProducts, setMillennialBestsellerProducts] = useState<ProductRecord[]>([]);
@@ -92,6 +94,22 @@ export default function Home() {
       if (addedTimeoutRef.current) {
         clearTimeout(addedTimeoutRef.current);
       }
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadHomeBanner = async () => {
+      try {
+        const config = await fetchBannerConfig();
+        if (active) setHomeBanner(config.homeBanner);
+      } catch {
+        // Keep fallback data
+      }
+    };
+    void loadHomeBanner();
+    return () => {
+      active = false;
     };
   }, []);
 
@@ -230,7 +248,7 @@ export default function Home() {
       {/* Section 1 - Hero */}
       <section className="relative w-full pt-16">
         <div
-          className="relative w-full overflow-hidden bg-[#0b0b0f] aspect-[16/10] sm:aspect-[16/8] md:aspect-[1232/420] lg:aspect-auto lg:h-[calc(100vh-64px)]"
+          className="relative h-[70vh] h-[70svh] w-full overflow-hidden bg-[#0b0b0f] sm:h-auto sm:aspect-[16/8] md:aspect-[1232/420] lg:aspect-auto lg:h-[calc(100vh-64px)]"
           style={{ "--hero-design-w": 1920, "--hero-design-h": 1000 } as CSSProperties}
         >
           <motion.div
@@ -240,11 +258,20 @@ export default function Home() {
             className="relative h-full w-full"
           >
             <Image
-              src="/hero/hero3.jpeg"
-              alt="Style Sakhi hero"
+              src={homeBanner.mobileImage || homeBanner.desktopImage || homeBanner.image}
+              alt={homeBanner.alt || "Style Sakhi hero"}
               fill
               priority
-              className="object-cover object-center"
+              sizes="100vw"
+              className="object-cover object-center sm:hidden"
+            />
+            <Image
+              src={homeBanner.desktopImage || homeBanner.image || homeBanner.mobileImage || "/hero/hero3.jpeg"}
+              alt={homeBanner.alt || "Style Sakhi hero"}
+              fill
+              priority
+              sizes="100vw"
+              className="hidden object-cover object-center sm:block"
             />
           </motion.div>
 
@@ -298,8 +325,8 @@ export default function Home() {
           >
             {[
               { name: "Gen X", href: "/gen-x", image: "/era/gen x.jpeg" },
-              { name: "Millennial", href: "/millennial", image: "/era/millennial.png" },
-              { name: "Gen Z", href: "/gen-z", image: "/era/gen z.jpeg" },
+              { name: "Millennial", href: "/millennial", image: "/era/millennial.jfif" },
+              { name: "Gen Z", href: "/gen-z", image: "/era/genz.jfif" },
               { name: "Gen Alpha", href: "/gen-alpha", image: "/era/gen alpha.png" },
             ].map((card, index) => (
               <motion.div
@@ -320,7 +347,13 @@ export default function Home() {
                         src={card.image}
                         alt={`${card.name} featured collection`}
                         fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        className={`object-cover transition-transform duration-700 ${
+                          card.name === "Millennial"
+                            ? "scale-[1.40] group-hover:scale-[1.50]"
+                            : card.name === "Gen Z"
+                              ? "scale-[1.08] group-hover:scale-[1.12]"
+                              : "group-hover:scale-105"
+                        }`}
                       />
                     </div>
                     <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/62 via-black/20 to-transparent" />
@@ -1455,4 +1488,3 @@ export default function Home() {
     </div>
   );
 }
-

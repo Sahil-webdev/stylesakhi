@@ -145,7 +145,7 @@ export const HamburgerMenuOverlay: React.FC<HamburgerMenuOverlayProps> = ({
   }, [isOpen, onClose]);
 
   return (
-    <div ref={containerRef} className={cn("absolute w-full h-full", className)}>
+    <div ref={containerRef} className={cn("absolute inset-0 pointer-events-none", className)}>
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Krona+One:wght@400&display=swap');
@@ -164,10 +164,12 @@ export const HamburgerMenuOverlay: React.FC<HamburgerMenuOverlayProps> = ({
             clip-path: circle(0px at ${buttonLeft} ${buttonTop});
             transition: clip-path ${animationDuration}s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             ${enableBlur ? "backdrop-filter: blur(10px);" : ""}
+            pointer-events: none;
           }
           
           .hamburger-overlay-${zIndex}.open {
             clip-path: circle(150% at ${buttonLeft} ${buttonTop});
+            pointer-events: auto;
           }
           
           .hamburger-button-${zIndex} {
@@ -181,6 +183,7 @@ export const HamburgerMenuOverlay: React.FC<HamburgerMenuOverlayProps> = ({
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
+            pointer-events: auto;
           }
           
           .hamburger-button-${zIndex}:hover {

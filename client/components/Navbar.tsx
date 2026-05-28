@@ -135,9 +135,24 @@ export default function Navbar() {
             </div>
 
             <div className="flex h-10 items-center gap-1.5 md:gap-2">
-              <button className="flex h-9 w-9 items-center justify-center text-gray-700 transition-colors hover:text-[#B91C1C] md:hidden">
-                <Search className="h-4 w-4" />
-              </button>
+              <div className="flex h-8 w-8 items-center justify-center md:hidden">
+                {isAuthenticated && user ? (
+                  <UserAccountAvatar
+                    className="h-8 w-8"
+                    user={{ name: user.name, email: user.email, avatar: user.avatar }}
+                    onOrderView={() => router.push("/orders")}
+                    onLogout={logout}
+                  />
+                ) : (
+                  <button
+                    onClick={() => router.push("/auth")}
+                    aria-label="Open account"
+                    className="flex h-8 w-8 items-center justify-center text-gray-700 transition-colors hover:text-[#B91C1C]"
+                  >
+                    <User className="h-5 w-5" strokeWidth={2} />
+                  </button>
+                )}
+              </div>
 
               <div className="hidden h-9 w-44 shrink-0 items-center rounded-full border border-[#2a2a2a] bg-white px-3 shadow-none md:flex lg:w-60">
                 <input

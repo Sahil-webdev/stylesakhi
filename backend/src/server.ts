@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
 import connectDB from '@/config/database';
 
 // Import routes
@@ -20,6 +21,8 @@ import orderRoutes from '@/routes/order.routes';
 import adminRoutes from '@/routes/admin.routes';
 import bannerRoutes from '@/routes/banner.routes';
 import adminBannerRoutes from '@/routes/admin-banner.routes';
+import adminMediaRoutes from '@/routes/admin-media.routes';
+import { mediaStorageConfig } from '@/utils/cloudinary';
 
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
@@ -74,6 +77,17 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Static media files served from local VPS storage
+const mediaConfig = mediaStorageConfig();
+app.use(
+  mediaConfig.mediaUrlPrefix,
+  express.static(path.resolve(mediaConfig.mediaRootDir), {
+    maxAge: '30d',
+    etag: true,
+    fallthrough: true,
+  }),
+);
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
@@ -84,6 +98,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/admin/banners', adminBannerRoutes);
+app.use('/api/admin/media', adminMediaRoutes);
 app.use('/api/admin', adminRoutes);
 
 // 404 handler

@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { getDefaultPermissions, type AppRole } from "@/hooks/useRBAC";
 import { getAdminToken } from "@/lib/adminAuth";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/+$/, "");
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
 const roleOptions: { role: AppRole; label: string; description: string; icon: typeof Shield }[] = [
   { role: "super_admin", label: "Super Admin", description: "Full unrestricted access to everything", icon: ShieldAlert },

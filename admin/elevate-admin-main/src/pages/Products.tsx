@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAdminToken } from "@/lib/adminAuth";
+import { deleteAdminMedia, uploadAdminMedia } from "@/lib/mediaUpload";
 
 type AdminProduct = {
   _id: string;
@@ -46,23 +47,23 @@ type EditableImage = {
   id: string;
   fileName: string;
   previewUrl: string;
-  dataUrl: string;
-  objectUrl?: string;
+  mediaUrl: string;
+  publicId?: string;
 };
 
 type EditableVideo = {
   fileName: string;
   previewUrl: string;
-  dataUrl: string;
-  objectUrl?: string;
+  mediaUrl: string;
+  publicId?: string;
 };
 
 const normalizeApiBaseUrl = (input?: string) => {
   const value = (input || "").trim().replace(/\/+$/, "");
-  if (!value) return "http://localhost:5000/api";
+  if (!value) return "https://stylesakhi.com/api";
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith(":")) return `http://localhost${value}`;
-  if (value.startsWith("/")) return `http://localhost:5000${value}`;
+  if (value.startsWith("/")) return `https://stylesakhi.com${value}`;
   return `http://${value}`;
 };
 
@@ -237,7 +238,7 @@ const ProductsPage = () => {
       } catch (fetchError) {
         if (mounted) {
           if (fetchError instanceof TypeError) {
-            setError("Backend API unreachable. Start backend on http://localhost:5000.");
+            setError("Backend API unreachable. Check VITE_API_URL or backend deployment.");
           } else {
             setError(fetchError instanceof Error ? fetchError.message : "Failed to load products");
           }
@@ -295,12 +296,6 @@ const ProductsPage = () => {
     [selectedAccessoryCategory],
   );
 
-  const releaseObjectUrls = (images: EditableImage[]) => {
-    images.forEach((image) => {
-      if (image.objectUrl) URL.revokeObjectURL(image.objectUrl);
-    });
-  };
-
   const normalizeDetails = (value: Record<string, string>) =>
     Object.entries(value).reduce<Record<string, string>>((acc, [key, detail]) => {
       const normalized = detail.trim();
@@ -309,10 +304,7 @@ const ProductsPage = () => {
     }, {});
 
   const replaceEditImages = (nextImages: EditableImage[]) => {
-    setEditImages((prev) => {
-      releaseObjectUrls(prev);
-      return nextImages;
-    });
+    setEditImages(nextImages);
   };
 
   const addEditImages = async (fileList: FileList | null) => {
@@ -324,44 +316,53 @@ const ProductsPage = () => {
     const remainingSlots = Math.max(0, 4 - editImages.length);
     if (remainingSlots === 0) return;
 
-    const toDataUrl = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Failed to read image file"));
-        reader.readAsDataURL(file);
-      });
-
     const chosenFiles = validFiles.slice(0, remainingSlots);
-    const nextFiles = await Promise.all(
-      chosenFiles.map(async (file) => {
-        const objectUrl = URL.createObjectURL(file);
-        return {
-          id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
-          fileName: file.name,
-          previewUrl: objectUrl,
-          dataUrl: await toDataUrl(file),
-          objectUrl,
-        } satisfies EditableImage;
-      }),
-    );
+    const token = getAdminToken();
+    if (!token) {
+      setEditError("Admin session expired. Please login again.");
+      return;
+    }
 
-    setEditImages((prev) => [...prev, ...nextFiles]);
+    try {
+      const nextFiles = await Promise.all(
+        chosenFiles.map(async (file) => {
+          const uploaded = await uploadAdminMedia({
+            apiBaseUrl: API_BASE_URL,
+            token,
+            file,
+            kind: "product-image",
+          });
+
+          return {
+            id: `${file.name}-${file.lastModified}-${Math.random().toString(36).slice(2, 8)}`,
+            fileName: file.name,
+            previewUrl: uploaded.url,
+            mediaUrl: uploaded.url,
+            publicId: uploaded.publicId,
+          } satisfies EditableImage;
+        }),
+      );
+
+      setEditImages((prev) => [...prev, ...nextFiles]);
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : "Failed to upload image.");
+    }
   };
 
   const removeEditImage = (id: string) => {
-    setEditImages((prev) => {
-      const target = prev.find((image) => image.id === id);
-      if (target?.objectUrl) URL.revokeObjectURL(target.objectUrl);
-      return prev.filter((image) => image.id !== id);
-    });
+    const target = editImages.find((image) => image.id === id);
+    if (target?.publicId) {
+      void deleteAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token: getAdminToken(),
+        publicId: target.publicId,
+      });
+    }
+    setEditImages((prev) => prev.filter((image) => image.id !== id));
   };
 
   const replaceEditVideo = (nextVideo: EditableVideo | null) => {
-    setEditVideo((prev) => {
-      if (prev?.objectUrl) URL.revokeObjectURL(prev.objectUrl);
-      return nextVideo;
-    });
+    setEditVideo(nextVideo);
   };
 
   const addEditVideo = async (fileList: FileList | null) => {
@@ -372,30 +373,47 @@ const ProductsPage = () => {
       return;
     }
 
-    const toDataUrl = (targetFile: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error("Failed to read video file"));
-        reader.readAsDataURL(targetFile);
+    try {
+      const token = getAdminToken();
+      if (!token) {
+        setEditError("Admin session expired. Please login again.");
+        return;
+      }
+
+      const uploaded = await uploadAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token,
+        file,
+        kind: "product-video",
       });
 
-    try {
-      const objectUrl = URL.createObjectURL(file);
-      const dataUrl = await toDataUrl(file);
-      replaceEditVideo({
+      if (editVideo?.publicId) {
+        void deleteAdminMedia({
+          apiBaseUrl: API_BASE_URL,
+          token,
+          publicId: editVideo.publicId,
+        });
+      }
+      setEditVideo({
         fileName: file.name,
-        previewUrl: objectUrl,
-        dataUrl,
-        objectUrl,
+        previewUrl: uploaded.url,
+        mediaUrl: uploaded.url,
+        publicId: uploaded.publicId,
       });
-    } catch {
-      setEditError("Failed to process selected video.");
+    } catch (error) {
+      setEditError(error instanceof Error ? error.message : "Failed to process selected video.");
     }
   };
 
   const removeEditVideo = () => {
-    replaceEditVideo(null);
+    if (editVideo?.publicId) {
+      void deleteAdminMedia({
+        apiBaseUrl: API_BASE_URL,
+        token: getAdminToken(),
+        publicId: editVideo.publicId,
+      });
+    }
+    setEditVideo(null);
   };
 
   const handleEditCategoryChange = (category: ProductEditForm["category"]) => {
@@ -444,7 +462,7 @@ const ProductsPage = () => {
         ? {
             fileName: "product-video",
             previewUrl: product.video,
-            dataUrl: product.video,
+            mediaUrl: product.video,
           }
         : null,
     );
@@ -453,7 +471,7 @@ const ProductsPage = () => {
         id: `${product._id}-existing-${index}`,
         fileName: `image-${index + 1}`,
         previewUrl: imageUrl,
-        dataUrl: imageUrl,
+        mediaUrl: imageUrl,
       })),
     );
     setEditForm({
@@ -493,7 +511,7 @@ const ProductsPage = () => {
   const handleSaveEdit = async () => {
     if (!editingProduct || !canEditProduct) return;
 
-    const images = editImages.map((image) => image.dataUrl).slice(0, 4);
+    const images = editImages.map((image) => image.mediaUrl).slice(0, 4);
     if (images.length === 0) {
       setEditError("Please upload at least 1 product image.");
       return;
@@ -544,7 +562,7 @@ const ProductsPage = () => {
           stock: parsedStock,
           brand: editForm.brand.trim(),
           images,
-          video: editVideo?.dataUrl || "",
+          video: editVideo?.mediaUrl || "",
           sizes: editForm.category === "sneakers" ? selectedSneakerSizes : [],
           colors: editForm.category === "sneakers" ? selectedSneakerColors : [],
           productDetails,

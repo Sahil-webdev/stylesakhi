@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -9,19 +9,15 @@ import BannerCarousel from "@/components/BannerCarousel";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
 
-const generationHeroImage = "/hero/hero3.jpeg";
-const withGenerationHeroImage = (items: BannerItem[]) =>
-  items.map((item) => ({ ...item, image: generationHeroImage }));
-
 export default function GenXPage() {
-  const [banners, setBanners] = useState(() => withGenerationHeroImage(defaultGenerationBanners["gen-x"]));
+  const [banners, setBanners] = useState<BannerItem[]>(() => defaultGenerationBanners["gen-x"]);
 
   useEffect(() => {
     let active = true;
     const loadBanners = async () => {
       try {
         const config = await fetchBannerConfig();
-        if (active) setBanners(withGenerationHeroImage(config.generationBanners["gen-x"]));
+        if (active) setBanners(config.generationBanners["gen-x"]);
       } catch {
         // Keep fallback data
       }
@@ -40,61 +36,74 @@ export default function GenXPage() {
           <BannerCarousel banners={banners} autoPlayInterval={4000} />
         </section>
 
-        <section className="bg-white py-10">
-          <div className="max-w-7xl mx-auto px-8 flex flex-wrap justify-between items-center gap-8">
-            <div className="flex items-center space-x-4">
-              <div className="bg-[#eef4ff] p-3 rounded-lg text-[#002440]">
-                <span className="material-symbols-outlined">local_shipping</span>
+        <section className="bg-white py-7 sm:py-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+              <div className="rounded-xl border border-[#dce7f7] bg-[#f8fbff] p-3 sm:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#e5efff] text-[#002440] sm:h-11 sm:w-11">
+                    <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-headline text-sm font-bold tracking-tight text-[#002440]">Free Shipping</p>
+                    <p className="truncate font-body text-xs text-slate-500">Orders over ₹150</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-headline font-bold text-sm tracking-tight">Free Shipping</p>
-                <p className="font-body text-xs text-slate-500">On all orders over ?150</p>
+
+              <div className="rounded-xl border border-[#dce7f7] bg-[#f8fbff] p-3 sm:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#e5efff] text-[#002440] sm:h-11 sm:w-11">
+                    <span className="material-symbols-outlined text-[20px]">assignment_return</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-headline text-sm font-bold tracking-tight text-[#002440]">30-Day Returns</p>
+                    <p className="truncate font-body text-xs text-slate-500">Hassle-free guarantee</p>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-[#eef4ff] p-3 rounded-lg text-[#002440]">
-                <span className="material-symbols-outlined">assignment_return</span>
+
+              <div className="rounded-xl border border-[#dce7f7] bg-[#f8fbff] p-3 sm:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#e5efff] text-[#002440] sm:h-11 sm:w-11">
+                    <span className="material-symbols-outlined text-[20px]">verified_user</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-headline text-sm font-bold tracking-tight text-[#002440]">Secure Checkout</p>
+                    <p className="truncate font-body text-xs text-slate-500">256-bit SSL protection</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="font-headline font-bold text-sm tracking-tight">30-Day Returns</p>
-                <p className="font-body text-xs text-slate-500">Hassle-free guarantee</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-[#eef4ff] p-3 rounded-lg text-[#002440]">
-                <span className="material-symbols-outlined">verified_user</span>
-              </div>
-              <div>
-                <p className="font-headline font-bold text-sm tracking-tight">Secure Checkout</p>
-                <p className="font-body text-xs text-slate-500">256-bit SSL protection</p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="bg-[#eef4ff] p-3 rounded-lg text-[#002440]">
-                <span className="material-symbols-outlined">eco</span>
-              </div>
-              <div>
-                <p className="font-headline font-bold text-sm tracking-tight">Ethical Sourcing</p>
-                <p className="font-body text-xs text-slate-500">Responsible materials</p>
+
+              <div className="rounded-xl border border-[#dce7f7] bg-[#f8fbff] p-3 sm:p-4">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#e5efff] text-[#002440] sm:h-11 sm:w-11">
+                    <span className="material-symbols-outlined text-[20px]">eco</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-headline text-sm font-bold tracking-tight text-[#002440]">Ethical Sourcing</p>
+                    <p className="truncate font-body text-xs text-slate-500">Responsible materials</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-16 px-8 max-w-7xl mx-auto">
-          <div className="flex justify-between items-end mb-12">
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4 sm:mb-12">
             <div>
               <span className="text-[#F4A261] font-label text-xs font-bold tracking-[0.2em] uppercase">Signature Essentials</span>
-              <h2 className="font-headline text-[2rem] font-bold text-[#002440] mt-2">Clothing</h2>
+              <h2 className="mt-2 font-headline text-[1.7rem] font-bold text-[#002440] sm:text-[2rem]">Clothing</h2>
             </div>
             <Link className="font-label text-sm font-semibold text-[#395f94] hover:underline underline-offset-8 transition-all flex items-center group" href="/clothing?generation=gen-x">
               View More
               <span className="material-symbols-outlined ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-              <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
+              <div className="relative mb-3 h-[210px] overflow-hidden rounded-lg bg-[#e7eefb] sm:mb-4 sm:h-[270px] lg:h-[340px]">
                 <img
                   alt="Detailed studio shot of a classic navy blue tailored wool blazer on a invisible mannequin, neutral studio background"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -112,12 +121,12 @@ export default function GenXPage() {
                   }}
                 />
               </div>
-              <h3 className="font-headline font-semibold text-lg text-[#002440]">Tailored Wool Blazer</h3>
-              <p className="font-body text-slate-500 text-sm mb-2">Midnight Navy</p>
-              <p className="font-headline font-bold text-[#002440]">?345.00</p>
+              <h3 className="font-headline text-base font-semibold leading-tight text-[#002440] sm:text-lg">Tailored Wool Blazer</h3>
+              <p className="mb-1 font-body text-xs text-slate-500 sm:mb-2 sm:text-sm">Midnight Navy</p>
+              <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹345.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-              <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
+              <div className="relative mb-3 h-[210px] overflow-hidden rounded-lg bg-[#e7eefb] sm:mb-4 sm:h-[270px] lg:h-[340px]">
                 <img
                   alt="Folded luxury cream cashmere sweater showing texture and knit pattern on a dark oak table surface"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -135,12 +144,12 @@ export default function GenXPage() {
                   }}
                 />
               </div>
-              <h3 className="font-headline font-semibold text-lg text-[#002440]">Essential Cashmere V-Neck</h3>
-              <p className="font-body text-slate-500 text-sm mb-2">Oatmeal Melange</p>
-              <p className="font-headline font-bold text-[#002440]">?295.00</p>
+              <h3 className="font-headline text-base font-semibold leading-tight text-[#002440] sm:text-lg">Essential Cashmere V-Neck</h3>
+              <p className="mb-1 font-body text-xs text-slate-500 sm:mb-2 sm:text-sm">Oatmeal Melange</p>
+              <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹295.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-              <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
+              <div className="relative mb-3 h-[210px] overflow-hidden rounded-lg bg-[#e7eefb] sm:mb-4 sm:h-[270px] lg:h-[340px]">
                 <img
                   alt="Pair of wide-leg beige high-waisted trousers hanging on a minimalist brass hanger against a white wall"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -158,12 +167,12 @@ export default function GenXPage() {
                   }}
                 />
               </div>
-              <h3 className="font-headline font-semibold text-lg text-[#002440]">Pleated Wide-Leg Trouser</h3>
-              <p className="font-body text-slate-500 text-sm mb-2">Desert Sand</p>
-              <p className="font-headline font-bold text-[#002440]">?185.00</p>
+              <h3 className="font-headline text-base font-semibold leading-tight text-[#002440] sm:text-lg">Pleated Wide-Leg Trouser</h3>
+              <p className="mb-1 font-body text-xs text-slate-500 sm:mb-2 sm:text-sm">Desert Sand</p>
+              <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹185.00</p>
             </Link>
             <Link className="group cursor-pointer block" href="/clothing/the-atelier-trench">
-              <div className="relative overflow-hidden rounded-lg mb-4 h-[340px] bg-[#e7eefb]">
+              <div className="relative mb-3 h-[210px] overflow-hidden rounded-lg bg-[#e7eefb] sm:mb-4 sm:h-[270px] lg:h-[340px]">
                 <img
                   alt="Minimalist white crisp cotton button-down shirt tucked into dark trousers, focused on the collar and cuff quality"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -181,15 +190,15 @@ export default function GenXPage() {
                   }}
                 />
               </div>
-              <h3 className="font-headline font-semibold text-lg text-[#002440]">Signature Poplin Shirt</h3>
-              <p className="font-body text-slate-500 text-sm mb-2">Optic White</p>
-              <p className="font-headline font-bold text-[#002440]">?120.00</p>
+              <h3 className="font-headline text-base font-semibold leading-tight text-[#002440] sm:text-lg">Signature Poplin Shirt</h3>
+              <p className="mb-1 font-body text-xs text-slate-500 sm:mb-2 sm:text-sm">Optic White</p>
+              <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹120.00</p>
             </Link>
           </div>
         </section>
 
         <section className="bg-[#f8f9ff] py-16">
-          <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-8 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-4">
               <span className="text-[#F4A261] font-label text-xs font-bold tracking-[0.2em] uppercase">The Finishing Touches</span>
               <h2 className="font-headline text-[2rem] font-bold text-[#002440] mt-2 mb-6">Accessories</h2>
@@ -203,9 +212,9 @@ export default function GenXPage() {
                 Explore Accessories
               </Link>
             </div>
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Link className="bg-white p-6 rounded-lg editorial-shadow group cursor-pointer block" href="/accessories/croissant-leather-bag">
-                <div className="relative h-[280px] overflow-hidden rounded-lg mb-6 bg-[#eef4ff]">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:col-span-8">
+              <Link className="group block cursor-pointer rounded-lg bg-white p-3 editorial-shadow sm:p-5" href="/accessories/croissant-leather-bag">
+                <div className="relative mb-3 h-[150px] overflow-hidden rounded-lg bg-[#eef4ff] sm:mb-5 sm:h-[220px] lg:h-[260px]">
                   <img
                     alt="Large minimalist tan leather tote bag standing upright on a grey stone surface with soft lighting"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -223,16 +232,16 @@ export default function GenXPage() {
                     }}
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-headline font-semibold text-[#002440]">Architectural Leather Tote</h3>
-                    <p className="font-body text-xs text-slate-500">Vegetable Tanned Leather</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-headline text-sm font-semibold text-[#002440] sm:text-base">Architectural Leather Tote</h3>
+                    <p className="font-body text-[10px] text-slate-500 sm:text-xs">Vegetable Tanned Leather</p>
                   </div>
-                  <p className="font-headline font-bold text-[#002440]">?495</p>
+                  <p className="shrink-0 font-headline text-sm font-bold text-[#002440] sm:text-base">₹495</p>
                 </div>
               </Link>
-              <Link className="bg-white p-6 rounded-lg editorial-shadow group cursor-pointer transform lg:translate-y-12 block" href="/accessories/croissant-leather-bag">
-                <div className="relative h-[280px] overflow-hidden rounded-lg mb-6 bg-[#eef4ff]">
+              <Link className="group block cursor-pointer rounded-lg bg-white p-3 editorial-shadow sm:p-5 lg:translate-y-10" href="/accessories/croissant-leather-bag">
+                <div className="relative mb-3 h-[150px] overflow-hidden rounded-lg bg-[#eef4ff] sm:mb-5 sm:h-[220px] lg:h-[260px]">
                   <img
                     alt="Elegant silk scarf with abstract geometric print in navy and orange draped over a velvet chair"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -250,26 +259,26 @@ export default function GenXPage() {
                     }}
                   />
                 </div>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-headline font-semibold text-[#002440]">Abstract Print Silk Scarf</h3>
-                    <p className="font-body text-xs text-slate-500">100% Mulberry Silk</p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="truncate font-headline text-sm font-semibold text-[#002440] sm:text-base">Abstract Print Silk Scarf</h3>
+                    <p className="font-body text-[10px] text-slate-500 sm:text-xs">100% Mulberry Silk</p>
                   </div>
-                  <p className="font-headline font-bold text-[#002440]">?110</p>
+                  <p className="shrink-0 font-headline text-sm font-bold text-[#002440] sm:text-base">₹110</p>
                 </div>
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="py-16 px-8 max-w-7xl mx-auto mt-10 lg:mt-0">
+        <section className="mx-auto mt-10 max-w-7xl px-4 py-16 sm:px-8 lg:mt-0">
           <div className="mb-12 text-center">
             <span className="text-[#F4A261] font-label text-xs font-bold tracking-[0.2em] uppercase">Comfort Without Compromise</span>
             <h2 className="font-headline text-[2rem] font-bold text-[#002440] mt-2">Sneakers</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Link className="bg-white p-4 rounded-lg group cursor-pointer transition-colors hover:bg-[#eef4ff] block" href="/sneakers/nova-form-strider">
-              <div className="relative overflow-hidden rounded-lg mb-6 h-[240px]">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 md:gap-8">
+            <Link className="group block cursor-pointer rounded-lg bg-white p-3 transition-colors hover:bg-[#eef4ff] sm:p-4" href="/sneakers/nova-form-strider">
+              <div className="relative mb-3 h-[150px] overflow-hidden rounded-lg sm:mb-5 sm:h-[200px] lg:h-[240px]">
                 <img
                   alt="Clean white premium leather low-top sneakers in a bright minimalist setting with clean shadows"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -277,17 +286,17 @@ export default function GenXPage() {
                 />
                 <ProductHoverActions product={{ id: "genx-sneakers-urban-minimalist-leather-low", name: "Urban Minimalist Leather Low", price: 165, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCJU5mMsIyfh0CosozqFO32YpcvdLtkKYgKEqR3asK8aWnvQrhRvdQCfcPzxhYvvEHUKv4UkDvFfbb_oPYhOf9-hXLAt72byLTwSVVKNYA6j2Vm9OFqHQWLLhAnnZjiuRrBArj3W7c-F-ZkYTMyC9P6VYuKA3nWKwqYGi42BLHN2QxFQqFEOYDkGAPFgA0YRto9WZByiNy0iq0ifQVYNZNrRl833xECdSJZYrS4dCJ9z55rtB02gWyVVfmDQc38iaRp8S2kz-iV3bjN", category: "Sneakers", href: "/sneakers/nova-form-strider" }} />
               </div>
-              <div className="px-2">
-                <h3 className="font-headline font-semibold text-lg text-[#002440]">Urban Minimalist Leather Low</h3>
-                <p className="font-body text-slate-500 text-sm mb-4">Ergonomic footbed, White/Tan</p>
-                <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">?165.00</p>
-                  <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
+              <div className="px-1 sm:px-2">
+                <h3 className="font-headline text-sm font-semibold leading-tight text-[#002440] sm:text-base lg:text-lg">Urban Minimalist Leather Low</h3>
+                <p className="mb-2 font-body text-[10px] text-slate-500 sm:mb-3 sm:text-xs lg:mb-4 lg:text-sm">Ergonomic footbed, White/Tan</p>
+                <div className="flex items-center justify-between">
+                  <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹165.00</p>
+                  <span className="material-symbols-outlined text-[18px] text-slate-400 transition-colors group-hover:text-[#002440] sm:text-[20px]">add_shopping_cart</span>
                 </div>
               </div>
             </Link>
-            <Link className="bg-white p-4 rounded-lg group cursor-pointer transition-colors hover:bg-[#eef4ff] block" href="/sneakers/nova-form-strider">
-              <div className="relative overflow-hidden rounded-lg mb-6 h-[240px]">
+            <Link className="group block cursor-pointer rounded-lg bg-white p-3 transition-colors hover:bg-[#eef4ff] sm:p-4" href="/sneakers/nova-form-strider">
+              <div className="relative mb-3 h-[150px] overflow-hidden rounded-lg sm:mb-5 sm:h-[200px] lg:h-[240px]">
                 <img
                   alt="Elegant leather slip-on loafers in a warm tan color showing clean craftsmanship and flexible sole"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -295,17 +304,17 @@ export default function GenXPage() {
                 />
                 <ProductHoverActions product={{ id: "genx-sneakers-seamless-leather-slip-on", name: "Seamless Leather Slip-On", price: 140, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAPoHoYCQ5VR1pcke_GFpeq6mmVELXKTa-Rg33YjRkvluGNk3QbgSHig1sKD0ZDUIKILo9BrLiAXzOoedCbjM8UPFS-mO808A0Yrsa3c3tYIqojKizEo10Xoc88C58kkA8C-izwm5WIR9nJyJ0HADyc2WoezyEoJehS4nq_4nJsI9na7kGer57nC1vQaUyi8OjB-M36UbTeykn4wWjS-dTtkt4thr8eo9a5B1cN0d6R_qKBHsK4iwiX_wb6QgJa8nDONrj1Ya26Vb38", category: "Sneakers", href: "/sneakers/nova-form-strider" }} />
               </div>
-              <div className="px-2">
-                <h3 className="font-headline font-semibold text-lg text-[#002440]">Seamless Leather Slip-On</h3>
-                <p className="font-body text-slate-500 text-sm mb-4">Ultra-flexible sole, Camel</p>
-                <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">?140.00</p>
-                  <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
+              <div className="px-1 sm:px-2">
+                <h3 className="font-headline text-sm font-semibold leading-tight text-[#002440] sm:text-base lg:text-lg">Seamless Leather Slip-On</h3>
+                <p className="mb-2 font-body text-[10px] text-slate-500 sm:mb-3 sm:text-xs lg:mb-4 lg:text-sm">Ultra-flexible sole, Camel</p>
+                <div className="flex items-center justify-between">
+                  <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹140.00</p>
+                  <span className="material-symbols-outlined text-[18px] text-slate-400 transition-colors group-hover:text-[#002440] sm:text-[20px]">add_shopping_cart</span>
                 </div>
               </div>
             </Link>
-            <Link className="bg-white p-4 rounded-lg group cursor-pointer transition-colors hover:bg-[#eef4ff] block" href="/sneakers/nova-form-strider">
-              <div className="relative overflow-hidden rounded-lg mb-6 h-[240px]">
+            <Link className="group block cursor-pointer rounded-lg bg-white p-3 transition-colors hover:bg-[#eef4ff] sm:p-4" href="/sneakers/nova-form-strider">
+              <div className="relative mb-3 h-[150px] overflow-hidden rounded-lg sm:mb-5 sm:h-[200px] lg:h-[240px]">
                 <img
                   alt="High-end knit ergonomic athletic sneakers in soft grey tones focused on the supportive heel and mesh texture"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -313,12 +322,12 @@ export default function GenXPage() {
                 />
                 <ProductHoverActions product={{ id: "genx-sneakers-movement-tech-knit-runner", name: "Movement Tech Knit Runner", price: 195, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD7m8ydXHm7WtfN0fUOHwhiM_gK3TEUhqIw5Wyynh3eVmlKkij8ZmW-xQ2K_C421S6SQIQkBZmW1cXwAirD7UwhECA7fJGl1DjzwVIdDSrzcUa1_qozj1pz5tP-tH9wyRvkYQ2m9hZFQVLl32kOWe7z9uEu9_KQGAeEKlUFOvqUlrN4n5YXMOTSImVAV1odP4Jr1tgZD1i4amyERA6yFsb5ImpIRYLCKkGms4FQfqmUl8BlePzQgLhAH-tsECtekMytGjd8BCJVm3k0", category: "Sneakers", href: "/sneakers/nova-form-strider" }} />
               </div>
-              <div className="px-2">
-                <h3 className="font-headline font-semibold text-lg text-[#002440]">Movement Tech Knit Runner</h3>
-                <p className="font-body text-slate-500 text-sm mb-4">Breathable mesh, Slate Grey</p>
-                <div className="flex justify-between items-center">
-                  <p className="font-headline font-bold text-[#002440]">?195.00</p>
-                  <span className="material-symbols-outlined text-slate-400 group-hover:text-[#002440] transition-colors">add_shopping_cart</span>
+              <div className="px-1 sm:px-2">
+                <h3 className="font-headline text-sm font-semibold leading-tight text-[#002440] sm:text-base lg:text-lg">Movement Tech Knit Runner</h3>
+                <p className="mb-2 font-body text-[10px] text-slate-500 sm:mb-3 sm:text-xs lg:mb-4 lg:text-sm">Breathable mesh, Slate Grey</p>
+                <div className="flex items-center justify-between">
+                  <p className="font-headline text-sm font-bold text-[#002440] sm:text-base">₹195.00</p>
+                  <span className="material-symbols-outlined text-[18px] text-slate-400 transition-colors group-hover:text-[#002440] sm:text-[20px]">add_shopping_cart</span>
                 </div>
               </div>
             </Link>
@@ -362,6 +371,7 @@ export default function GenXPage() {
     </div>
   );
 }
+
 
 
 

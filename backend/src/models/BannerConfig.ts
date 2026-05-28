@@ -16,9 +16,13 @@ export const BANNER_DB_KEY_MAP: Record<
 
 export interface IBannerItem {
   image: string;
+  desktopImage?: string;
+  mobileImage?: string;
   alt: string;
   link?: string;
   publicId?: string;
+  desktopPublicId?: string;
+  mobilePublicId?: string;
 }
 
 export interface IBannerConfig extends Document {
@@ -38,9 +42,13 @@ export interface IBannerConfig extends Document {
 
 export const DEFAULT_HOME_BANNER: IBannerItem = {
   image: '/hero/heroImg.png',
+  desktopImage: '/hero/heroImg.png',
+  mobileImage: '/hero/heroImg.png',
   alt: 'StyleSakhi hero banner',
   link: '',
   publicId: '',
+  desktopPublicId: '',
+  mobilePublicId: '',
 };
 
 const defaultCarouselImages = [
@@ -53,9 +61,13 @@ const defaultCarouselImages = [
 const makeDefaultGenerationBanners = (label: string): IBannerItem[] =>
   defaultCarouselImages.map((image, index) => ({
     image,
+    desktopImage: image,
+    mobileImage: image,
     alt: `${label} Collection Banner ${index + 1}`,
     link: '',
     publicId: '',
+    desktopPublicId: '',
+    mobilePublicId: '',
   }));
 
 export const DEFAULT_GENERATION_BANNERS: Record<BannerGeneration, IBannerItem[]> = {
@@ -68,9 +80,13 @@ export const DEFAULT_GENERATION_BANNERS: Record<BannerGeneration, IBannerItem[]>
 
 const cloneBannerItem = (value: IBannerItem): IBannerItem => ({
   image: value.image,
+  desktopImage: value.desktopImage || value.image,
+  mobileImage: value.mobileImage || value.desktopImage || value.image,
   alt: value.alt,
   link: value.link || '',
   publicId: value.publicId || '',
+  desktopPublicId: value.desktopPublicId || value.publicId || '',
+  mobilePublicId: value.mobilePublicId || value.publicId || '',
 });
 
 const cloneBannerItems = (value: IBannerItem[]): IBannerItem[] => value.map(cloneBannerItem);
@@ -81,6 +97,16 @@ const BannerItemSchema = new Schema<IBannerItem>(
       type: String,
       required: true,
       trim: true,
+    },
+    desktopImage: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    mobileImage: {
+      type: String,
+      trim: true,
+      default: '',
     },
     alt: {
       type: String,
@@ -94,6 +120,16 @@ const BannerItemSchema = new Schema<IBannerItem>(
       default: '',
     },
     publicId: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    desktopPublicId: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    mobilePublicId: {
       type: String,
       trim: true,
       default: '',

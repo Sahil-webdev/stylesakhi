@@ -10,6 +10,8 @@ import BannerConfig, {
 
 export type BannerPayloadItem = {
   image: string;
+  desktopImage?: string;
+  mobileImage?: string;
   alt: string;
   link?: string;
 };
@@ -22,11 +24,19 @@ export type BannerPayload = {
 const normalizeString = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
 
 const normalizePublicItem = (value: unknown, fallback: IBannerItem): BannerPayloadItem => {
-  const image = normalizeString((value as IBannerItem | undefined)?.image) || fallback.image;
+  const source = ((value as IBannerItem | undefined) || {}) as Partial<IBannerItem>;
+  const fallbackDesktop = fallback.desktopImage || fallback.image;
+  const fallbackMobile = fallback.mobileImage || fallbackDesktop;
+
+  const desktopImage = normalizeString(source.desktopImage) || normalizeString(source.image) || fallbackDesktop;
+  const mobileImage = normalizeString(source.mobileImage) || desktopImage || fallbackMobile;
+  const image = desktopImage || mobileImage || fallback.image;
   const alt = normalizeString((value as IBannerItem | undefined)?.alt) || fallback.alt;
   const link = normalizeString((value as IBannerItem | undefined)?.link);
   return {
     image,
+    desktopImage,
+    mobileImage,
     alt,
     ...(link ? { link } : {}),
   };

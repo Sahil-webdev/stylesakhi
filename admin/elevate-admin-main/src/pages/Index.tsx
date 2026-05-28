@@ -6,7 +6,7 @@ import { RecentOrdersTable } from "@/components/dashboard/RecentOrders";
 import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
 import { getAdminAuthHeaders } from "@/lib/adminAuth";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/+$/, "");
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
 const Index = () => {
   const [totalOrders, setTotalOrders] = useState<number | null>(null);

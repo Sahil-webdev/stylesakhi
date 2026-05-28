@@ -7,6 +7,8 @@ import Image from "next/image";
 interface BannerCarouselProps {
   banners: {
     image: string;
+    desktopImage?: string;
+    mobileImage?: string;
     alt: string;
     link?: string;
   }[];
@@ -25,6 +27,7 @@ export default function BannerCarousel({
 }: BannerCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev === banners.length - 1 ? 0 : prev + 1));
@@ -48,14 +51,29 @@ export default function BannerCarousel({
     return () => clearInterval(interval);
   }, [isAutoPlaying, autoPlayInterval, nextSlide]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobileView(mediaQuery.matches);
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
+  }, []);
+
   const handleMouseEnter = () => setIsAutoPlaying(false);
   const handleMouseLeave = () => setIsAutoPlaying(true);
 
   if (banners.length === 0) return null;
 
+  const getBannerSrc = (banner: BannerCarouselProps["banners"][number]) => {
+    const desktopImage = banner.desktopImage || banner.image;
+    const mobileImage = banner.mobileImage || desktopImage;
+    return isMobileView ? mobileImage : desktopImage;
+  };
+
   return (
     <div
-      className="relative w-full overflow-hidden group bg-black aspect-[16/10] sm:aspect-[16/8] md:aspect-[1232/420]"
+      className="group relative h-[70vh] h-[70svh] w-full overflow-hidden bg-black sm:h-auto sm:aspect-[16/8] md:aspect-[1232/420]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -71,18 +89,20 @@ export default function BannerCarousel({
             {banner.link ? (
               <a className="block h-full w-full" href={banner.link}>
                 <Image
-                  src={banner.image}
+                  src={getBannerSrc(banner)}
                   alt={banner.alt}
                   fill
+                  sizes="100vw"
                   className="object-cover scale-[1.28] md:scale-100"
                   priority={index === 0}
                 />
               </a>
             ) : (
               <Image
-                src={banner.image}
+                src={getBannerSrc(banner)}
                 alt={banner.alt}
                 fill
+                sizes="100vw"
                 className="object-cover scale-[1.28] md:scale-100"
                 priority={index === 0}
               />
