@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
+import PageBackButton from "@/components/PageBackButton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -21,6 +22,7 @@ function AccessoriesPageContent() {
   const [maxPrice, setMaxPrice] = useState(5000);
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
   const generation = searchParams.get("generation") || "";
+  const generationFallbackPath = generation === "boomer" ? "/boomers" : generation ? `/${generation}` : "/";
 
   useEffect(() => {
     let mounted = true;
@@ -90,6 +92,9 @@ function AccessoriesPageContent() {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <PageBackButton className="bg-[#eef3ff] hover:border-[#644aad66] hover:text-[#644aad]" fallbackHref={generationFallbackPath} label="Back" />
+        </div>
         <header className="mb-8 rounded-3xl border border-[#abadae]/20 bg-gradient-to-br from-white to-[#eff1f2] px-6 py-10 text-center shadow-sm md:px-10">
           <h1 className="text-4xl font-extrabold tracking-tight md:text-6xl">Accessories</h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-[#595c5d] md:text-base">Dynamic accessories from admin panel with working filters and sorting.</p>

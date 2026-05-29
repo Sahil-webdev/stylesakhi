@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Star } from "lucide-react";
 
 type ReviewItem = {
   _id: string;
@@ -37,9 +38,7 @@ function StarRow({ value }: { value: number }) {
   return (
     <div className="flex items-center gap-1">
       {[1, 2, 3, 4, 5].map((s) => (
-        <span key={s} className={`text-sm ${s <= value ? "text-amber-400" : "text-gray-300"}`}>
-          ?
-        </span>
+        <Star key={s} className={`h-4 w-4 ${s <= value ? "fill-amber-400 text-amber-400" : "text-gray-300"}`} />
       ))}
     </div>
   );
@@ -145,10 +144,11 @@ export default function ProductReviewsSection({ productId, className = "" }: { p
             <button
               key={s}
               type="button"
-              className={`text-xl ${selectedRating >= s ? "text-amber-400" : "text-gray-300"}`}
+              className={`rounded-sm p-0.5 ${selectedRating >= s ? "text-amber-400" : "text-gray-300"}`}
               onClick={() => setSelectedRating(s)}
+              aria-label={`Rate ${s} star${s > 1 ? "s" : ""}`}
             >
-              ?
+              <Star className={`h-5 w-5 ${selectedRating >= s ? "fill-amber-400" : ""}`} />
             </button>
           ))}
         </div>

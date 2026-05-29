@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Heart, ShoppingCart, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageBackButton from "@/components/PageBackButton";
 import { useShop } from "@/contexts/ShopContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { rememberAuthRedirect } from "@/lib/auth-redirect";
@@ -17,6 +18,9 @@ export default function WishlistPage() {
       <Navbar />
 
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <PageBackButton className="bg-rose-50/80 hover:border-[#B91C1C66] hover:text-[#B91C1C]" fallbackHref="/" label="Back" />
+        </div>
         {!authLoading && !isAuthenticated ? (
           <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
             <h1 className="mb-2 text-2xl font-bold text-gray-900">Login to view your wishlist</h1>

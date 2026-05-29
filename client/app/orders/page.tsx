@@ -2,6 +2,7 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PageBackButton from "@/components/PageBackButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -246,6 +247,9 @@ export default function OrdersPage() {
       `}</style>
 
       <main className="orders-body mx-auto w-full max-w-5xl px-4 pb-24 pt-24 md:px-8">
+        <div className="mb-6">
+          <PageBackButton className="bg-[#eef2ff] hover:border-[#4b5aa466] hover:text-[#4b5aa4]" fallbackHref="/profile" label="Back" />
+        </div>
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-10 md:mb-14">
           <h1 className="orders-headline mb-3 text-4xl font-bold tracking-tight text-[#2d3335] md:text-5xl">Your Orders</h1>
           <p className="text-lg text-[#5a6062]">Track, manage and revisit your purchases.</p>

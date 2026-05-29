@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
+import PageBackButton from "@/components/PageBackButton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -21,6 +22,7 @@ function ClothingPageContent() {
   const [sortBy, setSortBy] = useState("recommended");
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
   const generation = searchParams.get("generation") || "";
+  const generationFallbackPath = generation === "boomer" ? "/boomers" : generation ? `/${generation}` : "/";
 
   useEffect(() => {
     let mounted = true;
@@ -90,6 +92,9 @@ function ClothingPageContent() {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <PageBackButton className="bg-[#eef0ff] hover:border-[#644aad66] hover:text-[#644aad]" fallbackHref={generationFallbackPath} label="Back" />
+        </div>
         <header className="relative mb-8 overflow-hidden rounded-3xl border border-[#abadae]/20 bg-gradient-to-br from-[#f5f6f7] to-[#eff1f2] p-8 shadow-[0_20px_40px_-10px_rgba(100,74,173,0.08)] md:p-12">
           <div className="relative">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#644aad]">Curated Collection</p>

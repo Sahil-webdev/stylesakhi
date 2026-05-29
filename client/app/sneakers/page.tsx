@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
+import PageBackButton from "@/components/PageBackButton";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -21,6 +22,7 @@ function SneakersPageContent() {
   const [sortBy, setSortBy] = useState("recommended");
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
   const generation = searchParams.get("generation") || "";
+  const generationFallbackPath = generation === "boomer" ? "/boomers" : generation ? `/${generation}` : "/";
 
   useEffect(() => {
     let mounted = true;
@@ -87,6 +89,9 @@ function SneakersPageContent() {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <PageBackButton className="bg-[#eff3ff] hover:border-[#644aad66] hover:text-[#644aad]" fallbackHref={generationFallbackPath} label="Back" />
+        </div>
         <header className="pt-4 pb-10 px-4 rounded-3xl bg-gradient-to-br from-[#f5f6f7] to-[#eff1f2] mb-8">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">Sneakers</h1>
