@@ -55,7 +55,7 @@ export default function Footer() {
             <h3 className="text-white font-semibold text-lg mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/women" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/clothing" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Women&apos;s Collection
                 </Link>
               </li>
@@ -65,12 +65,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/collection" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/classic" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Exclusive Collection
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/contact-us" className="text-sm hover:text-[#B91C1C] transition-colors">
                   About Us
                 </Link>
               </li>
@@ -87,27 +87,27 @@ export default function Footer() {
             <h3 className="text-white font-semibold text-lg mb-4">Customer Service</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/track-order" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/orders" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Track Your Order
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/refund-cancellation" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/faqs" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Shipping Information
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/faqs" className="text-sm hover:text-[#B91C1C] transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/size-guide" className="text-sm hover:text-[#B91C1C] transition-colors">
+                <Link href="/faqs" className="text-sm hover:text-[#B91C1C] transition-colors">
                   Size Guide
                 </Link>
               </li>

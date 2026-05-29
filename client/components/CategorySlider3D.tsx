@@ -24,7 +24,7 @@ export default function CategorySlider3D() {
       name: "Women's Fashion",
       description: "Explore the latest trends in ethnic and western wear",
       image: "/women-hero-1.jpg",
-      link: "/women",
+      link: "/clothing",
     },
     {
       name: "Accessories",
@@ -36,7 +36,7 @@ export default function CategorySlider3D() {
       name: "Exclusive Collection",
       description: "Discover our handpicked designer collections",
       image: "/collection-hero-1.jpg",
-      link: "/collection",
+      link: "/classic",
     },
   ];
 

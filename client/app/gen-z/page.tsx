@@ -435,7 +435,7 @@ export default function GenZPage() {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 gap-7 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-2 md:gap-7 xl:grid-cols-3">
               {clothingProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -529,7 +529,7 @@ export default function GenZPage() {
               </div>
             </motion.div>
 
-            <div className="grid grid-cols-1 gap-7 xl:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-1 md:gap-7 xl:grid-cols-2">
               {sneakersProducts.map((item, idx) => {
                 const activeSize = selectedSizes[item.id] ?? item.sizes[0];
                 return (
@@ -539,14 +539,14 @@ export default function GenZPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.6, delay: idx * 0.06 }}
-                    className="grid min-h-[340px] overflow-hidden rounded-[28px] border border-[#1a17140a] bg-white md:grid-cols-2"
+                    className="overflow-hidden rounded-[18px] border border-[#1a17140a] bg-white md:grid md:min-h-[340px] md:grid-cols-2 md:rounded-[28px]"
                   >
-                    <Link href={item.href} className="relative overflow-hidden bg-[#eae4d8]">
+                    <Link href={item.href} className="relative h-32 overflow-hidden bg-[#eae4d8] sm:h-40 md:h-auto">
                       <img src={item.image} alt={item.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
                     </Link>
 
-                    <div className="flex flex-col justify-center p-7 md:p-8">
-                      <div className="mb-4 flex flex-wrap gap-2">
+                    <div className="flex flex-col justify-center p-3 sm:p-4 md:p-8">
+                      <div className="mb-2 flex flex-wrap gap-1.5 md:mb-4 md:gap-2">
                         {item.tags.map((tag) => {
                           const style = tag.includes("New")
                             ? "bg-[#c44b2b14] text-[#c44b2b] border-[#c44b2b33]"
@@ -554,20 +554,20 @@ export default function GenZPage() {
                               ? "bg-[#b8a9d426] text-[#7b6a9e] border-[#b8a9d44d]"
                               : "bg-[#a8c5a026] text-[#5a7a52] border-[#a8c5a04d]";
                           return (
-                            <span key={`${item.id}-${tag}`} className={`rounded-full border px-3 py-1 text-[9px] uppercase tracking-[0.1em] ${style}`}>
+                            <span key={`${item.id}-${tag}`} className={`rounded-full border px-2 py-1 text-[8px] uppercase tracking-[0.08em] md:px-3 md:text-[9px] md:tracking-[0.1em] ${style}`}>
                               {tag}
                             </span>
                           );
                         })}
                       </div>
 
-                      <Link href={item.href} className={`${syne.className} mb-2 text-2xl font-bold text-[#1a1714]`}>
+                      <Link href={item.href} className={`${syne.className} mb-1 text-base font-bold leading-tight text-[#1a1714] sm:text-lg md:mb-2 md:text-2xl`}>
                         {item.name}
                       </Link>
-                      <p className="mb-4 text-xs leading-relaxed text-[#8a8279]">{item.description}</p>
-                      <p className={`${syne.className} mb-5 text-3xl font-bold text-[#1a1714]`}>{"\u20B9"}{item.price}</p>
+                      <p className="mb-2 text-[10px] leading-snug text-[#8a8279] sm:text-[11px] md:mb-4 md:text-xs md:leading-relaxed">{item.description}</p>
+                      <p className={`${syne.className} mb-3 text-lg font-bold text-[#1a1714] sm:text-xl md:mb-5 md:text-3xl`}>{"\u20B9"}{item.price}</p>
 
-                      <div className="mb-5 flex flex-wrap gap-1.5">
+                      <div className="mb-3 hidden flex-wrap gap-1.5 md:mb-5 md:flex">
                         {item.sizes.map((size) => (
                           <button
                             key={`${item.id}-${size}`}
@@ -580,20 +580,20 @@ export default function GenZPage() {
                         ))}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 md:gap-2">
                         <button
                           type="button"
                           onClick={() => addToCart(productToShopProduct(item))}
-                          className="inline-flex items-center gap-2 rounded-full bg-[#1a1714] px-6 py-3 text-xs uppercase tracking-[0.1em] text-[#f6f3ee] transition hover:bg-[#c44b2b]"
+                          className="inline-flex items-center gap-1 rounded-full bg-[#1a1714] px-3 py-2 text-[10px] uppercase tracking-[0.08em] text-[#f6f3ee] transition hover:bg-[#c44b2b] md:gap-2 md:px-6 md:py-3 md:text-xs md:tracking-[0.1em]"
                         >
                           Add to Cart
                         </button>
                         <button
                           type="button"
                           onClick={() => toggleWishlist(productToShopProduct(item))}
-                          className="grid h-11 w-11 place-items-center rounded-full border border-[#1a17141a] bg-white"
+                          className="grid h-8 w-8 place-items-center rounded-full border border-[#1a17141a] bg-white md:h-11 md:w-11"
                         >
-                          <Heart className={`h-4 w-4 ${isWishlisted(item.id) ? "fill-[#c44b2b] text-[#c44b2b]" : "text-[#1a1714]"}`} />
+                          <Heart className={`h-3.5 w-3.5 md:h-4 md:w-4 ${isWishlisted(item.id) ? "fill-[#c44b2b] text-[#c44b2b]" : "text-[#1a1714]"}`} />
                         </button>
                       </div>
                     </div>
