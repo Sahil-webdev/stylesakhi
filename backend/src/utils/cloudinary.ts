@@ -45,7 +45,27 @@ const MEDIA_URL_PREFIX = (() => {
   const withLeading = raw.startsWith('/') ? raw : `/${raw}`;
   return withLeading.replace(/\/+$/, '');
 })();
-const BACKEND_PUBLIC_URL = ((process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || '5000'}`).trim() || `http://localhost:${process.env.PORT || '5000'}`).replace(/\/+$/, '');
+const normalizeBaseUrl = (value: string) => value.trim().replace(/\/+$/, '');
+
+const isLocalBaseUrl = (value: string) => {
+  try {
+    const parsed = new URL(value);
+    const host = parsed.hostname.toLowerCase();
+    return host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+  } catch {
+    return false;
+  }
+};
+
+const FALLBACK_PUBLIC_URL = normalizeBaseUrl(process.env.DEFAULT_PUBLIC_BASE_URL || 'https://stylesakhi.com');
+const configuredPublicUrl = normalizeBaseUrl(
+  (process.env.BACKEND_PUBLIC_URL || `http://localhost:${process.env.PORT || '5000'}`).trim() ||
+    `http://localhost:${process.env.PORT || '5000'}`,
+);
+const BACKEND_PUBLIC_URL =
+  process.env.NODE_ENV === 'production' && isLocalBaseUrl(configuredPublicUrl)
+    ? FALLBACK_PUBLIC_URL
+    : configuredPublicUrl;
 
 const normalizeStorageDriver = (value: string): StorageDriver => {
   const normalized = value.trim().toLowerCase();

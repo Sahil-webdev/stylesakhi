@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import {
   BANNER_DB_KEY_MAP,
   BANNER_GENERATIONS,
@@ -15,6 +15,21 @@ import { sendError, sendServerError, sendSuccess } from '@/utils/response';
 const router = Router();
 
 const CLOUDINARY_BANNER_FOLDER = 'stylesakhi/banners';
+
+const getRequestPublicBaseUrl = (req: Request) => {
+  const explicit = (process.env.BACKEND_PUBLIC_URL || '').trim().replace(/\/+$/, '');
+  if (explicit && !/^https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0)(?::\d+)?$/i.test(explicit)) {
+    return explicit;
+  }
+
+  const forwardedHost = (req.headers['x-forwarded-host'] as string | undefined)?.split(',')[0]?.trim();
+  const host = forwardedHost || req.get('host') || '';
+  const forwardedProto = (req.headers['x-forwarded-proto'] as string | undefined)?.split(',')[0]?.trim();
+  const proto = forwardedProto || req.protocol || 'https';
+
+  if (host) return `${proto}://${host}`.replace(/\/+$/, '');
+  return explicit;
+};
 
 type BannerItemInput = {
   image?: unknown;
@@ -143,7 +158,7 @@ router.use(authenticateAdmin);
 router.get('/', authorizeModule('settings', 'can_view'), async (_req, res) => {
   try {
     const config = await ensureBannerConfig();
-    return sendSuccess(res, mapBannerDocToPayload(config));
+    return sendSuccess(res, mapBannerDocToPayload(config, { publicBaseUrl: getRequestPublicBaseUrl(_req) }));
   } catch (_error) {
     return sendServerError(res, 'Failed to fetch admin banners');
   }
@@ -217,7 +232,11 @@ router.put('/', authorizeModule('settings', 'can_edit'), async (req, res) => {
 
     await Promise.allSettled(idsToDelete.map((publicId) => destroyMediaByPublicId(publicId, 'image')));
 
-    return sendSuccess(res, mapBannerDocToPayload(config), 'Banners updated successfully');
+    return sendSuccess(
+      res,
+      mapBannerDocToPayload(config, { publicBaseUrl: getRequestPublicBaseUrl(req) }),
+      'Banners updated successfully',
+    );
   } catch (error: any) {
     const message = error instanceof Error ? error.message : 'Failed to update banners';
     if (message === 'Banner image is required') {

@@ -23,6 +23,39 @@ const normalizeApiBaseUrl = (input?: string) => {
 };
 
 const API_BASE_URL = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+const API_ORIGIN = (() => {
+  try {
+    return new URL(API_BASE_URL).origin;
+  } catch {
+    return '';
+  }
+})();
+
+const resolveBannerUrl = (value: string) => {
+  const url = (value || '').trim();
+  if (!url) return '';
+
+  if (url.startsWith('/')) {
+    return API_ORIGIN ? `${API_ORIGIN}${url}` : url;
+  }
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname.startsWith('/media/')) {
+      const isLocal =
+        parsed.hostname === 'localhost' ||
+        parsed.hostname === '127.0.0.1' ||
+        parsed.hostname === '0.0.0.0';
+      if (isLocal && API_ORIGIN) {
+        return `${API_ORIGIN}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+    }
+  } catch {
+    return url;
+  }
+
+  return url;
+};
 
 export const defaultHomeBanner: BannerItem = {
   image: '/hero/heroImg.png',
@@ -60,13 +93,13 @@ const normalizeBannerItem = (value: unknown, fallback: BannerItem): BannerItem =
   const fallbackMobile = fallback.mobileImage || fallbackDesktop;
   const desktopImage =
     typeof source.desktopImage === 'string' && source.desktopImage.trim()
-      ? source.desktopImage.trim()
+      ? resolveBannerUrl(source.desktopImage.trim())
       : typeof source.image === 'string' && source.image.trim()
-        ? source.image.trim()
-        : fallbackDesktop;
+        ? resolveBannerUrl(source.image.trim())
+        : resolveBannerUrl(fallbackDesktop);
   const mobileImage =
     typeof source.mobileImage === 'string' && source.mobileImage.trim()
-      ? source.mobileImage.trim()
+      ? resolveBannerUrl(source.mobileImage.trim())
       : desktopImage || fallbackMobile;
   const image = desktopImage || mobileImage || fallback.image;
   const alt = typeof source.alt === 'string' && source.alt.trim() ? source.alt.trim() : fallback.alt;
