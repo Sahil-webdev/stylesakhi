@@ -118,7 +118,9 @@ router.get('/', async (req, res) => {
     }
 
     if (typeof isActive === 'string') {
-      query.isActive = isActive === 'true';
+      if (isActive === 'true' || isActive === 'false') {
+        query.isActive = isActive === 'true';
+      }
     } else {
       query.isActive = true;
     }

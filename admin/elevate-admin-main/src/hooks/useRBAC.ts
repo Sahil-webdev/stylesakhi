@@ -27,6 +27,9 @@ export interface ActivityEntry {
   id: string;
   action: string;
   created_at: string;
+  module?: string;
+  actor_name?: string;
+  actor_email?: string;
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
@@ -103,6 +106,30 @@ export const useUserPermissions = (userId?: string) => {
 export const useActivityLog = () => {
   return useQuery({
     queryKey: ["activityLog"],
-    queryFn: async () => [] as ActivityEntry[],
+    queryFn: async () => {
+      const res = await fetch(`${API_BASE_URL}/admin/activity-log?limit=40`, {
+        headers: {
+          ...authHeaders(),
+        },
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload?.success) {
+        throw new Error(payload?.error || "Failed to fetch activity log");
+      }
+      return (payload?.data || []) as ActivityEntry[];
+    },
   });
+};
+
+export const removeTeamMember = async (userId: string) => {
+  const token = getAdminToken();
+  const res = await fetch(`${API_BASE_URL}/admin/team/${userId}`, {
+    method: "DELETE",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  const payload = await res.json();
+  if (!res.ok || !payload?.success) {
+    throw new Error(payload?.error || "Failed to remove team member");
+  }
+  return payload?.data;
 };

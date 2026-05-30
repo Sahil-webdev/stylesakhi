@@ -3,76 +3,102 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { RevenueChart, OrdersChart, CategoryChart } from "@/components/dashboard/Charts";
 import { RecentOrdersTable } from "@/components/dashboard/RecentOrders";
-import { DollarSign, ShoppingCart, Users, TrendingUp } from "lucide-react";
+import { DollarSign, ShoppingCart, TrendingUp, Truck, Users } from "lucide-react";
 import { getAdminAuthHeaders } from "@/lib/adminAuth";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
+type DashboardStat = {
+  key: string;
+  title: string;
+  value: number;
+  change: number;
+  changeType: "positive" | "negative";
+};
+
+const formatInr = (amount: number) => `\u20B9${Number(amount || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+const formatPct = (value: number) => `${value >= 0 ? "+" : ""}${Number(value || 0).toFixed(2)}%`;
+
+const iconByKey = {
+  revenue: DollarSign,
+  orders: ShoppingCart,
+  customers: Users,
+  conversionRate: TrendingUp,
+  deliveredRate: Truck,
+} as const;
+
 const Index = () => {
-  const [totalOrders, setTotalOrders] = useState<number | null>(null);
-  const [totalCustomers, setTotalCustomers] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [statsPayload, setStatsPayload] = useState<DashboardStat[]>([]);
 
   useEffect(() => {
-    const fetchDashboardCounts = async () => {
+    const fetchDashboard = async () => {
+      setLoading(true);
       try {
-        const [ordersRes, usersRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/admin/orders?limit=1`, { headers: getAdminAuthHeaders() }),
-          fetch(`${API_BASE_URL}/admin/users?limit=1`, { headers: getAdminAuthHeaders() }),
-        ]);
+        const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+          headers: getAdminAuthHeaders(),
+        });
+        const payload = await response.json();
 
-        const [ordersPayload, usersPayload] = await Promise.all([ordersRes.json(), usersRes.json()]);
+        if (!response.ok || !payload?.success) {
+          throw new Error(payload?.error || "Failed to fetch dashboard stats");
+        }
 
-        if (ordersRes.ok && ordersPayload?.success) {
-          setTotalOrders(Number(ordersPayload?.data?.pagination?.total || 0));
-        }
-        if (usersRes.ok && usersPayload?.success) {
-          setTotalCustomers(Number(usersPayload?.data?.pagination?.total || 0));
-        }
+        const stats = Array.isArray(payload?.data?.stats) ? (payload.data.stats as DashboardStat[]) : [];
+        setStatsPayload(stats);
       } catch {
-        // Keep fallback values if request fails
+        setStatsPayload([]);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDashboardCounts();
+    fetchDashboard();
   }, []);
 
-  const stats = useMemo(
-    () => [
-      { title: "Total Revenue", value: "₹48,295", change: "+12.5%", changeType: "positive" as const, icon: DollarSign },
-      {
-        title: "Total Orders",
-        value: totalOrders === null ? "..." : totalOrders.toLocaleString("en-IN"),
-        change: "+8.2%",
-        changeType: "positive" as const,
-        icon: ShoppingCart,
-      },
-      {
-        title: "Customers",
-        value: totalCustomers === null ? "..." : totalCustomers.toLocaleString("en-IN"),
-        change: "+15.3%",
-        changeType: "positive" as const,
-        icon: Users,
-      },
-      { title: "Conversion Rate", value: "3.24%", change: "-2.1%", changeType: "negative" as const, icon: TrendingUp },
-    ],
-    [totalOrders, totalCustomers],
-  );
+  const stats = useMemo(() => {
+    const fallback: DashboardStat[] = [
+      { key: "revenue", title: "Total Revenue", value: 0, change: 0, changeType: "positive" },
+      { key: "orders", title: "Total Orders", value: 0, change: 0, changeType: "positive" },
+      { key: "customers", title: "Customers", value: 0, change: 0, changeType: "positive" },
+      { key: "conversionRate", title: "Conversion Rate", value: 0, change: 0, changeType: "positive" },
+    ];
+
+    const source = statsPayload.length > 0 ? statsPayload : fallback;
+
+    return source.slice(0, 4).map((item) => {
+      const icon = iconByKey[item.key as keyof typeof iconByKey] || TrendingUp;
+      const numericValue = Number(item.value || 0);
+      const value =
+        item.key === "revenue"
+          ? formatInr(numericValue)
+          : item.key === "conversionRate" || item.key === "deliveredRate"
+            ? `${numericValue.toFixed(2)}%`
+            : numericValue.toLocaleString("en-IN");
+
+      return {
+        title: item.title,
+        value: loading ? "..." : value,
+        change: formatPct(Number(item.change || 0)),
+        changeType: item.changeType === "negative" ? "negative" : "positive",
+        icon,
+      };
+    });
+  }, [loading, statsPayload]);
 
   return (
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Welcome back, John. Here's what's happening.</p>
+        <p className="text-sm text-muted-foreground mt-1">Live overview of your store performance</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, i) => (
           <StatsCard key={stat.title} {...stat} index={i} />
         ))}
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <RevenueChart />
         <OrdersChart />

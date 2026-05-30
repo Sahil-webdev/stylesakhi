@@ -8,6 +8,7 @@ import PageBackButton from "@/components/PageBackButton";
 import { useShop } from "@/contexts/ShopContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { rememberAuthRedirect } from "@/lib/auth-redirect";
+import { resolveProductHref } from "@/lib/product-link";
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist, addToCart } = useShop();
@@ -66,14 +67,14 @@ export default function WishlistPage() {
                   <X className="h-4 w-4" />
                 </button>
 
-                <Link href={item.href || "/"}>
+                <Link href={resolveProductHref(item)}>
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     <img alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" src={item.image} />
                   </div>
                 </Link>
 
                 <div className="space-y-2 p-3">
-                  <Link className="line-clamp-1 text-sm font-bold text-gray-900 transition hover:text-teal-700" href={item.href || "/"}>
+                  <Link className="line-clamp-1 text-sm font-bold text-gray-900 transition hover:text-teal-700" href={resolveProductHref(item)}>
                     {item.name}
                   </Link>
                   <p className=" text-xs text-gray-500">{item.category}</p>

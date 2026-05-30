@@ -27,9 +27,13 @@ type AdminOrder = {
   createdAt: string;
   shippingAddress?: {
     fullName?: string;
+    phone?: string;
+    addressLine1?: string;
+    addressLine2?: string;
     city?: string;
     state?: string;
     pincode?: string;
+    country?: string;
   };
   items: Array<{
     product?: string;
@@ -40,6 +44,13 @@ type AdminOrder = {
     size?: string;
     color?: string;
   }>;
+};
+
+type PaginationState = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 };
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
@@ -63,7 +74,7 @@ const toLabel = (status: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 
-const formatInr = (amount: number) => `â‚¹${Number(amount || 0).toLocaleString("en-IN")}`;
+const formatInr = (amount: number) => `\u20B9${Number(amount || 0).toLocaleString("en-IN")}`;
 
 const getDateAfterDays = (baseDate: Date, days: number) => {
   const next = new Date(baseDate);
@@ -91,6 +102,16 @@ const formatDeliveryLabel = (value?: string, createdAt?: string) => {
   });
 };
 
+const buildAddressLines = (shippingAddress?: AdminOrder["shippingAddress"]) => {
+  if (!shippingAddress) return [];
+
+  const cityStatePin = [shippingAddress.city, shippingAddress.state, shippingAddress.pincode].filter(Boolean).join(" - ");
+
+  return [shippingAddress.addressLine1, shippingAddress.addressLine2, cityStatePin, shippingAddress.country]
+    .map((part) => String(part || "").trim())
+    .filter(Boolean);
+};
+
 const OrdersPage = () => {
   const { hasModuleAccess } = useAuth();
   const canEditOrders = hasModuleAccess("orders", "can_edit");
@@ -104,13 +125,20 @@ const OrdersPage = () => {
   const [updatingOrderId, setUpdatingOrderId] = useState("");
   const [statusDrafts, setStatusDrafts] = useState<Record<string, AdminOrderStatus>>({});
   const [deliveryDateDrafts, setDeliveryDateDrafts] = useState<Record<string, string>>({});
+  const [pagination, setPagination] = useState<PaginationState>({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
 
   const fetchOrders = async () => {
     setLoading(true);
     setError("");
     try {
       const params = new URLSearchParams();
-      params.set("limit", "200");
+      params.set("page", String(pagination.page));
+      params.set("limit", String(pagination.limit));
       if (selectedStatus !== "all") params.set("status", selectedStatus);
       if (search.trim()) params.set("search", search.trim());
 
@@ -124,6 +152,8 @@ const OrdersPage = () => {
 
       const nextOrders: AdminOrder[] = Array.isArray(payload?.data?.items) ? payload.data.items : [];
       setOrders(nextOrders);
+      setPagination((prev) => ({ ...prev, ...(payload?.data?.pagination || {}) }));
+
       setStatusDrafts((prev) => {
         const next = { ...prev };
         for (const order of nextOrders) {
@@ -149,6 +179,10 @@ const OrdersPage = () => {
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStatus, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, page: 1 }));
   }, [selectedStatus]);
 
   useEffect(() => {
@@ -194,13 +228,13 @@ const OrdersPage = () => {
 
       const updatedOrder: AdminOrder = payload.data;
       setOrders((prev) =>
-        prev.map((order) =>
-          order._id === orderId
+        prev.map((currentOrder) =>
+          currentOrder._id === orderId
             ? {
-                ...order,
+                ...currentOrder,
                 ...updatedOrder,
               }
-            : order,
+            : currentOrder,
         ),
       );
       setStatusDrafts((prev) => ({ ...prev, [orderId]: status }));
@@ -222,6 +256,7 @@ const OrdersPage = () => {
 
   const handleSearchInput = (value: string) => {
     setSearch(value);
+    setPagination((prev) => ({ ...prev, page: 1 }));
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -358,16 +393,41 @@ const OrdersPage = () => {
                               <div className="rounded-lg border border-border/60 bg-background/70 px-3 py-2">
                                 <p className="text-xs text-muted-foreground">Payment</p>
                                 <p className="font-medium text-foreground">
-                                  {String(order.paymentMethod || "cod").toUpperCase()} â€¢ {String(order.paymentStatus || "pending").toUpperCase()}
+                                  {String(order.paymentMethod || "cod").toUpperCase()} • {String(order.paymentStatus || "pending").toUpperCase()}
                                 </p>
                               </div>
                               <div className="rounded-lg border border-border/60 bg-background/70 px-3 py-2">
-                                <p className="text-xs text-muted-foreground">Pincode</p>
-                                <p className="font-medium text-foreground">{order.shippingAddress?.pincode || "N/A"}</p>
+                                <p className="text-xs text-muted-foreground">Location</p>
+                                <p className="font-medium text-foreground">
+                                  {[order.shippingAddress?.city, order.shippingAddress?.state].filter(Boolean).join(", ") || "N/A"}
+                                </p>
                               </div>
                               <div className="rounded-lg border border-border/60 bg-background/70 px-3 py-2">
                                 <p className="text-xs text-muted-foreground">Expected Delivery</p>
                                 <p className="font-medium text-foreground">{formatDeliveryLabel(order.expectedDeliveryDate, order.createdAt)}</p>
+                              </div>
+                            </div>
+
+                            <div className="rounded-xl border border-border/70 bg-background/70 p-3">
+                              <p className="mb-2 text-xs text-muted-foreground">Shipping Address</p>
+                              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                  <p className="text-xs text-muted-foreground">Recipient</p>
+                                  <p className="font-medium text-foreground">{order.shippingAddress?.fullName || "N/A"}</p>
+                                  <p className="mt-0.5 text-sm text-muted-foreground">{order.shippingAddress?.phone || "Phone not available"}</p>
+                                </div>
+                                <div className="rounded-lg border border-border/60 bg-background px-3 py-2">
+                                  <p className="text-xs text-muted-foreground">Delivery Address</p>
+                                  {buildAddressLines(order.shippingAddress).length ? (
+                                    <div className="space-y-0.5 text-sm text-foreground">
+                                      {buildAddressLines(order.shippingAddress).map((line, index) => (
+                                        <p key={`${order._id}-address-${index}`}>{line}</p>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm text-muted-foreground">Address not available</p>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
@@ -393,8 +453,8 @@ const OrdersPage = () => {
                                       <p className="truncate text-sm font-medium text-foreground">{item.name || "Product"}</p>
                                       <p className="text-xs text-muted-foreground">
                                         Qty: {item.quantity || 1}
-                                        {item.size ? ` â€¢ Size: ${item.size}` : ""}
-                                        {item.color ? ` â€¢ ${item.color}` : ""}
+                                        {item.size ? ` • Size: ${item.size}` : ""}
+                                        {item.color ? ` • ${item.color}` : ""}
                                       </p>
                                       <p className="text-xs font-medium text-foreground">{formatInr(item.price || 0)}</p>
                                     </div>
@@ -465,6 +525,35 @@ const OrdersPage = () => {
           </table>
         </div>
       </motion.div>
+
+      <div className="mt-4 flex flex-col items-start justify-between gap-2 rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
+        <p>
+          Page {pagination.page} of {pagination.totalPages} • {pagination.total.toLocaleString("en-IN")} orders
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page <= 1 || loading}
+            onClick={() => setPagination((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+            type="button"
+          >
+            Previous
+          </button>
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page >= pagination.totalPages || loading}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                page: Math.min(prev.totalPages, prev.page + 1),
+              }))
+            }
+            type="button"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </DashboardLayout>
   );
 };

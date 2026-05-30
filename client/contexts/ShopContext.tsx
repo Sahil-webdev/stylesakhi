@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useRouter } from "next/navigation";
 import { rememberAuthRedirect } from "@/lib/auth-redirect";
 import { useAuth } from "@/contexts/AuthContext";
+import { resolveProductHref } from "@/lib/product-link";
 
 export type ShopProduct = {
   id: string;
@@ -44,6 +45,17 @@ type PersistedState = {
   cart: CartItem[];
 };
 
+const normalizeShopProduct = (product: ShopProduct): ShopProduct => ({
+  ...product,
+  id: String(product.id || ""),
+  href: resolveProductHref({ id: product.id, href: product.href }),
+});
+
+const normalizeCartItem = (item: CartItem): CartItem => ({
+  ...normalizeShopProduct(item),
+  quantity: Math.max(1, Number(item.quantity || 1)),
+});
+
 export function ShopProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -58,7 +70,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw) as PersistedState;
-      return Array.isArray(parsed.wishlist) ? parsed.wishlist : [];
+      return Array.isArray(parsed.wishlist) ? parsed.wishlist.map((item) => normalizeShopProduct(item)) : [];
     } catch {
       return [];
     }
@@ -74,7 +86,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw) as PersistedState;
-      return Array.isArray(parsed.cart) ? parsed.cart : [];
+      return Array.isArray(parsed.cart) ? parsed.cart.map((item) => normalizeCartItem(item)) : [];
     } catch {
       return [];
     }
@@ -110,10 +122,11 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const addToWishlist = useCallback((product: ShopProduct) => {
     if (!requireLogin("wishlist")) return;
+    const safeProduct = normalizeShopProduct(product);
 
     setWishlist((prev) => {
-      if (prev.some((item) => item.id === product.id)) return prev;
-      return [product, ...prev];
+      if (prev.some((item) => item.id === safeProduct.id)) return prev;
+      return [safeProduct, ...prev];
     });
   }, [requireLogin]);
 
@@ -123,12 +136,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const toggleWishlist = useCallback((product: ShopProduct) => {
     if (!requireLogin("wishlist")) return;
+    const safeProduct = normalizeShopProduct(product);
 
     setWishlist((prev) => {
-      if (prev.some((item) => item.id === product.id)) {
-        return prev.filter((item) => item.id !== product.id);
+      if (prev.some((item) => item.id === safeProduct.id)) {
+        return prev.filter((item) => item.id !== safeProduct.id);
       }
-      return [product, ...prev];
+      return [safeProduct, ...prev];
     });
   }, [requireLogin]);
 
@@ -136,14 +150,15 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     if (!requireLogin("cart")) return;
 
     const safeQuantity = Math.max(1, Math.floor(quantity));
+    const safeProduct = normalizeShopProduct(product);
     setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
+      const existing = prev.find((item) => item.id === safeProduct.id);
       if (existing) {
         return prev.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + safeQuantity } : item
+          item.id === safeProduct.id ? { ...item, quantity: item.quantity + safeQuantity } : item
         );
       }
-      return [{ ...product, quantity: safeQuantity }, ...prev];
+      return [{ ...safeProduct, quantity: safeQuantity }, ...prev];
     });
   }, [requireLogin]);
 

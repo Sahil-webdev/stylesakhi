@@ -22,9 +22,11 @@ import { AddAdminModal } from "@/components/team/AddAdminModal";
 import { EditAdminPanel } from "@/components/team/EditAdminPanel";
 import { RoleCards } from "@/components/team/RoleCards";
 import { ActivityLog } from "@/components/team/ActivityLog";
-import { useTeamMembers, type TeamMember, type AppRole } from "@/hooks/useRBAC";
+import { removeTeamMember, useTeamMembers, type TeamMember, type AppRole } from "@/hooks/useRBAC";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
 
 const roleConfig: Record<AppRole, { label: string; color: string; icon: typeof Shield }> = {
   super_admin: { label: "Super Admin", color: "bg-primary/10 text-primary border-primary/20", icon: ShieldAlert },
@@ -39,7 +41,9 @@ const Team = () => {
   const [roleFilter, setRoleFilter] = useState<AppRole | "all">("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [removingMemberId, setRemovingMemberId] = useState("");
   const { data: members, isLoading } = useTeamMembers();
+  const queryClient = useQueryClient();
 
   const handleSearchInput = (value: string) => {
     setSearchQuery(value);
@@ -71,6 +75,28 @@ const Team = () => {
     acc[m.role] = (acc[m.role] || 0) + 1;
     return acc;
   }, {});
+
+  const handleRemoveMember = async (member: TeamMember) => {
+    if (removingMemberId) return;
+    const shouldRemove = window.confirm(`Remove ${member.full_name} from team?`);
+    if (!shouldRemove) return;
+
+    setRemovingMemberId(member.user_id);
+    try {
+      await removeTeamMember(member.user_id);
+      toast({ title: "Team member removed", description: `${member.full_name} has been removed.` });
+      queryClient.invalidateQueries({ queryKey: ["teamMembers"] });
+      queryClient.invalidateQueries({ queryKey: ["activityLog"] });
+    } catch (error) {
+      toast({
+        title: "Unable to remove member",
+        description: error instanceof Error ? error.message : "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setRemovingMemberId("");
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -229,7 +255,11 @@ const Team = () => {
                               <DropdownMenuItem onClick={() => window.open(`mailto:${member.email}`, "_blank")}>
                                 <Mail className="w-4 h-4 mr-2" /> Send Invite
                               </DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive">
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                disabled={removingMemberId === member.user_id}
+                                onClick={() => void handleRemoveMember(member)}
+                              >
                                 <Trash2 className="w-4 h-4 mr-2" /> Remove
                               </DropdownMenuItem>
                             </DropdownMenuContent>

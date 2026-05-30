@@ -22,6 +22,13 @@ type CustomerRow = {
   };
 };
 
+type PaginationState = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
 const formatDateTime = (value?: string) => {
@@ -43,6 +50,8 @@ const initials = (name?: string) => {
   return parts.map((p) => p[0]?.toUpperCase() || "").join("") || "U";
 };
 
+const formatInr = (amount: number) => `\u20B9${Number(amount || 0).toLocaleString("en-IN")}`;
+
 const CustomersPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get("q") || "");
@@ -51,13 +60,33 @@ const CustomersPage = () => {
   const [error, setError] = useState("");
   const [menuState, setMenuState] = useState<{ id: string; x: number; y: number } | null>(null);
   const [busyId, setBusyId] = useState<string>("");
+  const [pagination, setPagination] = useState<PaginationState>({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
+
+  const [editModalCustomer, setEditModalCustomer] = useState<CustomerRow | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+
+  const [withdrawModalCustomer, setWithdrawModalCustomer] = useState<CustomerRow | null>(null);
+  const [withdrawAmount, setWithdrawAmount] = useState("0");
+
+  const [remarkModalCustomer, setRemarkModalCustomer] = useState<CustomerRow | null>(null);
+  const [remarkText, setRemarkText] = useState("");
+
   const { hasModuleAccess } = useAuth();
   const canEditCustomers = hasModuleAccess("customers", "can_edit");
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
   const handleSearchInput = (value: string) => {
     setSearch(value);
+    setPagination((prev) => ({ ...prev, page: 1 }));
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -75,7 +104,8 @@ const CustomersPage = () => {
     setError("");
     try {
       const params = new URLSearchParams();
-      params.set("limit", "200");
+      params.set("page", String(pagination.page));
+      params.set("limit", String(pagination.limit));
       if (query.trim()) params.set("search", query.trim());
       const res = await fetch(`${API_BASE_URL}/admin/users?${params.toString()}`, {
         headers: getAdminAuthHeaders(),
@@ -83,6 +113,7 @@ const CustomersPage = () => {
       const payload = await res.json();
       if (!res.ok || !payload?.success) throw new Error(payload?.error || "Failed to fetch customers");
       setCustomers(Array.isArray(payload?.data?.items) ? payload.data.items : []);
+      setPagination((prev) => ({ ...prev, ...(payload?.data?.pagination || {}) }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch customers");
       setCustomers([]);
@@ -92,14 +123,16 @@ const CustomersPage = () => {
   };
 
   useEffect(() => {
-    fetchCustomers();
-  }, []);
+    fetchCustomers(search);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination.page, pagination.limit]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchCustomers(search);
     }, 300);
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   useEffect(() => {
@@ -190,6 +223,75 @@ const CustomersPage = () => {
     }
   };
 
+  const openEditModal = (customer: CustomerRow) => {
+    setEditModalCustomer(customer);
+    setEditName(customer.name || "");
+    setEditPhone(customer.phone || "");
+    setEditEmail(customer.email || "");
+  };
+
+  const openWithdrawModal = (customer: CustomerRow) => {
+    setWithdrawModalCustomer(customer);
+    setWithdrawAmount("0");
+  };
+
+  const openRemarkModal = (customer: CustomerRow) => {
+    setRemarkModalCustomer(customer);
+    setRemarkText("");
+  };
+
+  const submitEdit = async () => {
+    if (!editModalCustomer) return;
+    const data = await actionRequest(editModalCustomer, "/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: editName, phone: editPhone, email: editEmail }),
+    });
+    if (!data) return;
+    setCustomers((prev) =>
+      prev.map((c) =>
+        c._id === editModalCustomer._id
+          ? { ...c, name: data.name || c.name, phone: data.phone || c.phone, email: data.email || c.email }
+          : c,
+      ),
+    );
+    toast.success("Customer profile updated");
+    setEditModalCustomer(null);
+  };
+
+  const submitWithdraw = async () => {
+    if (!withdrawModalCustomer) return;
+    const amount = Number(withdrawAmount || 0);
+    if (Number.isNaN(amount) || amount < 0) {
+      toast.error("Enter a valid amount");
+      return;
+    }
+    const data = await actionRequest(withdrawModalCustomer, "/withdraw-credit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount }),
+    });
+    if (!data) return;
+    toast.success(`Withdraw request recorded: ${formatInr(Number(data.amount || 0))}`);
+    setWithdrawModalCustomer(null);
+  };
+
+  const submitRemark = async () => {
+    if (!remarkModalCustomer) return;
+    if (!remarkText.trim()) {
+      toast.error("Remark text is required");
+      return;
+    }
+    const data = await actionRequest(remarkModalCustomer, "/remarks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: remarkText.trim() }),
+    });
+    if (!data) return;
+    toast.success("Remark added");
+    setRemarkModalCustomer(null);
+  };
+
   const menuAction = async (key: string, customer: CustomerRow) => {
     if (busyId) return;
 
@@ -200,49 +302,23 @@ const CustomersPage = () => {
     }
 
     if (key === "edit") {
-      const name = window.prompt("Update name", customer.name || "");
-      if (name === null) return;
-      const phone = window.prompt("Update phone", customer.phone || "");
-      if (phone === null) return;
-      const data = await actionRequest(customer, "/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone }),
-      });
-      if (data) {
-        setCustomers((prev) => prev.map((c) => (c._id === customer._id ? { ...c, name: data.name, phone: data.phone } : c)));
-        toast.success("Profile updated");
-      }
+      openEditModal(customer);
       return;
     }
 
     if (key === "withdraw") {
-      const amount = window.prompt("Enter withdraw amount", "0");
-      if (amount === null) return;
-      const data = await actionRequest(customer, "/withdraw-credit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: Number(amount || 0) }),
-      });
-      if (data) toast.success(`Withdraw request recorded: ₹${Number(data.amount || 0).toLocaleString("en-IN")}`);
+      openWithdrawModal(customer);
       return;
     }
 
     if (key === "reset") {
       const data = await actionRequest(customer, "/reset-password", { method: "POST" });
-      if (data?.temporaryPassword) toast.success(`Temp password: ${data.temporaryPassword}`);
+      if (data) toast.success("Password reset successful.");
       return;
     }
 
     if (key === "remark") {
-      const text = window.prompt("Add admin remark", "");
-      if (!text) return;
-      const data = await actionRequest(customer, "/remarks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      if (data) toast.success("Remark added");
+      openRemarkModal(customer);
       return;
     }
 
@@ -254,7 +330,9 @@ const CustomersPage = () => {
 
     if (key === "report") {
       const data = await actionRequest(customer, "/report");
-      if (data) toast.message(`Orders: ${data.totalOrders} | Delivered: ${data.deliveredOrders} | Spent: ₹${Number(data.totalSpent || 0).toLocaleString("en-IN")}`);
+      if (data) {
+        toast.message(`Orders: ${data.totalOrders} | Delivered: ${data.deliveredOrders} | Spent: ${formatInr(Number(data.totalSpent || 0))}`);
+      }
       return;
     }
 
@@ -298,7 +376,7 @@ const CustomersPage = () => {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Customers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{rows.length} total customers</p>
+          <p className="mt-1 text-sm text-muted-foreground">{pagination.total} total customers</p>
         </div>
       </div>
 
@@ -360,7 +438,7 @@ const CustomersPage = () => {
                       </div>
                     </td>
                     <td className="px-5 py-3.5 text-sm text-foreground">{Number(c.stats?.ordersCount || 0)}</td>
-                    <td className="px-5 py-3.5 text-sm font-semibold text-foreground">₹{Number(c.stats?.totalSpent || 0).toLocaleString("en-IN")}</td>
+                    <td className="px-5 py-3.5 text-sm font-semibold text-foreground">{formatInr(Number(c.stats?.totalSpent || 0))}</td>
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">{formatDateTime(c.lastLoginAt)}</td>
                     <td className="px-5 py-3.5 text-right">
                       {canEditCustomers ? (
@@ -383,6 +461,35 @@ const CustomersPage = () => {
           </table>
         </div>
       </motion.div>
+
+      <div className="mt-4 flex flex-col items-start justify-between gap-2 rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
+        <p>
+          Page {pagination.page} of {pagination.totalPages} � {pagination.total.toLocaleString("en-IN")} customers
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page <= 1 || loading}
+            onClick={() => setPagination((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+            type="button"
+          >
+            Previous
+          </button>
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page >= pagination.totalPages || loading}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                page: Math.min(prev.totalPages, prev.page + 1),
+              }))
+            }
+            type="button"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {typeof window !== "undefined" && activeCustomer && menuState
         ? createPortal(
@@ -434,6 +541,61 @@ const CustomersPage = () => {
             document.body,
           )
         : null}
+
+      {editModalCustomer ? (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-background p-5 shadow-2xl">
+            <h3 className="text-lg font-semibold text-foreground">Edit Customer Profile</h3>
+            <div className="mt-4 space-y-3">
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Name" value={editName} onChange={(e) => setEditName(e.target.value)} />
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} />
+              <input className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Phone" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border px-3 py-1.5 text-sm" onClick={() => setEditModalCustomer(null)} type="button">Cancel</button>
+              <button className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground" onClick={() => void submitEdit()} type="button">Save</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {withdrawModalCustomer ? (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-background p-5 shadow-2xl">
+            <h3 className="text-lg font-semibold text-foreground">Withdraw Credit</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{withdrawModalCustomer.name}</p>
+            <input
+              className="mt-4 w-full rounded-lg border border-border px-3 py-2 text-sm"
+              placeholder="Amount"
+              type="number"
+              value={withdrawAmount}
+              onChange={(e) => setWithdrawAmount(e.target.value)}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border px-3 py-1.5 text-sm" onClick={() => setWithdrawModalCustomer(null)} type="button">Cancel</button>
+              <button className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground" onClick={() => void submitWithdraw()} type="button">Submit</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {remarkModalCustomer ? (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-background p-5 shadow-2xl">
+            <h3 className="text-lg font-semibold text-foreground">Add Admin Remark</h3>
+            <textarea
+              className="mt-4 h-28 w-full rounded-lg border border-border px-3 py-2 text-sm"
+              placeholder="Write remark"
+              value={remarkText}
+              onChange={(e) => setRemarkText(e.target.value)}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="rounded-lg border border-border px-3 py-1.5 text-sm" onClick={() => setRemarkModalCustomer(null)} type="button">Cancel</button>
+              <button className="rounded-lg bg-primary px-3 py-1.5 text-sm text-primary-foreground" onClick={() => void submitRemark()} type="button">Save</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </DashboardLayout>
   );
 };

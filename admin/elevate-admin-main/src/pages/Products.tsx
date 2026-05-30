@@ -162,6 +162,7 @@ const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [targetFilter, setTargetFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [sortBy, setSortBy] = useState("newest");
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,7 +225,7 @@ const ProductsPage = () => {
       try {
         setLoading(true);
         setError("");
-        const response = await fetch(`${API_BASE_URL}/products?isActive=true&limit=200`);
+        const response = await fetch(`${API_BASE_URL}/products?isActive=all&limit=200`);
         const payload = await response.json();
 
         if (!response.ok || !payload?.success) {
@@ -260,7 +261,6 @@ const ProductsPage = () => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
 
     const filtered = products.filter((product) => {
-      if (product.isActive === false) return false;
       const categoryLabel = formatCategory(product.category).toLowerCase();
       const generationLabel = formatGeneration(product.generation).toLowerCase();
       const subCategoryLabel = (product.subCategory || "").toLowerCase();
@@ -275,8 +275,12 @@ const ProductsPage = () => {
 
       const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
       const matchesTarget = targetFilter === "all" || product.generation === targetFilter;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && product.isActive !== false) ||
+        (statusFilter === "inactive" && product.isActive === false);
 
-      return matchesSearch && matchesCategory && matchesTarget;
+      return matchesSearch && matchesCategory && matchesTarget && matchesStatus;
     });
 
     return [...filtered].sort((a, b) => {
@@ -286,7 +290,7 @@ const ProductsPage = () => {
       if (sortBy === "oldest") return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
       return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
-  }, [products, searchQuery, categoryFilter, targetFilter, sortBy]);
+  }, [products, searchQuery, categoryFilter, targetFilter, statusFilter, sortBy]);
 
   const canCreateProduct = hasModuleAccess("products", "can_create");
   const canEditProduct = hasModuleAccess("products", "can_edit");
@@ -578,12 +582,7 @@ const ProductsPage = () => {
       }
 
       const updated = payload.data as AdminProduct;
-      setProducts((prev) => {
-        if (updated.isActive === false) {
-          return prev.filter((item) => item._id !== updated._id);
-        }
-        return prev.map((item) => (item._id === updated._id ? { ...item, ...updated } : item));
-      });
+      setProducts((prev) => prev.map((item) => (item._id === updated._id ? { ...item, ...updated } : item)));
       resetEditModalState();
     } catch (saveError) {
       setEditError(saveError instanceof Error ? saveError.message : "Failed to update product");
@@ -746,6 +745,19 @@ const ProductsPage = () => {
                 </select>
                 <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
               </div>
+
+              <div className="relative">
+                <select
+                  className="appearance-none pl-4 pr-10 py-2 bg-[#f1f4f6] border-none rounded-xl text-sm font-medium text-[#2b3437] focus:ring-2 focus:ring-[#4d44e3]/20 outline-none cursor-pointer"
+                  onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
+                  value={statusFilter}
+                >
+                  <option value="all">Status: All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+              </div>
             </div>
           </div>
 
@@ -784,6 +796,9 @@ const ProductsPage = () => {
                       <span className="px-2.5 py-1 rounded-md bg-[#d2d9f8]/90 backdrop-blur text-[10px] font-bold text-[#444c65] uppercase tracking-wider">{formatGeneration(product.generation)}</span>
                       {product.isHighestSelling ? (
                         <span className="px-2.5 py-1 rounded-md bg-[#fef3c7] text-[10px] font-bold text-[#854d0e] uppercase tracking-wider">Highest selling</span>
+                      ) : null}
+                      {product.isActive === false ? (
+                        <span className="px-2.5 py-1 rounded-md bg-[#fee2e2] text-[10px] font-bold text-[#991b1b] uppercase tracking-wider">Inactive</span>
                       ) : null}
                     </div>
                   </div>

@@ -43,7 +43,7 @@ const toLabel = (status: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 
-const formatInr = (amount: number) => `₹${Number(amount || 0).toLocaleString("en-IN")}`;
+const formatInr = (amount: number) => `\u20B9${Number(amount || 0).toLocaleString("en-IN")}`;
 
 export const RecentOrdersTable = () => {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
@@ -157,3 +157,4 @@ export const RecentOrdersTable = () => {
     </motion.div>
   );
 };
+

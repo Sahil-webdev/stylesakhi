@@ -10,6 +10,7 @@ export type ProductRecord = {
   subCategory?: string;
   generation: ProductGeneration;
   price: number;
+  discountPrice?: number | null;
   stock: number;
   images: string[];
   video?: string;

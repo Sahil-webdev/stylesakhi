@@ -38,6 +38,11 @@ export const ActivityLog = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-foreground">{log.action}</p>
+                {log.actor_name ? (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    by {log.actor_name}
+                  </p>
+                ) : null}
                 <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                   <Clock className="w-3 h-3" />
                   {new Date(log.created_at).toLocaleString()}

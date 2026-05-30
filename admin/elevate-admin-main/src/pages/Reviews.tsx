@@ -15,6 +15,13 @@ type ReviewRow = {
   product?: { name?: string; category?: string; generation?: string };
 };
 
+type PaginationState = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
 
 const initials = (value?: string) => {
@@ -31,9 +38,16 @@ const ReviewsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [summary, setSummary] = useState({ averageRating: 0, totalReviews: 0, fiveStarReviews: 0 });
+  const [pagination, setPagination] = useState<PaginationState>({
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 1,
+  });
 
   const handleSearchInput = (value: string) => {
     setSearch(value);
+    setPagination((prev) => ({ ...prev, page: 1 }));
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
@@ -51,7 +65,8 @@ const ReviewsPage = () => {
     setError("");
     try {
       const params = new URLSearchParams();
-      params.set("limit", "200");
+      params.set("page", String(pagination.page));
+      params.set("limit", String(pagination.limit));
       if (search.trim()) params.set("search", search.trim());
       if (ratingFilter !== "all") params.set("rating", ratingFilter);
 
@@ -67,6 +82,7 @@ const ReviewsPage = () => {
         totalReviews: Number(payload?.data?.summary?.totalReviews || 0),
         fiveStarReviews: Number(payload?.data?.summary?.fiveStarReviews || 0),
       });
+      setPagination((prev) => ({ ...prev, ...(payload?.data?.pagination || {}) }));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch reviews");
       setReviews([]);
@@ -77,9 +93,13 @@ const ReviewsPage = () => {
   };
 
   useEffect(() => {
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  }, [ratingFilter]);
+
+  useEffect(() => {
     fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ratingFilter]);
+  }, [ratingFilter, pagination.page, pagination.limit]);
 
   useEffect(() => {
     const timer = setTimeout(() => fetchReviews(), 300);
@@ -190,12 +210,41 @@ const ReviewsPage = () => {
                     ) : null}
                   </div>
 
-                  <p className="text-sm text-muted-foreground whitespace-pre-line break-words [overflow-wrap:anywhere]">{review.comment}</p>
+                  <p className="[overflow-wrap:anywhere] whitespace-pre-line break-words text-sm text-muted-foreground">{review.comment}</p>
                 </div>
               </div>
             </motion.div>
           ))
         )}
+      </div>
+
+      <div className="mt-4 flex flex-col items-start justify-between gap-2 rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
+        <p>
+          Page {pagination.page} of {pagination.totalPages} • {pagination.total.toLocaleString("en-IN")} reviews
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page <= 1 || loading}
+            onClick={() => setPagination((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+            type="button"
+          >
+            Previous
+          </button>
+          <button
+            className="rounded-lg border border-border px-3 py-1.5 text-sm text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={pagination.page >= pagination.totalPages || loading}
+            onClick={() =>
+              setPagination((prev) => ({
+                ...prev,
+                page: Math.min(prev.totalPages, prev.page + 1),
+              }))
+            }
+            type="button"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </DashboardLayout>
   );

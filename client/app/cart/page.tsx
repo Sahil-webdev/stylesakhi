@@ -8,6 +8,7 @@ import PageBackButton from "@/components/PageBackButton";
 import { useShop } from "@/contexts/ShopContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { rememberAuthRedirect } from "@/lib/auth-redirect";
+import { resolveProductHref } from "@/lib/product-link";
 
 export default function CartPage() {
   const { cart, removeFromCart, updateCartQuantity, clearCart } = useShop();
@@ -73,14 +74,16 @@ export default function CartPage() {
             <div className="space-y-4 lg:col-span-2">
               {cart.map((item) => (
                 <div key={item.id} className="flex gap-4 rounded-2xl bg-white p-4 shadow-sm">
-                  <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                  <Link href={resolveProductHref(item)} className="relative h-28 w-24 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     <img alt={item.name} className="h-full w-full object-cover" src={item.image} />
-                  </div>
+                  </Link>
 
                   <div className="flex flex-1 flex-col justify-between gap-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-base font-bold text-gray-900">{item.name}</p>
+                        <Link href={resolveProductHref(item)} className="text-base font-bold text-gray-900 hover:text-teal-700">
+                          {item.name}
+                        </Link>
                         <p className="text-xs text-gray-500">{item.category}</p>
                       </div>
                       <button

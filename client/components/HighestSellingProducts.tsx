@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ProductHoverActions from "@/components/ProductHoverActions";
 import type { ShopProduct } from "@/contexts/ShopContext";
+import { resolveProductHref } from "@/lib/product-link";
 
 export type HighestSellingProduct = ShopProduct & {
   badge: string;
@@ -61,7 +62,7 @@ export default function HighestSellingProducts({
               className="group relative min-w-[245px] snap-start overflow-hidden rounded-lg border border-black/10 bg-white shadow-[0_12px_34px_rgba(17,24,39,0.08)] transition hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(17,24,39,0.12)] lg:min-w-0"
             >
               <div className="relative aspect-[4/5] overflow-hidden bg-[#eef1f4]">
-                <Link href={product.href || "/"}>
+                <Link href={resolveProductHref(product)}>
                   {product.video ? (
                     <video
                       autoPlay
@@ -98,8 +99,8 @@ export default function HighestSellingProducts({
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#7a828c]">
                     {product.category}
                   </p>
-                  <Link
-                    href={product.href || "/"}
+                <Link
+                    href={resolveProductHref(product)}
                     className="mt-1 block line-clamp-1 text-base font-extrabold text-[#1f2933] transition hover:text-[#B91C1C]"
                   >
                     {product.name}
