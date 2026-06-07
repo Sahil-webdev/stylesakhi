@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User, Settings } from "lucide-react";
+import { Search, Bell, Sun, Moon, ChevronDown, LogOut, User } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -14,6 +14,8 @@ export const TopNavbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const profileRef = useRef<HTMLDivElement | null>(null);
 
   const displayName = user?.name || "Admin";
   const initials =
@@ -54,6 +56,25 @@ export const TopNavbar = () => {
     navigate("/login", { replace: true });
   };
 
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (showNotifications && notificationsRef.current && !notificationsRef.current.contains(target)) {
+        setShowNotifications(false);
+      }
+
+      if (showProfile && profileRef.current && !profileRef.current.contains(target)) {
+        setShowProfile(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+    };
+  }, [showNotifications, showProfile]);
+
   const notifications = [
     { id: 1, text: "New order #1234 received", time: "2m ago", unread: true },
     { id: 2, text: "Payment of $450 processed", time: "1h ago", unread: true },
@@ -92,7 +113,7 @@ export const TopNavbar = () => {
         </motion.button>
 
         {/* Notifications */}
-        <div className="relative">
+        <div className="relative" ref={notificationsRef}>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -123,7 +144,7 @@ export const TopNavbar = () => {
         </div>
 
         {/* Profile */}
-        <div className="relative">
+        <div className="relative" ref={profileRef}>
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -146,18 +167,25 @@ export const TopNavbar = () => {
               >
                 {[
                   { icon: User, label: "Profile" },
-                  { icon: Settings, label: "Settings" },
                   { icon: LogOut, label: "Log out" },
-                ].map((item) => (
+                ].map((item) => {
+                  const isLogout = item.label === "Log out";
+
+                  return (
                   <button
                     key={item.label}
                     onClick={item.label === "Log out" ? handleLogout : undefined}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-foreground hover:bg-muted/50 transition-colors"
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                      isLogout
+                        ? "text-red-600 hover:bg-red-50 hover:text-red-700 active:bg-red-100"
+                        : "text-foreground hover:bg-muted/50"
+                    }`}
                   >
-                    <item.icon className="w-4 h-4 text-muted-foreground" />
+                    <item.icon className={`w-4 h-4 ${isLogout ? "text-red-500" : "text-muted-foreground"}`} />
                     {item.label}
                   </button>
-                ))}
+                  );
+                })}
               </motion.div>
             )}
           </AnimatePresence>

@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { fetchProductBySlug, fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import ProductReviewsSection from "@/components/ProductReviewsSection";
 import { formatDeliveryFromNow } from "@/lib/delivery-estimate";
@@ -156,7 +157,7 @@ function AccessoriesDetailPageContent() {
                         price: product.price,
                         image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
                         category: "Accessories",
-                        href: `/accessories/croissant-leather-bag?product=${encodeURIComponent(product.slug || product._id)}`,
+                        href: buildCategoryDetailHref("accessories", product.slug || product._id),
                       })
                     }
                     type="button"
@@ -177,7 +178,7 @@ function AccessoriesDetailPageContent() {
                 <h2 className="font-headline text-xl md:text-2xl font-bold tracking-tight mb-5">Related Products</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {related.map((item) => (
-                    <Link key={item._id} href={`/accessories/croissant-leather-bag?product=${encodeURIComponent(item.slug || item._id)}`} className="group flex flex-col">
+                    <Link key={item._id} href={buildCategoryDetailHref("accessories", item.slug || item._id)} className="group flex flex-col">
                       <div className="w-full aspect-[4/5] bg-white rounded-xl overflow-hidden mb-2.5">
                         {item.video ? (
                           <video autoPlay className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loop muted playsInline preload="metadata" src={item.video} />

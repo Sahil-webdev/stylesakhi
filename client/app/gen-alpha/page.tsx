@@ -22,6 +22,8 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useShop, type ShopProduct } from "@/contexts/ShopContext";
 import BannerCarousel from "@/components/BannerCarousel";
 import { defaultGenerationBanners, fetchBannerConfig, type BannerItem } from "@/lib/banner-config";
+import { fetchProducts, type ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 
 const syne = Syne({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"] });
@@ -35,223 +37,12 @@ type CatalogProduct = {
   price: number;
   oldPrice?: number;
   image: string;
+  video?: string;
   badge?: string;
   rating: number;
   reviews: number;
   href: string;
 };
-
-const clothingProducts: CatalogProduct[] = [
-  {
-    id: "alpha-cloth-essential-white-tee",
-    name: "Essential White Tee",
-    category: "T-Shirts",
-    price: 45,
-    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=500&fit=crop&q=80",
-    badge: "New",
-    rating: 4.5,
-    reviews: 128,
-    href: "/clothing/the-atelier-trench",
-  },
-  {
-    id: "alpha-cloth-oversized-street-hoodie",
-    name: "Oversized Street Hoodie",
-    category: "Hoodies",
-    price: 89,
-    image: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=500&fit=crop&q=80",
-    badge: "Trending",
-    rating: 5,
-    reviews: 256,
-    href: "/clothing/the-atelier-trench",
-  },
-  {
-    id: "alpha-cloth-classic-oxford-shirt",
-    name: "Classic Oxford Shirt",
-    category: "Shirts",
-    price: 65,
-    image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=500&fit=crop&q=80",
-    rating: 4,
-    reviews: 89,
-    href: "/clothing/the-atelier-trench",
-  },
-  {
-    id: "alpha-cloth-washed-denim-jacket",
-    name: "Washed Denim Jacket",
-    category: "Jackets",
-    price: 105,
-    oldPrice: 150,
-    image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=500&fit=crop&q=80",
-    badge: "-30%",
-    rating: 4.5,
-    reviews: 174,
-    href: "/clothing/the-atelier-trench",
-  },
-  {
-    id: "alpha-cloth-slim-fit-dark-jeans",
-    name: "Slim Fit Dark Jeans",
-    category: "Jeans",
-    price: 78,
-    image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=500&fit=crop&q=80",
-    rating: 4,
-    reviews: 203,
-    href: "/clothing/the-atelier-trench",
-  },
-  {
-    id: "alpha-cloth-abstract-graphic-tee",
-    name: "Abstract Graphic Tee",
-    category: "T-Shirts",
-    price: 52,
-    image: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&h=500&fit=crop&q=80",
-    badge: "New",
-    rating: 5,
-    reviews: 91,
-    href: "/clothing/the-atelier-trench",
-  },
-];
-
-const accessoryProducts: CatalogProduct[] = [
-  {
-    id: "alpha-acc-minimal-chrono-watch",
-    name: "Minimal Chrono Watch",
-    category: "Watches",
-    price: 189,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=500&fit=crop&q=80",
-    badge: "Trending",
-    rating: 5,
-    reviews: 312,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-retro-aviator-shades",
-    name: "Retro Aviator Shades",
-    category: "Sunglasses",
-    price: 75,
-    image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=500&fit=crop&q=80",
-    rating: 4.5,
-    reviews: 167,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-logo-dad-cap",
-    name: "Logo Dad Cap",
-    category: "Caps",
-    price: 32,
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=500&fit=crop&q=80",
-    badge: "New",
-    rating: 4,
-    reviews: 94,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-heritage-leather-bag",
-    name: "Heritage Leather Bag",
-    category: "Bags",
-    price: 245,
-    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=500&fit=crop&q=80",
-    rating: 5,
-    reviews: 218,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-cuban-link-chain",
-    name: "Cuban Link Chain",
-    category: "Chains",
-    price: 120,
-    image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=500&fit=crop&q=80",
-    badge: "Limited",
-    rating: 4.5,
-    reviews: 143,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-slim-bifold-wallet",
-    name: "Slim Bifold Wallet",
-    category: "Wallets",
-    price: 58,
-    image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=400&h=500&fit=crop&q=80",
-    rating: 4,
-    reviews: 76,
-    href: "/accessories/croissant-leather-bag",
-  },
-  {
-    id: "alpha-acc-reversible-leather-belt",
-    name: "Reversible Leather Belt",
-    category: "Belts",
-    price: 48,
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=500&fit=crop&q=80",
-    rating: 5,
-    reviews: 198,
-    href: "/accessories/croissant-leather-bag",
-  },
-];
-
-const sneakerProducts: CatalogProduct[] = [
-  {
-    id: "alpha-snk-air-max-pulse-red",
-    name: "Air Max Pulse Red",
-    category: "Running",
-    price: 180,
-    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=500&fit=crop&q=80",
-    badge: "New Drop",
-    rating: 5,
-    reviews: 487,
-    href: "/sneakers/nova-form-strider",
-  },
-  {
-    id: "alpha-snk-cloud-runner-white",
-    name: "Cloud Runner White",
-    category: "Lifestyle",
-    price: 145,
-    image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=400&h=500&fit=crop&q=80",
-    badge: "Trending",
-    rating: 4.5,
-    reviews: 342,
-    href: "/sneakers/nova-form-strider",
-  },
-  {
-    id: "alpha-snk-retro-high-og-multi",
-    name: "Retro High OG Multi",
-    category: "Basketball",
-    price: 210,
-    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=500&fit=crop&q=80",
-    badge: "Limited Stock",
-    rating: 5,
-    reviews: 521,
-    href: "/sneakers/nova-form-strider",
-  },
-  {
-    id: "alpha-snk-shadow-500-black",
-    name: "Shadow 500 Black",
-    category: "Streetwear",
-    price: 165,
-    image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=500&fit=crop&q=80",
-    rating: 4,
-    reviews: 276,
-    href: "/sneakers/nova-form-strider",
-  },
-  {
-    id: "alpha-snk-ultraboost-blue-fusion",
-    name: "Ultraboost Blue Fusion",
-    category: "Running",
-    price: 190,
-    image: "https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&h=500&fit=crop&q=80",
-    badge: "New Drop",
-    rating: 4.5,
-    reviews: 398,
-    href: "/sneakers/nova-form-strider",
-  },
-  {
-    id: "alpha-snk-air-force-1-shadow",
-    name: "Air Force 1 Shadow",
-    category: "Casual",
-    price: 130,
-    image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=500&fit=crop&q=80",
-    badge: "Trending",
-    rating: 5,
-    reviews: 614,
-    href: "/sneakers/nova-form-strider",
-  },
-];
 
 const marqueeItems = [
   "Summer Sale - Up to 50% Off",
@@ -269,6 +60,40 @@ function productToShopItem(product: CatalogProduct): ShopProduct {
     image: product.image,
     category: product.category,
     href: product.href,
+  };
+}
+
+function mapProductRecordToCatalogProduct(product: ProductRecord): CatalogProduct {
+  const currentPrice =
+    typeof product.discountPrice === "number" &&
+    product.discountPrice > 0 &&
+    product.discountPrice < product.price
+      ? product.discountPrice
+      : product.price;
+
+  const oldPrice =
+    typeof product.discountPrice === "number" &&
+    product.discountPrice > 0 &&
+    product.discountPrice < product.price
+      ? product.price
+      : undefined;
+
+  const categoryLabel = (product.subCategory || product.category || "StyleSakhi")
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+  return {
+    id: product._id,
+    name: product.name,
+    category: categoryLabel,
+    price: currentPrice,
+    oldPrice,
+    image: product.images?.[0] || "/hero/hero.jpeg",
+    video: product.video,
+    badge: product.featured ? "Featured" : product.isHighestSelling ? "Best Seller" : undefined,
+    rating: Number(product.averageRating || 0),
+    reviews: Number(product.numReviews || 0),
+    href: buildCategoryDetailHref(product.category, product.slug || product._id),
   };
 }
 
@@ -329,13 +154,25 @@ function ProductCard({
         </div>
 
         <Link href={product.href}>
-          <Image
-            src={product.image}
-            alt={product.name}
-            width={420}
-            height={540}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          {product.video ? (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              src={product.video}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <Image
+              src={product.image}
+              alt={product.name}
+              width={420}
+              height={540}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          )}
         </Link>
 
         <div className="pointer-events-none absolute inset-x-3 bottom-3 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
@@ -402,6 +239,10 @@ function ProductCard({
 
 export default function GenAlphaPage() {
   const [banners, setBanners] = useState<BannerItem[]>(() => fallbackBanners);
+  const [clothingProducts, setClothingProducts] = useState<CatalogProduct[]>([]);
+  const [accessoryProducts, setAccessoryProducts] = useState<CatalogProduct[]>([]);
+  const [sneakerProducts, setSneakerProducts] = useState<CatalogProduct[]>([]);
+  const [sectionLimit, setSectionLimit] = useState(4);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const { addToCart, isWishlisted, toggleWishlist } = useShop();
@@ -423,6 +264,75 @@ export default function GenAlphaPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    const updateSectionLimit = () => {
+      const width = window.innerWidth;
+      if (width >= 1280) {
+        setSectionLimit(8);
+        return;
+      }
+      if (width >= 1024) {
+        setSectionLimit(6);
+        return;
+      }
+      setSectionLimit(4);
+    };
+
+    updateSectionLimit();
+    window.addEventListener("resize", updateSectionLimit);
+    return () => window.removeEventListener("resize", updateSectionLimit);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadCatalog = async () => {
+      try {
+        const [clothing, accessories, sneakers] = await Promise.all([
+          fetchProducts({
+            generation: "gen-alpha",
+            category: "clothing",
+            isActive: "true",
+            limit: "24",
+          }),
+          fetchProducts({
+            generation: "gen-alpha",
+            category: "accessories",
+            isActive: "true",
+            limit: "24",
+          }),
+          fetchProducts({
+            generation: "gen-alpha",
+            category: "sneakers",
+            isActive: "true",
+            limit: "24",
+          }),
+        ]);
+
+        if (!active) return;
+
+        setClothingProducts(clothing.map(mapProductRecordToCatalogProduct));
+        setAccessoryProducts(accessories.map(mapProductRecordToCatalogProduct));
+        setSneakerProducts(sneakers.map(mapProductRecordToCatalogProduct));
+      } catch {
+        if (!active) return;
+        setClothingProducts([]);
+        setAccessoryProducts([]);
+        setSneakerProducts([]);
+      }
+    };
+
+    void loadCatalog();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const visibleClothingProducts = clothingProducts.slice(0, sectionLimit);
+  const visibleAccessoryProducts = accessoryProducts.slice(0, 8);
+  const visibleSneakerProducts = sneakerProducts.slice(0, sectionLimit);
 
   const handleNewsletterSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -481,7 +391,7 @@ export default function GenAlphaPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-              {clothingProducts.map((product) => {
+              {visibleClothingProducts.map((product) => {
                 const wished = isWishlisted(product.id);
                 return (
                   <ProductCard
@@ -493,6 +403,11 @@ export default function GenAlphaPage() {
                   />
                 );
               })}
+              {visibleClothingProducts.length === 0 ? (
+                <div className="col-span-full rounded-[20px] border border-dashed border-[#cfe1f5] bg-white/70 px-6 py-12 text-center text-sm text-[#6a7f9d] shadow-[0_10px_30px_rgba(20,71,142,0.06)]">
+                  No clothing products available yet for Gen Alpha.
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
@@ -516,7 +431,7 @@ export default function GenAlphaPage() {
             </div>
 
             <div className="flex gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {accessoryProducts.map((product) => {
+              {visibleAccessoryProducts.map((product) => {
                 const wished = isWishlisted(product.id);
                 return (
                   <div key={product.id} className="min-w-[260px] max-w-[260px]">
@@ -529,6 +444,11 @@ export default function GenAlphaPage() {
                   </div>
                 );
               })}
+              {visibleAccessoryProducts.length === 0 ? (
+                <div className="flex min-h-[180px] w-full min-w-full items-center justify-center rounded-[20px] border border-dashed border-[#cfe1f5] bg-white/70 px-6 py-12 text-center text-sm text-[#6a7f9d] shadow-[0_10px_30px_rgba(20,71,142,0.06)]">
+                  No accessories available yet for Gen Alpha.
+                </div>
+              ) : null}
             </div>
           </div>
         </section>
@@ -556,7 +476,7 @@ export default function GenAlphaPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-              {sneakerProducts.map((product) => {
+              {visibleSneakerProducts.map((product) => {
                 const wished = isWishlisted(product.id);
                 return (
                   <ProductCard
@@ -569,6 +489,11 @@ export default function GenAlphaPage() {
                   />
                 );
               })}
+              {visibleSneakerProducts.length === 0 ? (
+                <div className="col-span-full rounded-[20px] border border-dashed border-white/10 bg-[#151515] px-6 py-12 text-center text-sm text-[#9b9b9b] shadow-[0_20px_60px_rgba(0,0,0,0.24)]">
+                  No sneaker drops available yet for Gen Alpha.
+                </div>
+              ) : null}
             </div>
           </div>
         </section>

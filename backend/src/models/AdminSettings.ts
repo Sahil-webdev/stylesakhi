@@ -7,6 +7,7 @@ export interface IAdminSettings extends Document {
     lastName: string;
     name: string;
     email: string;
+    phone: string;
   };
   notifications: {
     emailNotifs: boolean;
@@ -36,6 +37,7 @@ const AdminSettingsSchema = new Schema<IAdminSettings>(
       lastName: { type: String, default: '' },
       name: { type: String, default: '' },
       email: { type: String, default: '' },
+      phone: { type: String, default: '' },
     },
     notifications: {
       emailNotifs: { type: Boolean, default: true },

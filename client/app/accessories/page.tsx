@@ -3,6 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
 import PageBackButton from "@/components/PageBackButton";
@@ -84,7 +85,7 @@ function AccessoriesPageContent() {
     price: product.price,
     image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
     category: "Accessories",
-    href: `/accessories/croissant-leather-bag?product=${encodeURIComponent(product.slug || product._id)}`,
+    href: buildCategoryDetailHref("accessories", product.slug || product._id),
   });
 
   return (
@@ -192,9 +193,9 @@ function AccessoriesPageContent() {
                     <article
                       className="group cursor-pointer overflow-hidden rounded-2xl border border-[#abadae]/20 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                       key={product._id}
-                      onClick={() => router.push(`/accessories/croissant-leather-bag?product=${encodeURIComponent(product.slug || product._id)}`)}
+                      onClick={() => router.push(buildCategoryDetailHref("accessories", product.slug || product._id))}
                     >
-                      <Link href={`/accessories/croissant-leather-bag?product=${encodeURIComponent(product.slug || product._id)}`} onClick={(e) => e.stopPropagation()}>
+                      <Link href={buildCategoryDetailHref("accessories", product.slug || product._id)} onClick={(e) => e.stopPropagation()}>
                         <div className="relative aspect-[4/5] overflow-hidden bg-[#eff1f2]">
                           {product.video ? (
                             <video
@@ -215,7 +216,7 @@ function AccessoriesPageContent() {
                       <div className="space-y-3 p-4">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-wide text-[#595c5d]">{product.brand || "Accessory"}</p>
-                          <Link className="text-lg font-bold hover:text-[#644aad]" href={`/accessories/croissant-leather-bag?product=${encodeURIComponent(product.slug || product._id)}`} onClick={(e) => e.stopPropagation()}>
+                          <Link className="text-lg font-bold hover:text-[#644aad]" href={buildCategoryDetailHref("accessories", product.slug || product._id)} onClick={(e) => e.stopPropagation()}>
                             {product.name}
                           </Link>
                           <p className="text-sm font-semibold text-[#644aad]">₹{product.price}</p>

@@ -988,6 +988,7 @@ router.get('/settings', authorizeModule('settings', 'can_view'), async (req, res
         lastName,
         name: existing?.profile?.name || adminUser.name || '',
         email: existing?.profile?.email || adminUser.email || '',
+        phone: existing?.profile?.phone || adminUser.phone || '',
       },
       notifications: {
         emailNotifs: existing?.notifications?.emailNotifs ?? DEFAULT_ADMIN_SETTINGS.notifications.emailNotifs,
@@ -1023,6 +1024,7 @@ router.put('/settings', authorizeModule('settings', 'can_edit'), async (req, res
     const lastName = String(nextProfile.lastName || '').trim();
     const combinedName = String(nextProfile.name || `${firstName} ${lastName}`.trim()).trim();
     const profileEmail = String(nextProfile.email || adminUser.email || '').toLowerCase().trim();
+    const profilePhone = String(nextProfile.phone || adminUser.phone || '').trim();
 
     if (!combinedName) {
       return sendError(res, 'Profile name is required');
@@ -1043,6 +1045,7 @@ router.put('/settings', authorizeModule('settings', 'can_edit'), async (req, res
 
     adminUser.name = combinedName;
     adminUser.email = profileEmail;
+    adminUser.phone = profilePhone;
     await adminUser.save();
 
     const settings = await AdminSettings.findOneAndUpdate(
@@ -1054,6 +1057,7 @@ router.put('/settings', authorizeModule('settings', 'can_edit'), async (req, res
             lastName,
             name: combinedName,
             email: profileEmail,
+            phone: profilePhone,
           },
           notifications: {
             emailNotifs: Boolean(nextNotifications.emailNotifs),

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddFlowProgress from "@/components/products/AddFlowProgress";
 
@@ -9,7 +9,7 @@ const generationOptions = [
     description: "Digital pioneers & experience seekers. Focuses on authenticity and curated lifestyles.",
     icon: "smartphone",
     span: "md:col-span-3",
-    cardPadding: "p-6",
+    cardPadding: "sm:p-6",
     iconSize: "text-2xl",
     titleSize: "text-xl",
     descSize: "text-sm",
@@ -20,7 +20,7 @@ const generationOptions = [
     description: "Trendy, bold & native digital. Driven by rapid trends, visual expression, and social commerce.",
     icon: "bolt",
     span: "md:col-span-3",
-    cardPadding: "p-6",
+    cardPadding: "sm:p-6",
     iconSize: "text-2xl",
     titleSize: "text-xl",
     descSize: "text-sm",
@@ -31,7 +31,7 @@ const generationOptions = [
     description: "The newest wave. Highly connected, visually driven tech natives.",
     icon: "smart_toy",
     span: "md:col-span-2",
-    cardPadding: "p-5",
+    cardPadding: "sm:p-5",
     iconSize: "text-xl",
     titleSize: "text-base",
     descSize: "text-xs",
@@ -42,7 +42,7 @@ const generationOptions = [
     description: "Pragmatic brand advocates. Values quality, utility, and direct messaging.",
     icon: "work_outline",
     span: "md:col-span-2",
-    cardPadding: "p-5",
+    cardPadding: "sm:p-5",
     iconSize: "text-xl",
     titleSize: "text-base",
     descSize: "text-xs",
@@ -53,7 +53,7 @@ const generationOptions = [
     description: "Traditional consumers. Loyal to established brands and premium service.",
     icon: "workspace_premium",
     span: "md:col-span-2",
-    cardPadding: "p-5",
+    cardPadding: "sm:p-5",
     iconSize: "text-xl",
     titleSize: "text-base",
     descSize: "text-xs",
@@ -63,9 +63,19 @@ const generationOptions = [
 const AddProductGenerationPage = () => {
   const navigate = useNavigate();
   const [selectedGeneration, setSelectedGeneration] = useState<string>("");
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const handleGenerationSelect = (value: string) => {
+    if (isRedirecting) return;
+    setSelectedGeneration(value);
+    setIsRedirecting(true);
+    window.setTimeout(() => {
+      navigate(`/products/add/category?generation=${encodeURIComponent(value)}`);
+    }, 140);
+  };
 
   return (
-    <div className="bg-[#f8f9fa] font-body text-[#2b3437] min-h-screen flex flex-col antialiased selection:bg-[#e2dfff] selection:text-[#3f33d6]">
+    <div className="min-h-screen bg-[#f8f9fa] font-body text-[#2b3437] antialiased selection:bg-[#e2dfff] selection:text-[#3f33d6]">
       <style>{`
         @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap");
         @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
@@ -83,16 +93,16 @@ const AddProductGenerationPage = () => {
         }
       `}</style>
 
-      <header className="w-full px-8 py-6 flex items-center justify-between bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="sticky top-0 z-10 flex w-full items-center justify-between bg-white/60 px-4 py-4 backdrop-blur-sm sm:px-6 sm:py-5 md:px-8 md:py-6">
         <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-[#4d44e3] text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+          <span className="material-symbols-outlined text-2xl text-[#4d44e3]" style={{ fontVariationSettings: "'FILL' 1" }}>
             widgets
           </span>
-          <span className="font-headline font-bold text-[#2b3437] tracking-tight">The Architect</span>
+          <span className="font-headline text-sm font-bold tracking-tight text-[#2b3437] sm:text-base">The Architect</span>
         </div>
         <button
           aria-label="Close flow"
-          className="flex items-center justify-center p-2 rounded-full text-[#586064] hover:bg-[#eaeff1] transition-colors"
+          className="flex items-center justify-center rounded-full p-2 text-[#586064] transition-colors hover:bg-[#eaeff1]"
           onClick={() => navigate("/products")}
           type="button"
         >
@@ -100,26 +110,26 @@ const AddProductGenerationPage = () => {
         </button>
       </header>
 
-      <main className="flex-grow flex items-center justify-center p-5 md:p-8 w-full">
-        <div className="max-w-3xl w-full">
-          <div className="mb-10">
+      <main className="flex w-full justify-center px-4 py-5 sm:px-5 md:min-h-[calc(100vh-88px)] md:items-center md:px-8 md:py-8">
+        <div className="w-full max-w-3xl">
+          <div className="mb-6 sm:mb-8 md:mb-10">
             <AddFlowProgress from={0} stepLabel="Step 1 of 3" stepTitle="Select Generation" to={33.33} />
           </div>
 
-          <div className="mb-8 text-center md:text-left">
-            <h1 className="font-headline text-3xl md:text-4xl font-extrabold text-[#2b3437] tracking-tight mb-3">Who is this product for?</h1>
-            <p className="text-[#586064] text-base max-w-xl">
+          <div className="mb-6 text-center md:mb-8 md:text-left">
+            <h1 className="mb-3 font-headline text-2xl font-extrabold tracking-tight text-[#2b3437] sm:text-3xl md:text-4xl">Who is this product for?</h1>
+            <p className="max-w-xl text-sm text-[#586064] sm:text-base">
               Define the primary demographic target to ensure accurate curation and analytics tracking across the ecosystem.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-10">
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:mb-10 md:grid-cols-6">
             {generationOptions.map((option) => {
               const isChecked = selectedGeneration === option.value;
               return (
                 <label
                   key={option.value}
-                  className={`group relative ${option.span} flex flex-col items-start ${option.cardPadding} rounded-xl cursor-pointer transition-all duration-300 hover:bg-white hover:shadow-[0_24px_40px_-15px_rgba(43,52,55,0.06)] hover:-translate-y-1 ${
+                  className={`group relative ${option.span} flex cursor-pointer flex-col items-start rounded-xl p-4 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-[0_24px_40px_-15px_rgba(43,52,55,0.06)] ${option.cardPadding} ${
                     isChecked ? "bg-white shadow-[0_20px_35px_-15px_rgba(77,68,227,0.25)]" : "bg-[#f1f4f6]"
                   }`}
                 >
@@ -127,17 +137,17 @@ const AddProductGenerationPage = () => {
                     checked={isChecked}
                     className="sr-only"
                     name="generation"
-                    onChange={() => setSelectedGeneration(option.value)}
+                    onChange={() => handleGenerationSelect(option.value)}
                     type="radio"
                     value={option.value}
                   />
-                  <div className="relative z-10 p-3 rounded-lg bg-[#eaeff1] text-[#4d44e3] mb-4 md:mb-6 transition-colors group-hover:bg-[#e2dfff] group-hover:text-[#3f33d6]">
+                  <div className="relative z-10 mb-3 rounded-lg bg-[#eaeff1] p-3 text-[#4d44e3] transition-colors group-hover:bg-[#e2dfff] group-hover:text-[#3f33d6] md:mb-6">
                     <span className={`material-symbols-outlined ${option.iconSize}`}>{option.icon}</span>
                   </div>
-                  <h3 className={`relative z-10 font-headline font-bold ${option.titleSize} text-[#2b3437] mb-1 md:mb-2 tracking-tight`}>{option.title}</h3>
-                  <p className={`relative z-10 font-body text-[#586064] ${option.descSize} leading-relaxed`}>{option.description}</p>
+                  <h3 className={`relative z-10 mb-1 font-headline font-bold tracking-tight text-[#2b3437] md:mb-2 ${option.titleSize}`}>{option.title}</h3>
+                  <p className={`relative z-10 font-body leading-relaxed text-[#586064] ${option.descSize}`}>{option.description}</p>
                   <div
-                    className={`absolute inset-0 z-0 rounded-xl pointer-events-none transition-all duration-200 ${
+                    className={`pointer-events-none absolute inset-0 z-0 rounded-xl transition-all duration-200 ${
                       isChecked ? "ring-2 ring-[#4d44e3]" : ""
                     }`}
                   ></div>
@@ -146,9 +156,9 @@ const AddProductGenerationPage = () => {
             })}
           </div>
 
-          <div className="flex items-center justify-between pt-6 mt-6">
+          <div className="mt-4 flex flex-col gap-3 border-t border-[#e7ecef] pt-4 sm:mt-6 sm:flex-row sm:items-center sm:justify-between sm:pt-6">
             <button
-              className="flex items-center gap-2 text-[#586064] hover:text-[#4d44e3] transition-colors font-medium px-3 py-2 rounded-md hover:bg-[#f1f4f6]"
+              className="flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium text-[#586064] transition-colors hover:bg-[#f1f4f6] hover:text-[#4d44e3] sm:justify-start"
               onClick={() => navigate(-1)}
               type="button"
             >
@@ -156,19 +166,10 @@ const AddProductGenerationPage = () => {
               Back
             </button>
 
-            <button
-              className={`flex items-center gap-2 px-7 py-2.5 rounded-md font-headline font-bold tracking-wide transition-all ${
-                selectedGeneration
-                  ? "bg-[#4d44e3] text-[#faf6ff] hover:bg-[#4034d7]"
-                  : "bg-[#e2e9ec] text-[#737c7f] cursor-not-allowed"
-              }`}
-              disabled={!selectedGeneration}
-              onClick={() => navigate(`/products/add/category?generation=${encodeURIComponent(selectedGeneration)}`)}
-              type="button"
-            >
-              Next
-              <span className="material-symbols-outlined text-xl">arrow_forward</span>
-            </button>
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-[#f1f4f6] px-4 py-2 text-center text-xs font-medium text-[#586064] sm:justify-end sm:text-sm">
+              <span className="material-symbols-outlined text-[18px] text-[#4d44e3]">touch_app</span>
+              Select a generation to continue automatically
+            </div>
           </div>
         </div>
       </main>

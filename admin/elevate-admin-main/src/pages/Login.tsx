@@ -1,10 +1,12 @@
-import { FormEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { fetchAdminSetupStatus } from "@/lib/adminApi";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { signIn } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -12,11 +14,63 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [infoMessage, setInfoMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(true);
+  const [setupRequired, setSetupRequired] = useState(false);
+
+  const setupSuccessMessage = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("setup") === "success";
+  }, [location.search]);
+
+  const passwordResetSuccessMessage = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("reset") === "success";
+  }, [location.search]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadSetupStatus = async () => {
+      try {
+        const status = await fetchAdminSetupStatus();
+        if (!active) return;
+        setSetupRequired(status.setupRequired);
+      } catch {
+        if (!active) return;
+        setSetupRequired(false);
+      } finally {
+        if (active) setSetupLoading(false);
+      }
+    };
+
+    void loadSetupStatus();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (setupSuccessMessage) {
+      setInfoMessage("Super admin created successfully. You can now sign in with these credentials.");
+      return;
+    }
+    if (passwordResetSuccessMessage) {
+      setInfoMessage("Password reset successful. Please sign in with your new password.");
+      return;
+    }
+    setInfoMessage("");
+  }, [passwordResetSuccessMessage, setupSuccessMessage]);
+
+  if (!setupLoading && setupRequired && !setupSuccessMessage) {
+    return <Navigate to="/signup" replace />;
+  }
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError("");
+    setInfoMessage("");
 
     if (!email.trim() || !password.trim()) {
       setError("Email and password are required.");
@@ -115,11 +169,12 @@ const LoginPage = () => {
                   />
                   <span className="font-medium text-[#586064] transition-colors group-hover:text-[#2b3437]">Remember Me</span>
                 </label>
-                <button type="button" className="font-semibold text-[#4d44e3] transition-all hover:underline hover:underline-offset-4">
+                <Link to="/forgot-password" className="font-semibold text-[#4d44e3] transition-all hover:underline hover:underline-offset-4">
                   Forgot Password?
-                </button>
+                </Link>
               </div>
 
+              {infoMessage ? <p className="rounded-md bg-[#edf8ef] px-3 py-2 text-sm font-medium text-[#237b35]">{infoMessage}</p> : null}
               {error ? <p className="rounded-md bg-[#fff1f1] px-3 py-2 text-sm font-medium text-[#c62828]">{error}</p> : null}
 
               <button

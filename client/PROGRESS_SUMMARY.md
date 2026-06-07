@@ -231,12 +231,12 @@ npm run seed
 
 Output:
 ```
-✅ Admin created: admin@stylesakhi.com
+✅ Admin setup supported through one-time super-admin signup
 ✅ Created 3 categories
 ✅ Created 15 products
 
 🔐 Admin credentials:
-   Email: admin@stylesakhi.com
+   Email: created during one-time super-admin signup
    Password: admin123
 ```
 
@@ -276,7 +276,7 @@ POST http://localhost:3000/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@stylesakhi.com",
+  "email": "created during one-time super-admin signup",
   "password": "admin123"
 }
 ```

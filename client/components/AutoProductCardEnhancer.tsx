@@ -15,6 +15,7 @@ const SUPPORTED_ROUTES = [
   "/clothing/the-atelier-trench",
   "/accessories/croissant-leather-bag",
   "/sneakers/nova-form-strider",
+  "/product/",
 ];
 
 function inferCategory(href: string) {

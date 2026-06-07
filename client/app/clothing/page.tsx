@@ -3,6 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
 import PageBackButton from "@/components/PageBackButton";
@@ -84,7 +85,7 @@ function ClothingPageContent() {
     price: product.price,
     image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
     category: "Clothing",
-    href: `/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`,
+    href: buildCategoryDetailHref("clothing", product.slug || product._id),
   });
 
   return (
@@ -207,9 +208,9 @@ function ClothingPageContent() {
                     <article
                       className="group cursor-pointer overflow-hidden rounded-2xl border border-[#abadae]/20 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
                       key={product._id}
-                      onClick={() => router.push(`/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`)}
+                      onClick={() => router.push(buildCategoryDetailHref("clothing", product.slug || product._id))}
                     >
-                      <Link href={`/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`} onClick={(e) => e.stopPropagation()}>
+                      <Link href={buildCategoryDetailHref("clothing", product.slug || product._id)} onClick={(e) => e.stopPropagation()}>
                         <div className="relative aspect-[4/5] overflow-hidden bg-[#eff1f2]">
                           {product.video ? (
                             <video
@@ -230,7 +231,7 @@ function ClothingPageContent() {
                       <div className="space-y-3 p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <Link className="text-lg font-bold hover:text-[#644aad]" href={`/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`} onClick={(e) => e.stopPropagation()}>
+                            <Link className="text-lg font-bold hover:text-[#644aad]" href={buildCategoryDetailHref("clothing", product.slug || product._id)} onClick={(e) => e.stopPropagation()}>
                               {product.name}
                             </Link>
                             <p className="text-sm text-[#595c5d]">{product.productDetails.fabricType || product.subCategory || "Clothing"}</p>

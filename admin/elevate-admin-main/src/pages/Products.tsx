@@ -183,6 +183,7 @@ const ProductsPage = () => {
   const [clothingPattern, setClothingPattern] = useState("");
   const [clothingStyle, setClothingStyle] = useState("");
   const [pendingDeleteProduct, setPendingDeleteProduct] = useState<AdminProduct | null>(null);
+  const [mobileControlsPanel, setMobileControlsPanel] = useState<"search" | "filters" | "sort" | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
   const editVideoInputRef = useRef<HTMLInputElement | null>(null);
   const [editForm, setEditForm] = useState<ProductEditForm>({
@@ -217,6 +218,10 @@ const ProductsPage = () => {
     const q = searchParams.get("q") || "";
     setSearchQuery((prev) => (prev === q ? prev : q));
   }, [searchParams]);
+
+  const toggleMobileControlsPanel = (panel: "search" | "filters" | "sort") => {
+    setMobileControlsPanel((prev) => (prev === panel ? null : panel));
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -680,21 +685,21 @@ const ProductsPage = () => {
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
 
-      <div className="products-page w-full bg-[#f8f9fa] text-[#2b3437] p-6 md:p-8 lg:p-10 rounded-2xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div className="products-page w-full rounded-2xl bg-[#f8f9fa] p-4 text-[#2b3437] sm:p-5 md:p-8 lg:p-10">
+        <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center md:mb-8">
           <div>
-            <h2 className="font-headline text-3xl md:text-4xl font-bold text-[#2b3437] tracking-tight mb-1">Products</h2>
-            <p className="text-[#586064] text-sm md:text-base">
+            <h2 className="mb-1 font-headline text-2xl font-bold tracking-tight text-[#2b3437] sm:text-3xl md:text-4xl">Products</h2>
+            <p className="text-sm text-[#586064] md:text-base">
               Manage your inventory and product catalog. Showing {visibleProducts.length} product{visibleProducts.length === 1 ? "" : "s"}.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white text-[#2b3437] rounded-xl hover:bg-[#f1f4f6] transition-colors font-medium text-sm shadow-[0_4px_24px_rgba(43,52,55,0.04)]" type="button">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
+            <button className="flex items-center justify-center gap-2 rounded-xl bg-white px-3 py-2 text-xs font-medium text-[#2b3437] shadow-[0_4px_24px_rgba(43,52,55,0.04)] transition-colors hover:bg-[#f1f4f6] sm:px-4 sm:text-sm" type="button">
               <span className="material-symbols-outlined text-lg">download</span>
               Export
             </button>
             {canCreateProduct ? (
-              <Link className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#4d44e3] to-[#4034d7] text-[#faf6ff] rounded-xl hover:shadow-[0_8px_32px_rgba(77,68,227,0.2)] transition-all font-medium text-sm" to="/products/add">
+              <Link className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4d44e3] to-[#4034d7] px-3 py-2 text-xs font-medium text-[#faf6ff] transition-all hover:shadow-[0_8px_32px_rgba(77,68,227,0.2)] sm:px-5 sm:py-2.5 sm:text-sm" to="/products/add">
                 <span className="material-symbols-outlined text-lg">add</span>
                 Add Product
               </Link>
@@ -702,80 +707,200 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl shadow-[0_4px_24px_rgba(43,52,55,0.04)] mb-8 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="w-full md:w-auto flex-1 flex flex-col sm:flex-row gap-3">
-            <div className="relative w-full sm:max-w-xs">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#586064] text-lg">search</span>
-              <input
-                className="w-full pl-10 pr-4 py-2 bg-[#f1f4f6] border-none rounded-xl text-sm text-[#2b3437] placeholder:text-[#586064] focus:bg-white focus:ring-2 focus:ring-[#4d44e3]/20 transition-all outline-none"
-                onChange={(e) => handleSearchInput(e.target.value)}
-                placeholder="Search products..."
-                type="text"
-                value={searchQuery}
-              />
+        <div className="mb-6 rounded-2xl bg-white p-3 shadow-[0_4px_24px_rgba(43,52,55,0.04)] md:mb-8 md:p-4">
+          <div className="grid grid-cols-3 gap-2 md:hidden">
+            <button
+              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                mobileControlsPanel === "search" ? "bg-[#4d44e3] text-white shadow-[0_8px_24px_rgba(77,68,227,0.2)]" : "bg-[#f1f4f6] text-[#2b3437]"
+              }`}
+              onClick={() => toggleMobileControlsPanel("search")}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">search</span>
+              Search
+            </button>
+            <button
+              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                mobileControlsPanel === "filters" ? "bg-[#4d44e3] text-white shadow-[0_8px_24px_rgba(77,68,227,0.2)]" : "bg-[#f1f4f6] text-[#2b3437]"
+              }`}
+              onClick={() => toggleMobileControlsPanel("filters")}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">filter_alt</span>
+              Filters
+            </button>
+            <button
+              className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                mobileControlsPanel === "sort" ? "bg-[#4d44e3] text-white shadow-[0_8px_24px_rgba(77,68,227,0.2)]" : "bg-[#f1f4f6] text-[#2b3437]"
+              }`}
+              onClick={() => toggleMobileControlsPanel("sort")}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[18px]">swap_vert</span>
+              Sort
+            </button>
+          </div>
+
+          <div className="hidden flex-col items-stretch justify-between gap-4 md:flex md:flex-row md:items-center">
+            <div className="flex w-full flex-1 flex-col gap-3 md:w-auto">
+              <div className="relative w-full sm:max-w-xs">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#586064] text-lg">search</span>
+                <input
+                  className="w-full rounded-xl border-none bg-[#f1f4f6] py-2 pl-10 pr-4 text-sm text-[#2b3437] placeholder:text-[#586064] outline-none transition-all focus:bg-white focus:ring-2 focus:ring-[#4d44e3]/20"
+                  onChange={(e) => handleSearchInput(e.target.value)}
+                  placeholder="Search products..."
+                  type="text"
+                  value={searchQuery}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="relative">
+                  <select
+                    className="w-full cursor-pointer appearance-none rounded-xl border-none bg-[#f1f4f6] py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    value={categoryFilter}
+                  >
+                    <option value="all">Category: All</option>
+                    <option value="clothing">Clothing</option>
+                    <option value="accessories">Accessories</option>
+                    <option value="sneakers">Sneakers</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                </div>
+
+                <div className="relative">
+                  <select
+                    className="w-full cursor-pointer appearance-none rounded-xl border-none bg-[#f1f4f6] py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                    onChange={(e) => setTargetFilter(e.target.value)}
+                    value={targetFilter}
+                  >
+                    <option value="all">Target: All Gens</option>
+                    <option value="gen-z">Gen Z</option>
+                    <option value="millennial">Millennial</option>
+                    <option value="gen-x">Gen X</option>
+                    <option value="boomer">Boomer</option>
+                    <option value="gen-alpha">Gen Alpha</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                </div>
+
+                <div className="relative">
+                  <select
+                    className="w-full cursor-pointer appearance-none rounded-xl border-none bg-[#f1f4f6] py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                    onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
+                    value={statusFilter}
+                  >
+                    <option value="all">Status: All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <div className="relative">
+            <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end md:w-auto">
+              <span className="text-sm font-medium text-[#586064]">Sort by:</span>
+              <div className="relative w-full sm:w-auto">
                 <select
-                  className="appearance-none pl-4 pr-10 py-2 bg-[#f1f4f6] border-none rounded-xl text-sm font-medium text-[#2b3437] focus:ring-2 focus:ring-[#4d44e3]/20 outline-none cursor-pointer"
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  value={categoryFilter}
+                  className="w-full cursor-pointer appearance-none rounded-xl border-none bg-white py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] shadow-[0_2px_12px_rgba(43,52,55,0.04)] outline-none focus:ring-2 focus:ring-[#4d44e3]/20 sm:w-auto"
+                  onChange={(e) => setSortBy(e.target.value)}
+                  value={sortBy}
                 >
-                  <option value="all">Category: All</option>
-                  <option value="clothing">Clothing</option>
-                  <option value="accessories">Accessories</option>
-                  <option value="sneakers">Sneakers</option>
+                  <option value="newest">Newest Added</option>
+                  <option value="price_high">Price: High to Low</option>
+                  <option value="price_low">Price: Low to High</option>
+                  <option value="popular">Most Popular</option>
                 </select>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
-              </div>
-
-              <div className="relative">
-                <select
-                  className="appearance-none pl-4 pr-10 py-2 bg-[#f1f4f6] border-none rounded-xl text-sm font-medium text-[#2b3437] focus:ring-2 focus:ring-[#4d44e3]/20 outline-none cursor-pointer"
-                  onChange={(e) => setTargetFilter(e.target.value)}
-                  value={targetFilter}
-                >
-                  <option value="all">Target: All Gens</option>
-                  <option value="gen-z">Gen Z</option>
-                  <option value="millennial">Millennial</option>
-                  <option value="gen-x">Gen X</option>
-                  <option value="boomer">Boomer</option>
-                  <option value="gen-alpha">Gen Alpha</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
-              </div>
-
-              <div className="relative">
-                <select
-                  className="appearance-none pl-4 pr-10 py-2 bg-[#f1f4f6] border-none rounded-xl text-sm font-medium text-[#2b3437] focus:ring-2 focus:ring-[#4d44e3]/20 outline-none cursor-pointer"
-                  onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
-                  value={statusFilter}
-                >
-                  <option value="all">Status: All</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">swap_vert</span>
               </div>
             </div>
           </div>
 
-          <div className="w-full md:w-auto flex items-center justify-end gap-3">
-            <span className="text-sm text-[#586064] font-medium">Sort by:</span>
-            <div className="relative">
-              <select
-                className="appearance-none pl-4 pr-10 py-2 bg-white shadow-[0_2px_12px_rgba(43,52,55,0.04)] border-none rounded-xl text-sm font-medium text-[#2b3437] focus:ring-2 focus:ring-[#4d44e3]/20 outline-none cursor-pointer"
-                onChange={(e) => setSortBy(e.target.value)}
-                value={sortBy}
-              >
-                <option value="newest">Newest Added</option>
-                <option value="price_high">Price: High to Low</option>
-                <option value="price_low">Price: Low to High</option>
-                <option value="popular">Most Popular</option>
-              </select>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">swap_vert</span>
-            </div>
+          <div className={`mt-3 space-y-3 md:hidden ${mobileControlsPanel ? "block" : "hidden"}`}>
+            {mobileControlsPanel === "search" ? (
+              <div className="rounded-2xl bg-[#f8f9fa] p-3">
+                <div className="relative w-full">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#586064] text-lg">search</span>
+                  <input
+                    className="w-full rounded-xl border-none bg-white py-2 pl-10 pr-4 text-sm text-[#2b3437] placeholder:text-[#586064] outline-none transition-all focus:ring-2 focus:ring-[#4d44e3]/20"
+                    onChange={(e) => handleSearchInput(e.target.value)}
+                    placeholder="Search products..."
+                    type="text"
+                    value={searchQuery}
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {mobileControlsPanel === "filters" ? (
+              <div className="rounded-2xl bg-[#f8f9fa] p-3">
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="relative">
+                    <select
+                      className="w-full cursor-pointer appearance-none rounded-xl border-none bg-white py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      value={categoryFilter}
+                    >
+                      <option value="all">Category: All</option>
+                      <option value="clothing">Clothing</option>
+                      <option value="accessories">Accessories</option>
+                      <option value="sneakers">Sneakers</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      className="w-full cursor-pointer appearance-none rounded-xl border-none bg-white py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                      onChange={(e) => setTargetFilter(e.target.value)}
+                      value={targetFilter}
+                    >
+                      <option value="all">Target: All Gens</option>
+                      <option value="gen-z">Gen Z</option>
+                      <option value="millennial">Millennial</option>
+                      <option value="gen-x">Gen X</option>
+                      <option value="boomer">Boomer</option>
+                      <option value="gen-alpha">Gen Alpha</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      className="w-full cursor-pointer appearance-none rounded-xl border-none bg-white py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                      onChange={(e) => setStatusFilter(e.target.value as "all" | "active" | "inactive")}
+                      value={statusFilter}
+                    >
+                      <option value="all">Status: All</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {mobileControlsPanel === "sort" ? (
+              <div className="rounded-2xl bg-[#f8f9fa] p-3">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-[#586064]">Sort by</label>
+                <div className="relative">
+                  <select
+                    className="w-full cursor-pointer appearance-none rounded-xl border-none bg-white py-2 pl-4 pr-10 text-sm font-medium text-[#2b3437] outline-none focus:ring-2 focus:ring-[#4d44e3]/20"
+                    onChange={(e) => setSortBy(e.target.value)}
+                    value={sortBy}
+                  >
+                    <option value="newest">Newest Added</option>
+                    <option value="price_high">Price: High to Low</option>
+                    <option value="price_low">Price: Low to High</option>
+                    <option value="popular">Most Popular</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[#586064] pointer-events-none">swap_vert</span>
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -785,47 +910,47 @@ const ProductsPage = () => {
           <div className="rounded-2xl bg-white p-10 text-center text-[#9e3f4e] shadow-[0_4px_24px_rgba(43,52,55,0.04)]">{error}</div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 xl:grid-cols-4 xl:gap-6">
               {visibleProducts.map((product) => (
-                <div key={product._id} className="group bg-white rounded-2xl overflow-hidden hover:shadow-[0_16px_40px_rgba(43,52,55,0.08)] transition-all duration-300 flex flex-col">
-                  <div className="relative aspect-[4/3] overflow-hidden bg-[#f1f4f6]">
+                <div key={product._id} className="group flex min-w-0 flex-col overflow-hidden rounded-xl bg-white transition-all duration-300 hover:shadow-[0_16px_40px_rgba(43,52,55,0.08)] sm:rounded-2xl">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-[#f1f4f6] sm:aspect-[4/3]">
                     <img alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images[0] || "https://placehold.co/640x480?text=No+Image"} />
 
-                    <div className="absolute bottom-3 left-3 flex gap-2">
-                      <span className="px-2.5 py-1 rounded-md bg-white/90 backdrop-blur text-[10px] font-bold text-[#2b3437] uppercase tracking-wider">{formatCategory(product.category)}</span>
-                      <span className="px-2.5 py-1 rounded-md bg-[#d2d9f8]/90 backdrop-blur text-[10px] font-bold text-[#444c65] uppercase tracking-wider">{formatGeneration(product.generation)}</span>
+                    <div className="absolute bottom-2 left-2 right-2 flex flex-wrap gap-1.5 sm:bottom-3 sm:left-3 sm:right-3 sm:gap-2">
+                      <span className="rounded-md bg-white/90 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#2b3437] backdrop-blur sm:px-2.5 sm:text-[10px]">{formatCategory(product.category)}</span>
+                      <span className="rounded-md bg-[#d2d9f8]/90 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#444c65] backdrop-blur sm:px-2.5 sm:text-[10px]">{formatGeneration(product.generation)}</span>
                       {product.isHighestSelling ? (
-                        <span className="px-2.5 py-1 rounded-md bg-[#fef3c7] text-[10px] font-bold text-[#854d0e] uppercase tracking-wider">Highest selling</span>
+                        <span className="rounded-md bg-[#fef3c7] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#854d0e] sm:px-2.5 sm:text-[10px]">Highest selling</span>
                       ) : null}
                       {product.isActive === false ? (
-                        <span className="px-2.5 py-1 rounded-md bg-[#fee2e2] text-[10px] font-bold text-[#991b1b] uppercase tracking-wider">Inactive</span>
+                        <span className="rounded-md bg-[#fee2e2] px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-[#991b1b] sm:px-2.5 sm:text-[10px]">Inactive</span>
                       ) : null}
                     </div>
                   </div>
 
-                  <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-2 gap-2">
-                      <h3 className="font-headline font-semibold text-lg text-[#2b3437] leading-tight group-hover:text-[#4d44e3] transition-colors">{product.name}</h3>
-                      <span className="font-headline font-bold text-[#4d44e3]">${product.price.toFixed(2)}</span>
+                  <div className="flex flex-1 flex-col p-2.5 sm:p-5">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <h3 className="line-clamp-2 min-w-0 font-headline text-[13px] font-semibold leading-tight text-[#2b3437] transition-colors group-hover:text-[#4d44e3] sm:text-lg">{product.name}</h3>
+                      <span className="shrink-0 font-headline text-[12px] font-bold text-[#4d44e3] sm:text-base">${product.price.toFixed(2)}</span>
                     </div>
 
-                    <p className="text-sm text-[#586064] line-clamp-2 mb-4">{product.description}</p>
+                    <p className="mb-3 line-clamp-2 text-[11px] leading-5 text-[#586064] sm:mb-4 sm:text-sm">{product.description}</p>
 
-                    <div className="mt-auto pt-4 flex items-center justify-between">
-                      <div className={`flex items-center gap-1.5 text-xs font-medium ${product.stock <= 0 ? "text-[#9e3f4e]" : "text-[#586064]"}`}>
+                    <div className="mt-auto flex flex-col gap-3 border-t border-[#edf1f3] pt-3 sm:flex-row sm:items-center sm:justify-between sm:pt-4">
+                      <div className={`flex items-center gap-1.5 text-[11px] font-medium sm:text-xs ${product.stock <= 0 ? "text-[#9e3f4e]" : "text-[#586064]"}`}>
                         <span className={`w-2 h-2 rounded-full ${product.stock <= 0 ? "bg-[#9e3f4e]" : product.stock < 20 ? "bg-[#f59e0b]" : "bg-[#10b981]"}`}></span>
                         {product.stock <= 0 ? "Out of stock" : `${product.stock} in stock`}
                       </div>
 
                       {canEditProduct || canDeleteProduct ? (
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex flex-wrap items-center justify-end gap-1.5">
                           {canEditProduct ? (
                             <button
-                              className={`h-8 w-8 rounded-lg grid place-items-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                              className={`grid h-8 w-8 place-items-center rounded-lg transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                                 product.isHighestSelling
                                   ? "bg-[#fef3c7] text-[#854d0e] hover:bg-[#fde68a]"
                                   : "bg-[#eef2ff] text-[#4d44e3] hover:bg-[#e0e7ff]"
-                              }`}
+                              } sm:h-8 sm:w-8 h-7 w-7`}
                               disabled={Boolean(togglingProductIds[product._id])}
                               onClick={() => handleToggleHighestSelling(product)}
                               title={product.isHighestSelling ? "Remove Highest Selling" : "Set Highest Selling"}
@@ -838,7 +963,7 @@ const ProductsPage = () => {
                           ) : null}
                           {canEditProduct ? (
                             <button
-                              className="h-8 w-8 rounded-lg grid place-items-center text-[#4d44e3] bg-[#f3f4f6] hover:bg-[#e5e7eb] transition-colors"
+                              className="grid h-7 w-7 place-items-center rounded-lg bg-[#f3f4f6] text-[#4d44e3] transition-colors hover:bg-[#e5e7eb] sm:h-8 sm:w-8"
                               onClick={() => openEditModal(product)}
                               title="Edit Product"
                               type="button"
@@ -848,7 +973,7 @@ const ProductsPage = () => {
                           ) : null}
                           {canDeleteProduct ? (
                             <button
-                              className="h-8 w-8 rounded-lg grid place-items-center text-[#9e3f4e] bg-[#fff1f3] hover:bg-[#ffe4e8] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                              className="grid h-7 w-7 place-items-center rounded-lg bg-[#fff1f3] text-[#9e3f4e] transition-colors hover:bg-[#ffe4e8] disabled:cursor-not-allowed disabled:opacity-60 sm:h-8 sm:w-8"
                               disabled={deletingProductId === product._id}
                               onClick={() => handleDeleteProduct(product)}
                               title="Delete Product"

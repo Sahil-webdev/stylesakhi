@@ -325,7 +325,7 @@ const AddProductDetailsPage = () => {
   };
 
   return (
-    <div className="bg-[#f8f9fa] text-[#2b3437] min-h-screen flex antialiased">
+    <div className="flex min-h-screen bg-[#f8f9fa] text-[#2b3437] antialiased">
       <style>{`
         @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap");
         @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
@@ -343,20 +343,18 @@ const AddProductDetailsPage = () => {
         }
       `}</style>
 
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f8f9fa] font-body">
-        <header className="bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                className="text-[#586064] hover:text-[#4d44e3] transition-colors flex items-center gap-2 font-medium"
-                onClick={() => navigate(`/products/add/category?generation=${encodeURIComponent(generationKey)}`)}
-                type="button"
-              >
-                <span className="material-symbols-outlined">arrow_back</span>
-                Back
-              </button>
-            </div>
-            <div className="text-right hidden sm:block">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f8f9fa] font-body">
+        <header className="sticky top-0 z-30 flex flex-col gap-3 bg-white/80 px-4 py-4 backdrop-blur-md sm:px-5 md:px-6">
+          <div className="flex items-start justify-between gap-3">
+            <button
+              className="inline-flex items-center gap-2 rounded-full bg-[#f1f4f6] px-3 py-2 text-sm font-medium text-[#586064] transition-colors hover:bg-[#e7ecef] hover:text-[#4d44e3] sm:text-base"
+              onClick={() => navigate(-1)}
+              type="button"
+            >
+              <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+              Back
+            </button>
+            <div className="hidden text-right sm:block">
               <p className="font-label text-xs uppercase tracking-widest text-[#586064]">
                 {generationLabel} | {categoryLabel}
               </p>
@@ -368,21 +366,21 @@ const AddProductDetailsPage = () => {
           </div>
 
           <div className="mt-2">
-            <h1 className="text-2xl md:text-3xl font-headline font-bold text-[#2b3437] tracking-tight">
+            <h1 className="font-headline text-2xl font-bold tracking-tight text-[#2b3437] md:text-3xl">
               Adding {generationLabel} {categoryLabel}
             </h1>
             <p className="text-[#586064] mt-1 text-sm">Finalize product details, media, and variations before publishing.</p>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-6 pb-16 pt-5">
-          <div className="max-w-5xl mx-auto">
-            <form className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 flex flex-col gap-6">
-                <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)] relative overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-4 pb-16 pt-4 sm:px-5 md:px-6 md:pt-5">
+          <div className="mx-auto max-w-5xl">
+            <form className="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+              <div className="flex flex-col gap-4 lg:col-span-2 lg:gap-6">
+                <section className="relative overflow-hidden rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
                   <div className="absolute inset-0 bg-[#f1f4f6]/20 pointer-events-none"></div>
                   <div className="relative z-10">
-                    <h3 className="text-lg md:text-xl font-headline font-bold mb-5 text-[#2b3437]">Basic Information</h3>
+                    <h3 className="mb-4 font-headline text-lg font-bold text-[#2b3437] md:mb-5 md:text-xl">Basic Information</h3>
                     <div className="space-y-5">
                       <div>
                         <label className="block text-sm font-medium text-[#586064] mb-2">Product Name</label>
@@ -406,7 +404,7 @@ const AddProductDetailsPage = () => {
                         ></textarea>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div>
                           <label className="block text-sm font-medium text-[#586064] mb-2">Price (USD)</label>
                           <div className="relative">
@@ -436,13 +434,13 @@ const AddProductDetailsPage = () => {
                   </div>
                 </section>
 
-                <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)]">
-                  <div className="flex justify-between items-center mb-5">
+                <section className="rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
+                  <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <h3 className="text-lg md:text-xl font-headline font-bold text-[#2b3437]">Media</h3>
                     <span className="text-sm text-[#586064]">{uploadedImages.length}/4 images {uploadedVideo ? "| 1 video" : "| 0 video"}</span>
                   </div>
                   <div
-                    className="border-2 border-dashed border-[#abb3b7]/40 rounded-xl bg-[#f1f4f6]/50 p-8 md:p-10 flex flex-col items-center justify-center text-center hover:bg-[#f1f4f6] transition-colors cursor-pointer group"
+                    className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#abb3b7]/40 bg-[#f1f4f6]/50 p-5 text-center transition-colors hover:bg-[#f1f4f6] sm:p-8 md:p-10"
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => {
                       event.preventDefault();
@@ -498,7 +496,7 @@ const AddProductDetailsPage = () => {
                   )}
 
                   <div className="mt-6 rounded-xl border border-[#dbe4e7] bg-[#fcfcfd] p-4">
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <h4 className="font-headline text-base font-bold text-[#2b3437]">Product Video (optional)</h4>
                       <button
                         className="rounded-md bg-[#dbe4e7] px-3 py-1.5 text-xs font-semibold text-[#4d44e3] transition-colors hover:bg-[#cfdbdf]"
@@ -541,9 +539,9 @@ const AddProductDetailsPage = () => {
                 </section>
               </div>
 
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4 lg:gap-6">
                 {categoryKey === "accessories" ? (
-                  <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)]">
+                  <section className="rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
                     <h3 className="text-lg md:text-xl font-headline font-bold mb-5 text-[#2b3437]">Product Details</h3>
 
                     <div className="space-y-5">
@@ -606,7 +604,7 @@ const AddProductDetailsPage = () => {
                     </div>
                   </section>
                 ) : categoryKey === "sneakers" ? (
-                  <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)]">
+                  <section className="rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
                     <h3 className="text-lg md:text-xl font-headline font-bold mb-5 text-[#2b3437]">Sneaker Details</h3>
                     <div className="space-y-5">
                       <div>
@@ -702,7 +700,7 @@ const AddProductDetailsPage = () => {
                     </div>
                   </section>
                 ) : (
-                  <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)]">
+                  <section className="rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
                     <h3 className="text-lg md:text-xl font-headline font-bold mb-5 text-[#2b3437]">Clothing Specifics</h3>
                     <div className="space-y-5">
                       <div>
@@ -739,7 +737,7 @@ const AddProductDetailsPage = () => {
                   </section>
                 )}
 
-                <section className="bg-white rounded-xl p-6 shadow-[0_4px_40px_rgba(43,52,55,0.06)]">
+                <section className="rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5 md:p-6">
                   <h3 className="text-lg font-headline font-bold text-[#2b3437] mb-4">Merchandising</h3>
                   <button
                     className={`w-full flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors ${
@@ -765,7 +763,7 @@ const AddProductDetailsPage = () => {
                   </p>
                 </section>
 
-                <div className="bg-white rounded-xl p-5 shadow-[0_4px_40px_rgba(43,52,55,0.06)] flex flex-col gap-3 mt-auto">
+                <div className="mt-auto flex flex-col gap-3 rounded-xl bg-white p-4 shadow-[0_4px_40px_rgba(43,52,55,0.06)] sm:p-5">
                   <button
                     className="w-full py-3 rounded-lg bg-gradient-to-br from-[#4d44e3] to-[#4034d7] text-[#faf6ff] font-headline font-bold text-base shadow-[0_8px_24px_rgba(77,68,227,0.2)] hover:shadow-[0_12px_32px_rgba(77,68,227,0.3)] transition-all transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
                     disabled={submitting}

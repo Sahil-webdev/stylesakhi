@@ -31,7 +31,12 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Security middleware
-app.use(helmet());
+// Allow media assets to be embedded across origins in admin/local development and public clients.
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+  })
+);
 
 // CORS configuration
 const rawOrigins = process.env.CORS_ORIGIN || 'http://localhost:3000';

@@ -3,6 +3,8 @@ type ProductLinkInput = {
   href?: string | null;
 };
 
+type ProductCategory = "clothing" | "accessories" | "sneakers";
+
 const isInvalidHref = (href: string) => {
   const normalized = href.trim().toLowerCase();
   if (!normalized) return true;
@@ -34,3 +36,13 @@ export function resolveProductHref(input: ProductLinkInput) {
   return `/product/${encodeURIComponent(fallbackId)}`;
 }
 
+export function buildCategoryDetailHref(category: ProductCategory, productIdOrSlug: string) {
+  const encoded = encodeURIComponent(productIdOrSlug);
+  if (category === "clothing") {
+    return `/clothing/the-atelier-trench?product=${encoded}`;
+  }
+  if (category === "accessories") {
+    return `/accessories/croissant-leather-bag?product=${encoded}`;
+  }
+  return `/sneakers/nova-form-strider?product=${encoded}`;
+}

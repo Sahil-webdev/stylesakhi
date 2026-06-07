@@ -20,6 +20,8 @@ import Team from "./pages/Team.tsx";
 import Banners from "./pages/Banners.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Login from "./pages/Login.tsx";
+import Signup from "./pages/Signup.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +77,22 @@ const AppRoutes = () => (
       element={
         <PublicOnlyRoute>
           <Login />
+        </PublicOnlyRoute>
+      }
+    />
+    <Route
+      path="/signup"
+      element={
+        <PublicOnlyRoute>
+          <Signup />
+        </PublicOnlyRoute>
+      }
+    />
+    <Route
+      path="/forgot-password"
+      element={
+        <PublicOnlyRoute>
+          <ForgotPassword />
         </PublicOnlyRoute>
       }
     />
@@ -193,7 +211,12 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
             <AppRoutes />
           </BrowserRouter>
         </TooltipProvider>

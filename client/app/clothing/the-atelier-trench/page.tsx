@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { fetchProductBySlug, fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import ProductReviewsSection from "@/components/ProductReviewsSection";
 import { formatDeliveryFromNow } from "@/lib/delivery-estimate";
@@ -176,7 +177,7 @@ function ClothingDetailPageContent() {
                         price: product.price,
                         image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
                         category: "Clothing",
-                        href: `/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`,
+                        href: buildCategoryDetailHref("clothing", product.slug || product._id),
                       })
                     }
                     type="button"
@@ -192,7 +193,7 @@ function ClothingDetailPageContent() {
                         price: product.price,
                         image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
                         category: "Clothing",
-                        href: `/clothing/the-atelier-trench?product=${encodeURIComponent(product.slug || product._id)}`,
+                        href: buildCategoryDetailHref("clothing", product.slug || product._id),
                       })
                     }
                     type="button"
@@ -213,7 +214,7 @@ function ClothingDetailPageContent() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   {related.map((item) => (
-                    <Link className="group block" href={`/clothing/the-atelier-trench?product=${encodeURIComponent(item.slug || item._id)}`} key={item._id}>
+                    <Link className="group block" href={buildCategoryDetailHref("clothing", item.slug || item._id)} key={item._id}>
                       <div className="rounded-xl overflow-hidden bg-white aspect-[3/4] mb-2">
                         {item.video ? (
                           <video autoPlay className="w-full h-full object-cover group-hover:scale-105 transition-transform" loop muted playsInline preload="metadata" src={item.video} />

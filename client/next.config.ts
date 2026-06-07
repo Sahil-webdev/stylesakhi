@@ -35,8 +35,26 @@ const nextConfig: NextConfig = {
         port: '5000',
       },
       {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5005',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '5005',
+      },
+      {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'stylesakhi.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.stylesakhi.com',
       },
       {
         protocol: 'https',

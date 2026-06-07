@@ -27,6 +27,8 @@ export interface IUser extends Document {
     text: string;
     createdAt: Date;
   }>;
+  passwordResetOtpHash?: string;
+  passwordResetOtpExpiresAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -110,6 +112,14 @@ const UserSchema: Schema<IUser> = new Schema(
         createdAt: { type: Date, default: Date.now },
       },
     ],
+    passwordResetOtpHash: {
+      type: String,
+      select: false,
+    },
+    passwordResetOtpExpiresAt: {
+      type: Date,
+      select: false,
+    },
   },
   {
     timestamps: true,

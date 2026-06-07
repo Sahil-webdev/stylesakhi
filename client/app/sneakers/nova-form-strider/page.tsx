@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { fetchProductBySlug, fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import ProductReviewsSection from "@/components/ProductReviewsSection";
 import { formatDeliveryFromNow } from "@/lib/delivery-estimate";
@@ -181,7 +182,7 @@ function SneakersDetailPageContent() {
                     price: product.price,
                     image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
                     category: "Sneakers",
-                    href: `/sneakers/nova-form-strider?product=${encodeURIComponent(product.slug || product._id)}`,
+                    href: buildCategoryDetailHref("sneakers", product.slug || product._id),
                   })
                 }
                 type="button"
@@ -202,7 +203,7 @@ function SneakersDetailPageContent() {
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {related.map((item) => (
-                    <Link className="group block bg-white rounded-2xl overflow-hidden border border-[#abadae]/30" href={`/sneakers/nova-form-strider?product=${encodeURIComponent(item.slug || item._id)}`} key={item._id}>
+                    <Link className="group block bg-white rounded-2xl overflow-hidden border border-[#abadae]/30" href={buildCategoryDetailHref("sneakers", item.slug || item._id)} key={item._id}>
                       <div className="aspect-square bg-[#eff1f2] overflow-hidden">
                         {item.video ? (
                           <video autoPlay className="w-full h-full object-cover group-hover:scale-105 transition-transform" loop muted playsInline preload="metadata" src={item.video} />

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 import { ADMIN_SESSION_KEY } from "@/lib/adminAuth";
+import { ADMIN_API_BASE_URL } from "@/lib/adminApi";
 
 export type PermissionModule =
   | "dashboard"
@@ -50,8 +51,6 @@ type AuthContextType = {
   hasModuleAccess: (module: PermissionModule, action?: "can_view" | "can_create" | "can_edit" | "can_delete") => boolean;
 };
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://stylesakhi.com/api").replace(/\/+$/, "");
-
 const AuthContext = createContext<AuthContextType>({
   user: null,
   token: "",
@@ -89,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(parsed.session);
         setToken(parsed.token);
 
-        const meResponse = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+        const meResponse = await fetch(`${ADMIN_API_BASE_URL}/auth/admin/me`, {
           headers: {
             Authorization: `Bearer ${parsed.token}`,
           },
@@ -138,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/admin/login`, {
+      const response = await fetch(`${ADMIN_API_BASE_URL}/auth/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

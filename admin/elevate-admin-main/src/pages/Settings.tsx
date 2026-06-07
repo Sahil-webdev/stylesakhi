@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { User, Bell, Shield, Globe, Loader2 } from "lucide-react";
+import { User, Bell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getAdminAuthHeaders } from "@/lib/adminAuth";
 
@@ -13,16 +13,11 @@ type SettingsPayload = {
     lastName: string;
     name: string;
     email: string;
+    phone: string;
   };
   notifications: {
     emailNotifs: boolean;
     pushNotifs: boolean;
-  };
-  security: {
-    twoFactorEnabled: boolean;
-  };
-  store: {
-    publicStore: boolean;
   };
 };
 
@@ -45,16 +40,11 @@ const SettingsPage = () => {
       lastName: "",
       name: "",
       email: "",
+      phone: "",
     },
     notifications: {
       emailNotifs: true,
       pushNotifs: false,
-    },
-    security: {
-      twoFactorEnabled: false,
-    },
-    store: {
-      publicStore: true,
     },
   });
 
@@ -75,16 +65,11 @@ const SettingsPage = () => {
           lastName: data?.profile?.lastName || "",
           name: data?.profile?.name || "",
           email: data?.profile?.email || "",
+          phone: data?.profile?.phone || "",
         },
         notifications: {
           emailNotifs: Boolean(data?.notifications?.emailNotifs),
           pushNotifs: Boolean(data?.notifications?.pushNotifs),
-        },
-        security: {
-          twoFactorEnabled: Boolean(data?.security?.twoFactorEnabled),
-        },
-        store: {
-          publicStore: Boolean(data?.store?.publicStore),
         },
       });
     } catch (error) {
@@ -98,7 +83,7 @@ const SettingsPage = () => {
     fetchSettings();
   }, []);
 
-  const handleProfileChange = (field: "firstName" | "lastName" | "name" | "email", value: string) => {
+  const handleProfileChange = (field: "firstName" | "lastName" | "name" | "email" | "phone", value: string) => {
     setSettings((prev) => ({
       ...prev,
       profile: {
@@ -191,6 +176,15 @@ const SettingsPage = () => {
                   className="w-full rounded-xl border border-transparent bg-muted/50 px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
                 />
               </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Mobile Number</label>
+                <input
+                  type="tel"
+                  value={settings.profile.phone}
+                  onChange={(e) => handleProfileChange("phone", e.target.value)}
+                  className="w-full rounded-xl border border-transparent bg-muted/50 px-3 py-2 text-sm text-foreground outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
             </div>
           </motion.div>
 
@@ -233,54 +227,10 @@ const SettingsPage = () => {
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-5">
-            <div className="mb-4 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Security</h3>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Two-Factor Authentication</p>
-                <p className="text-xs text-muted-foreground">Add an extra layer of security</p>
-              </div>
-              <ToggleSwitch
-                enabled={settings.security.twoFactorEnabled}
-                onChange={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    security: { twoFactorEnabled: !prev.security.twoFactorEnabled },
-                  }))
-                }
-              />
-            </div>
-          </motion.div>
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card p-5">
-            <div className="mb-4 flex items-center gap-2">
-              <Globe className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Store</h3>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Public Store</p>
-                <p className="text-xs text-muted-foreground">Make your store visible to everyone</p>
-              </div>
-              <ToggleSwitch
-                enabled={settings.store.publicStore}
-                onChange={() =>
-                  setSettings((prev) => ({
-                    ...prev,
-                    store: { publicStore: !prev.store.publicStore },
-                  }))
-                }
-              />
-            </div>
-          </motion.div>
-
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.1 }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => void saveSettings()}

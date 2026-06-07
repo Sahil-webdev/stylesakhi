@@ -9,12 +9,24 @@ export interface TokenPayload {
   role: string;
 }
 
+export interface PasswordResetTokenPayload {
+  userId: string;
+  email: string;
+  purpose: 'admin_password_reset';
+}
+
 /**
  * Generate JWT token
  */
 export function generateToken(payload: TokenPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRE,
+  } as jwt.SignOptions);
+}
+
+export function generatePasswordResetToken(payload: PasswordResetTokenPayload): string {
+  return jwt.sign(payload, `${JWT_SECRET}_password_reset`, {
+    expiresIn: '15m',
   } as jwt.SignOptions);
 }
 
@@ -25,6 +37,14 @@ export function verifyToken(token: string): TokenPayload | null {
   try {
     return jwt.verify(token, JWT_SECRET) as TokenPayload;
   } catch (error) {
+    return null;
+  }
+}
+
+export function verifyPasswordResetToken(token: string): PasswordResetTokenPayload | null {
+  try {
+    return jwt.verify(token, `${JWT_SECRET}_password_reset`) as PasswordResetTokenPayload;
+  } catch (_error) {
     return null;
   }
 }

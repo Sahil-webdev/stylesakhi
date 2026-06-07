@@ -3,6 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { fetchProducts, ProductRecord } from "@/lib/products-api";
+import { buildCategoryDetailHref } from "@/lib/product-link";
 import { useShop } from "@/contexts/ShopContext";
 import { Heart } from "lucide-react";
 import PageBackButton from "@/components/PageBackButton";
@@ -81,7 +82,7 @@ function SneakersPageContent() {
     price: product.price,
     image: product.images[0] || "https://placehold.co/640x800?text=No+Image",
     category: "Sneakers",
-    href: `/sneakers/nova-form-strider?product=${encodeURIComponent(product.slug || product._id)}`,
+    href: buildCategoryDetailHref("sneakers", product.slug || product._id),
   });
 
   return (
@@ -180,7 +181,7 @@ function SneakersPageContent() {
                     <article
                       className="group relative flex cursor-pointer flex-col overflow-hidden rounded-xl bg-white transition-all duration-300 hover:bg-[#eff1f2]"
                       key={product._id}
-                      onClick={() => router.push(`/sneakers/nova-form-strider?product=${encodeURIComponent(product.slug || product._id)}`)}
+                      onClick={() => router.push(buildCategoryDetailHref("sneakers", product.slug || product._id))}
                     >
                       <div className="relative aspect-[4/5] bg-[#eff1f2] overflow-hidden p-4 flex items-center justify-center">
                         {product.video ? (
@@ -228,7 +229,7 @@ function SneakersPageContent() {
                           </button>
                           <Link
                             className="text-xs text-[#644aad] hover:underline"
-                            href={`/sneakers/nova-form-strider?product=${encodeURIComponent(product.slug || product._id)}`}
+                            href={buildCategoryDetailHref("sneakers", product.slug || product._id)}
                             onClick={(e) => e.stopPropagation()}
                           >
                             View

@@ -50,6 +50,16 @@ export const RecentOrdersTable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const renderState = (message: string, tone: "default" | "error" = "default") => (
+    <div
+      className={`px-5 py-6 text-sm ${
+        tone === "error" ? "text-red-500" : "text-muted-foreground"
+      }`}
+    >
+      {message}
+    </div>
+  );
+
   useEffect(() => {
     const fetchRecentOrders = async () => {
       setLoading(true);
@@ -84,10 +94,103 @@ export const RecentOrdersTable = () => {
       className="glass-card overflow-hidden"
     >
       <div className="border-b border-border/50 px-5 py-4">
-        <h3 className="text-sm font-semibold text-foreground">Recent Orders</h3>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Recent Orders</h3>
+            <p className="mt-1 text-xs text-muted-foreground md:hidden">
+              Latest orders in a mobile-friendly view
+            </p>
+          </div>
+          {!loading && !error ? (
+            <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+              {orders.length} shown
+            </span>
+          ) : null}
+        </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
+
+      <div className="md:hidden">
+        {loading ? renderState("Loading recent orders...") : null}
+        {!loading && error ? renderState(error, "error") : null}
+        {!loading && !error && orders.length === 0 ? renderState("No recent orders found.") : null}
+
+        {!loading && !error && orders.length > 0 ? (
+          <div className="space-y-3 p-3">
+            {orders.map((order, i) => (
+              <motion.article
+                key={order._id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 + i * 0.05 }}
+                className="rounded-2xl border border-border/60 bg-background/80 p-4 shadow-[0_10px_24px_rgba(15,23,42,0.06)]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                      Order ID
+                    </p>
+                    <p className="mt-1 font-mono text-sm font-semibold text-foreground">
+                      #{order.orderNumber}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                      statusClass[order.status] || "status-pending"
+                    }`}
+                  >
+                    {toLabel(order.status)}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-muted/50 px-3 py-2.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Customer
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {order.shippingAddress?.fullName || "Customer"}
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-muted/50 px-3 py-2.5">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      Amount
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">
+                      {formatInr(order.totalPrice || 0)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-xl bg-muted/40 px-3 py-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    Product
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-sm font-medium text-foreground">
+                    {order.items?.[0]?.name || "Product"}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {order.items?.length > 1 ? `+${order.items.length - 1} more item(s)` : "1 item"}
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Order date</span>
+                  <span className="font-medium">
+                    {new Date(order.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full min-w-[720px]">
           <thead>
             <tr className="border-b border-border/50">
               {["Order ID", "Customer", "Product", "Amount", "Status", "Date"].map((h) => (

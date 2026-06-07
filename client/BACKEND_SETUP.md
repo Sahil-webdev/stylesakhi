@@ -135,7 +135,7 @@ npm run seed
 ```
 
 This will create:
-- 1 Admin user (email: admin@stylesakhi.com, password: admin123)
+- 1 admin user created through the one-time super-admin signup flow
 - 3 Categories (Gen-Z, Millennial, Classic)
 - 15 Products (5 per category)
 
